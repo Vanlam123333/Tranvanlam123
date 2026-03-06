@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
 COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
-# Nginx config
 RUN echo 'server { \
     listen 80; \
     root /var/www/html; \
@@ -25,7 +24,6 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/sites-available/default
 
-# Start script
 RUN echo '#!/bin/bash\nphp-fpm -D\nnginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80
