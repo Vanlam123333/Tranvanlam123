@@ -138,17 +138,52 @@ CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\"
 } elseif ($type === 'mindmap') {
     $topic = $input['topic'] ?? '';
     $depth = max(1, min(3, (int)($input['depth'] ?? 2)));
-    $depthDesc = ['1'=>'1 cấp nhánh (tổng quan)','2'=>'2 cấp nhánh (chi tiết vừa)','3'=>'3 cấp nhánh (chi tiết cao)'][$depth] ?? '2 cấp';
+
+    $depthGuide = [
+        1 => "Chỉ tạo các nhánh chính (4-6 nhánh), mỗi nhánh KHÔNG có children.",
+        2 => "Tạo nhánh chính (4-6 nhánh), mỗi nhánh có 3-5 nhánh con cụ thể.",
+        3 => "Tạo nhánh chính (4-6 nhánh), mỗi nhánh có 3-5 nhánh con, mỗi nhánh con có 2-3 nhánh cháu."
+    ][$depth];
+
+    $system = <<<'SYS'
+Bạn là chuyên gia giáo dục và tri thức bách khoa. Nhiệm vụ: tạo sơ đồ tư duy (mind map) có nội dung THỰC CHẤT, CHÍNH XÁC về chủ đề được yêu cầu.
+
+QUY TẮC BẮT BUỘC:
+1. Phân tích sâu chủ đề: nếu là bài học Sinh/Toán/Sử/Lý/Hóa → dùng đúng thuật ngữ, kiến thức thật của bài đó.
+2. Nhánh chính = các KHÍA CẠNH/CHỦ ĐỀ CON thực sự của nội dung (VD: "Định nghĩa", "Cấu tạo", "Chức năng", "Phân loại", "Ví dụ", "Ứng dụng").
+3. Nhánh con = thông tin CỤ THỂ, CHÍNH XÁC (tên, số liệu, khái niệm thật). KHÔNG dùng từ chung chung như "Phương pháp", "Giải pháp", "Tư duy", "Phát triển".
+4. Tên node: ngắn gọn (2-5 từ), đúng thuật ngữ chuyên ngành.
+5. CHỈ trả về JSON thuần túy, KHÔNG có markdown, KHÔNG có text ngoài JSON.
+6. JSON schema: {"name":"Tên chủ đề","children":[{"name":"Nhánh chính","children":[{"name":"Chi tiết cụ thể"},...]},...]}
+SYS;
+
     $messages = [
-        ['role'=>'system','content'=>'Bạn là chuyên gia tạo sơ đồ tư duy. CHỈ trả về JSON thuần túy, không markdown, không giải thích. Cấu trúc: {"name":"Chủ đề chính","children":[{"name":"Nhánh 1","children":[{"name":"Chi tiết 1.1"},{"name":"Chi tiết 1.2"}]},{"name":"Nhánh 2","children":[...]}]}'],
-        ['role'=>'user','content'=>"Tạo sơ đồ tư duy về: \"$topic\"\nĐộ sâu: $depthDesc\nMỗi nhánh chính có 4-6 nhánh con. Tên node ngắn gọn (tối đa 4 từ). Bao gồm các khía cạnh quan trọng nhất.\nCHỈ JSON, không markdown, không text thêm."]
+        ['role' => 'system', 'content' => $system],
+        ['role' => 'user',   'content' =>
+            "Chủ đề: \"$topic\"\n\n" .
+            "Cấu trúc yêu cầu: $depthGuide\n\n" .
+            "Hãy phân tích chủ đề này và tạo mind map với nội dung THỰC CHẤT:\n" .
+            "- Nếu là bài học (Sinh 10, Toán 11...): dùng đúng kiến thức của bài đó\n" .
+            "- Nếu là khái niệm khoa học: dùng định nghĩa, thành phần, cơ chế thật\n" .
+            "- Nếu là sự kiện lịch sử: dùng mốc thời gian, nhân vật, nguyên nhân thật\n" .
+            "- Nếu là kỹ năng/công nghệ: dùng các bước, công cụ, ứng dụng thật\n\n" .
+            "CHỈ JSON, không giải thích thêm."
+        ]
     ];
-    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
-    $clean = preg_replace('/```json|```/', '', $raw);
-    $s = strpos($clean, '{'); $e = strrpos($clean, '}');
-    if ($s === false) { echo json_encode(['error' => 'AI không trả về JSON hợp lệ']); exit; }
+
+    $raw   = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    $clean = preg_replace('/```json|```/i', '', $raw);
+    $s     = strpos($clean, '{');
+    $e     = strrpos($clean, '}');
+    if ($s === false) {
+        echo json_encode(['error' => 'AI không trả về JSON hợp lệ. Phản hồi: ' . mb_substr($raw, 0, 200)]);
+        exit;
+    }
     $tree = json_decode(substr($clean, $s, $e - $s + 1), true);
-    if (!$tree) { echo json_encode(['error' => 'Lỗi parse JSON: ' . $raw]); exit; }
+    if (!$tree || !isset($tree['name'])) {
+        echo json_encode(['error' => 'JSON không hợp lệ. Thử lại với chủ đề cụ thể hơn.']);
+        exit;
+    }
     echo json_encode(['tree' => $tree]);
 
 } elseif ($type === 'quiz') {
