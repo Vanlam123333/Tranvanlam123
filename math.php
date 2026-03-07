@@ -1104,7 +1104,9 @@ function exportPNG() {
   link.click();
 }
 
-// ── Mouse events ──
+// ── Mouse & Touch events (chỉ khi canvas tồn tại) ──
+if (canvas) {
+
 canvas.addEventListener('mousedown', e => {
   dragging = true;
   lastMouse = { x: e.offsetX, y: e.offsetY };
@@ -1189,11 +1191,11 @@ canvas.addEventListener('touchend', () => { dragging = false; touchDist = null; 
 // ── Resize observer ──
 new ResizeObserver(() => { resizeCanvas(); drawAll(); }).observe(canvas.parentElement);
 
-// Init — chỉ chạy graph engine nếu canvas tồn tại
-if (canvas) {
-  renderFnList();
-  setTimeout(() => { resizeCanvas(); drawAll(); }, 100);
-}
+// Init
+renderFnList();
+setTimeout(() => { resizeCanvas(); drawAll(); }, 100);
+
+} // end if (canvas)
 
 
 // ══════════════════════════════════════
