@@ -665,9 +665,12 @@ function appendMsg(m){
 
   const t=m.msg_type||'text';
   let inner='';
+  let imgOnly=false;
   if(t==='image'&&m.file_data){
+    const hasCaption=m.content&&m.content!==m.file_name;
+    if(!m.reply&&!hasCaption) imgOnly=true;
     inner=replyHtml+`<img src="${m.file_data}" class="msg-image" onclick="openLightbox(this.src)" alt="">`;
-    if(m.content&&m.content!==m.file_name) inner+=`<div style="margin-top:4px;">${m.content}</div>`;
+    if(hasCaption) inner+=`<div style="margin-top:6px;padding:0 4px;">${m.content}</div>`;
   } else if(t==='voice'&&m.file_data){
     const sd=m.file_data.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     inner=replyHtml+`<div class="voice-msg"><button class="voice-play-btn" onclick="playVoice(this,'${sd}')">▶</button><div class="voice-waveform" id="wf-${m.id}"></div></div>`;
