@@ -697,7 +697,7 @@ function showTab(t) {
   document.querySelectorAll('.math-tab').forEach((b,i) => {
     b.classList.toggle('active', ['graph','solver','formulas','calc'][i] === t);
   });
-  if (t === 'graph') setTimeout(() => { resizeCanvas(); drawAll(); }, 50);
+  if (t === 'graph' && canvas) setTimeout(() => { resizeCanvas(); drawAll(); }, 50);
   if (t === 'formulas') renderFormulas('all');
 }
 
@@ -715,7 +715,7 @@ let activeTool = 'move';
 let touchDist = null;
 
 const canvas = document.getElementById('graphCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 
 function resizeCanvas() {
   const wrap = canvas.parentElement;
@@ -1189,9 +1189,11 @@ canvas.addEventListener('touchend', () => { dragging = false; touchDist = null; 
 // ── Resize observer ──
 new ResizeObserver(() => { resizeCanvas(); drawAll(); }).observe(canvas.parentElement);
 
-// Init
-renderFnList();
-setTimeout(() => { resizeCanvas(); drawAll(); }, 100);
+// Init — chỉ chạy graph engine nếu canvas tồn tại
+if (canvas) {
+  renderFnList();
+  setTimeout(() => { resizeCanvas(); drawAll(); }, 100);
+}
 
 
 // ══════════════════════════════════════
@@ -1268,7 +1270,15 @@ async function solveMath() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'math_solve', problem: input, solveType })
     });
-    const data = await res.json();
+    if (res.status === 401) {
+      out.innerHTML = '<div class="step"><div class="step-num" style="color:var(--red)">⚠️ Lỗi đăng nhập</div>Vui lòng <a href="login.php">đăng nhập</a> để sử dụng tính năng giải toán AI.</div>';
+      btn.disabled = false; btn.textContent = '✨ Giải'; return;
+    }
+    let data;
+    try { data = await res.json(); } catch {
+      out.innerHTML = '<div class="step"><div class="step-num" style="color:var(--red)">⚠️ Lỗi máy chủ</div>Máy chủ trả về phản hồi không hợp lệ. Kiểm tra lại PHP server.</div>';
+      btn.disabled = false; btn.textContent = '✨ Giải'; return;
+    }
     out.innerHTML = data.result || 'Không giải được!';
     renderMathInElement(out, {
       delimiters: [
@@ -1276,7 +1286,13 @@ async function solveMath() {
         { left: '$', right: '$', display: false }
       ], throwOnError: false
     });
-  } catch { out.innerHTML = 'Lỗi kết nối AI!'; }
+  } catch (err) {
+    if (err instanceof TypeError && err.message.includes('fetch')) {
+      out.innerHTML = '<div class="step"><div class="step-num" style="color:var(--red)">⚠️ Không kết nối được</div>Không thể kết nối đến máy chủ. Đảm bảo PHP server đang chạy và file <code>ai_api.php</code> tồn tại.</div>';
+    } else {
+      out.innerHTML = '<div class="step"><div class="step-num" style="color:var(--red)">⚠️ Lỗi</div>' + (err.message || 'Lỗi không xác định') + '</div>';
+    }
+  }
   btn.disabled = false; btn.textContent = '✨ Giải';
 }
 
@@ -1735,7 +1751,7 @@ document.addEventListener('keydown', function(e) {
     '.':'dot','+':'add','-':'sub','*':'mul','/':e.shiftKey?'':'mul',
     'Enter':'eq','=':'eq','Backspace':'del','Escape':'ac',
   };
-  if (e.key === '/') { e.preventDefault(); cx('mul'); return; }
+  if (e.key === '/') { e.preventDefault(); cxAppend('÷'); return; }
   if (map[e.key]) { e.preventDefault(); cx(map[e.key]); }
   if (e.key === '(' || (e.key === '9' && e.shiftKey)) { e.preventDefault(); cx('lpar'); }
   if (e.key === ')' || (e.key === '0' && e.shiftKey)) { e.preventDefault(); cx('rpar'); }
