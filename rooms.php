@@ -209,7 +209,9 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
 .reply-preview{background:rgba(0,0,0,.07);border-left:3px solid rgba(255,255,255,.4);
   border-radius:6px;padding:5px 8px;margin-bottom:6px;font-size:11px;opacity:.85;}
 .msg-bubble.theirs .reply-preview{background:var(--surface);border-left-color:var(--accent);}
-.msg-image{max-width:220px;max-height:180px;border-radius:10px;display:block;cursor:pointer;}
+.msg-image{max-width:220px;max-height:180px;border-radius:10px;display:block;cursor:pointer;border:none;outline:none;}
+/* Image-only bubble: remove background/padding so no colored frame */
+.msg-bubble.img-only{background:transparent !important;padding:0 !important;border-radius:10px;}
 .msg-file{display:flex;align-items:center;gap:8px;padding:9px 11px;background:rgba(0,0,0,.1);
   border-radius:10px;text-decoration:none;color:inherit;font-size:12px;font-weight:600;min-width:150px;}
 .msg-file svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
@@ -680,8 +682,8 @@ function appendMsg(m){
   const avatarHtml=m.mine?'':`<div class="msg-avatar-wrap">${m.avatar}</div>`;
   div.innerHTML=`${avatarHtml}<div class="msg-body">
     <div class="msg-sender">${m.user}</div>
-    <div class="msg-bubble ${m.mine?'mine':'theirs'}">${inner}<div class="msg-actions">${actions}</div></div>
-    <div class="msg-meta"><span class="msg-time">${m.time}</span></div>
+    <div class="msg-bubble ${m.mine?'mine':'theirs'}${imgOnly?' img-only':''}">${inner}<div class="msg-actions">${actions}</div></div>
+    <div class="msg-meta"><span class="msg-time" title="${m.fulltime||''}">${m.time}</span></div>
   </div>`;
 
   const atBottom=ml.scrollTop+ml.clientHeight>=ml.scrollHeight-60;
