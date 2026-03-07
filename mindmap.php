@@ -728,17 +728,71 @@ function addToSidebar(id, title, topic) {
 
 // ── Export PNG ──
 function exportPNG() {
-  const svgEl = document.getElementById('mmCanvas');
+  const svgEl  = document.getElementById('mmCanvas');
+  const rootEl = document.getElementById('mmRoot');
+
+  // Tính bounding box thực của toàn bộ nội dung trong mmRoot
+  let bbox;
+  try { bbox = rootEl.getBBox(); } catch(e) { bbox = null; }
+
+  if (!bbox || bbox.width === 0) {
+    alert('Không có nội dung để xuất!'); return;
+  }
+
+  // Lấy transform hiện tại của mmRoot (pan/zoom)
+  const transform = rootEl.getAttribute('transform') || '';
+
+  const PAD = 48; // padding xung quanh
+  const W = Math.ceil(bbox.width  + PAD * 2);
+  const H = Math.ceil(bbox.height + PAD * 2);
+  const SCALE = 2; // retina
+
+  // Clone SVG và set viewBox đúng để capture đủ nội dung
+  const svgClone = svgEl.cloneNode(true);
+  svgClone.setAttribute('width',   W);
+  svgClone.setAttribute('height',  H);
+  svgClone.setAttribute('viewBox', `${bbox.x - PAD} ${bbox.y - PAD} ${W} ${H}`);
+  // Xoá transform pan/zoom trên root clone vì viewBox đã handle
+  const rootClone = svgClone.querySelector('#mmRoot');
+  if (rootClone) rootClone.removeAttribute('transform');
+
+  // Fix font, stroke cho SVG standalone
+  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  style.textContent = `
+    text { font-family: 'Plus Jakarta Sans', Arial, sans-serif; fill: ${isDark ? '#f0f0f8' : '#111118'}; }
+    .mm-link { fill: none; stroke-width: 2; opacity: 0.6; }
+  `;
+  svgClone.insertBefore(style, svgClone.firstChild);
+
+  // Background rect
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bg.setAttribute('x', bbox.x - PAD);
+  bg.setAttribute('y', bbox.y - PAD);
+  bg.setAttribute('width',  W);
+  bg.setAttribute('height', H);
+  bg.setAttribute('fill', isDark ? '#0d0d12' : '#f5f5f7');
+  svgClone.insertBefore(bg, svgClone.firstChild);
+
   const serializer = new XMLSerializer();
-  const svgStr = serializer.serializeToString(svgEl);
-  const canvas = document.createElement('canvas');
-  canvas.width = svgEl.clientWidth * 2; canvas.height = svgEl.clientHeight * 2;
-  const ctx2 = canvas.getContext('2d');
-  ctx2.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0d0d12';
-  ctx2.fillRect(0, 0, canvas.width, canvas.height);
+  const svgStr = serializer.serializeToString(svgClone);
+
+  const canvas2 = document.createElement('canvas');
+  canvas2.width  = W * SCALE;
+  canvas2.height = H * SCALE;
+  const ctx2 = canvas2.getContext('2d');
+  ctx2.scale(SCALE, SCALE);
+
   const img = new Image();
-  img.onload = () => { ctx2.drawImage(img, 0, 0, canvas.width, canvas.height); const a = document.createElement('a'); a.download = 'mindmap.png'; a.href = canvas.toDataURL(); a.click(); };
-  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+  img.onload = () => {
+    ctx2.drawImage(img, 0, 0, W, H);
+    const a = document.createElement('a');
+    a.download = 'mindmap.png';
+    a.href = canvas2.toDataURL('image/png');
+    a.click();
+  };
+  img.onerror = () => alert('Lỗi xuất PNG. Thử lại!');
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
 }
 
 // Resize observer
