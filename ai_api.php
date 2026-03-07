@@ -83,10 +83,11 @@ if ($type === 'chat') {
     $topic = $input['topic'] ?? '';
     $level = $input['level'] ?? 'B1-B2';
     $wordType = $input['wordType'] ?? 'tất cả';
+    $count = max(5, min(30, (int)($input['count'] ?? 10)));
     $typeNote = $wordType !== 'tất cả' ? ", chỉ lấy $wordType" : '';
     $messages = [
         ['role'=>'system','content'=>'Bạn là giáo viên tiếng Anh. CHỈ trả về JSON array thuần túy, không giải thích thêm.'],
-        ['role'=>'user','content'=>"Tạo 10 flashcard từ vựng tiếng Anh chủ đề \"$topic\", trình độ $level$typeNote.
+        ['role'=>'user','content'=>"Tạo $count flashcard từ vựng tiếng Anh chủ đề \"$topic\", trình độ $level$typeNote.
 Mỗi card: word (từ tiếng Anh), phonetic (phiên âm IPA), type (noun/verb/adj/adv), meaning (nghĩa tiếng Việt ngắn), example (câu ví dụ tiếng Anh tự nhiên), example_vi (dịch tiếng Việt).
 CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\":\"...\",\"example\":\"...\",\"example_vi\":\"...\"}]"]
     ];
