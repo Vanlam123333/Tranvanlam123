@@ -135,6 +135,22 @@ CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\"
     }
     echo json_encode(['result' => $result]);
 
+} elseif ($type === 'mindmap') {
+    $topic = $input['topic'] ?? '';
+    $depth = max(1, min(3, (int)($input['depth'] ?? 2)));
+    $depthDesc = ['1'=>'1 cấp nhánh (tổng quan)','2'=>'2 cấp nhánh (chi tiết vừa)','3'=>'3 cấp nhánh (chi tiết cao)'][$depth] ?? '2 cấp';
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là chuyên gia tạo sơ đồ tư duy. CHỈ trả về JSON thuần túy, không markdown, không giải thích. Cấu trúc: {"name":"Chủ đề chính","children":[{"name":"Nhánh 1","children":[{"name":"Chi tiết 1.1"},{"name":"Chi tiết 1.2"}]},{"name":"Nhánh 2","children":[...]}]}'],
+        ['role'=>'user','content'=>"Tạo sơ đồ tư duy về: \"$topic\"\nĐộ sâu: $depthDesc\nMỗi nhánh chính có 4-6 nhánh con. Tên node ngắn gọn (tối đa 4 từ). Bao gồm các khía cạnh quan trọng nhất.\nCHỈ JSON, không markdown, không text thêm."]
+    ];
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    $clean = preg_replace('/```json|```/', '', $raw);
+    $s = strpos($clean, '{'); $e = strrpos($clean, '}');
+    if ($s === false) { echo json_encode(['error' => 'AI không trả về JSON hợp lệ']); exit; }
+    $tree = json_decode(substr($clean, $s, $e - $s + 1), true);
+    if (!$tree) { echo json_encode(['error' => 'Lỗi parse JSON: ' . $raw]); exit; }
+    echo json_encode(['tree' => $tree]);
+
 } elseif ($type === 'quiz') {
     $topic = $input['topic'] ?? '';
     $level = $input['level'] ?? 1;

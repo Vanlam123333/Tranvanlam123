@@ -23,6 +23,8 @@ $user = getCurrentUser();
     <a href="notes.php"     class="nav-link <?= $current=='notes.php'?'active':'' ?>">🗒️ <span class="label">Ghi chú</span></a>
     <a href="planner.php"   class="nav-link <?= $current=='planner.php'?'active':'' ?>">📅 <span class="label">Kế hoạch</span></a>
     <a href="math.php"      class="nav-link <?= $current=='math.php'?'active':'' ?>">📐 <span class="label">Toán</span></a>
+    <a href="pomodoro.php"  class="nav-link <?= $current=='pomodoro.php'?'active':'' ?>">🍅 <span class="label">Pomodoro</span></a>
+    <a href="mindmap.php"   class="nav-link <?= $current=='mindmap.php'?'active':'' ?>">🗺️ <span class="label">Mind Map</span></a>
   </div>
   <div class="nav-user">
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
@@ -73,6 +75,8 @@ $user = getCurrentUser();
   <a href="notes.php">🗒️ Ghi chú</a>
   <a href="planner.php">📅 Kế hoạch</a>
   <a href="math.php">📐 Toán</a>
+  <a href="pomodoro.php">🍅 Pomodoro</a>
+  <a href="mindmap.php">🗺️ Mind Map</a>
   <a href="logout.php">🚪 Đăng xuất</a>
 </div>
 
