@@ -374,7 +374,7 @@ function showTab(t) {
 }
 
 // ══════════════════════════════════════
-//  GRAPH ENGINE
+//  GRAPH ENGINE (legacy canvas — disabled, GeoGebra is used instead)
 // ══════════════════════════════════════
 const COLORS = ['#4f6ef7','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
 let fns = [{ expr: 'x^2 - 3*x + 2', color: COLORS[0], visible: true, id: 0 }];
@@ -387,9 +387,10 @@ let activeTool = 'move';
 let touchDist = null;
 
 const canvas = document.getElementById('graphCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 
 function resizeCanvas() {
+  if (!canvas) return;
   const wrap = canvas.parentElement;
   canvas.width = wrap.clientWidth;
   canvas.height = wrap.clientHeight - 40 - 30; // toolbar + statusbar
@@ -470,6 +471,7 @@ function niceStep(rough) {
 }
 
 function drawAll() {
+  if (!canvas || !ctx) return;
   resizeCanvas();
   const W = canvas.width, H = canvas.height;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -777,6 +779,7 @@ function exportPNG() {
 }
 
 // ── Mouse events ──
+if (canvas) {
 canvas.addEventListener('mousedown', e => {
   dragging = true;
   lastMouse = { x: e.offsetX, y: e.offsetY };
@@ -864,6 +867,7 @@ new ResizeObserver(() => { resizeCanvas(); drawAll(); }).observe(canvas.parentEl
 // Init
 renderFnList();
 setTimeout(() => { resizeCanvas(); drawAll(); }, 100);
+} // end if (canvas)
 
 
 // ══════════════════════════════════════
