@@ -402,20 +402,19 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   }
   .rooms-sidebar{
     flex-shrink:0;height:auto;max-height:140px;
-    border-right:none;border-bottom:1px solid var(--border);overflow:hidden;
+    border-right:none;border-bottom:1px solid var(--border);
+    overflow-x:hidden;overflow-y:visible;
   }
-  .sidebar-header{padding:8px 12px 4px;}
+  .sidebar-header{padding:6px 12px 4px;}
   .sidebar-title{font-size:13px;margin-bottom:4px;}
-  .sidebar-header{padding:8px 12px 6px;}
-  .sidebar-title{font-size:13px;margin-bottom:6px;}
   .sidebar-search{display:none;}
   .rooms-list{
-    display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;
-    padding:4px 10px 8px;gap:8px;scrollbar-width:none;
+    display:flex;flex-direction:row;overflow-x:auto;overflow-y:visible;
+    padding:6px 10px 10px;gap:8px;scrollbar-width:none;
   }
   .rooms-list::-webkit-scrollbar{display:none;}
   .room-item{
-    flex-direction:column;align-items:center;padding:6px 8px;
+    flex-direction:column;align-items:center;padding:8px 8px 6px;
     border-radius:12px;min-width:64px;max-width:80px;
     height:auto !important;gap:4px;margin-bottom:0;flex-shrink:0;
     background:transparent;border:1.5px solid transparent;position:relative;
@@ -427,7 +426,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   .room-name{font-size:11px;font-weight:600;color:var(--text2);}
   .room-item.active .room-name{color:var(--accent);font-weight:700;}
   .room-preview{display:none;}
-  .room-badge{position:absolute;top:0px;right:0px;min-width:16px;height:16px;font-size:9px;}
+  .room-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;font-size:9px;z-index:2;}
   .room-meta{display:none;}
   .sidebar-footer{padding:0 10px 8px;}
   .new-room-btn{padding:6px 12px;font-size:11px;width:auto;}
@@ -543,12 +542,28 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
           if($msgType==='image' && $fileData) {
             $safeData = htmlspecialchars($fileData);
             $hasCaption = $content && ($m['content'] !== ($m['file_name']??''));
-            $innerHtml = $replyHtml.'<img src="'.$safeData.'" class="msg-image" onclick="openLightbox(this.src)" alt="'.$fileName.'">';
+            $imgImgOnlyClass = !$replyHtml ? ' img-only' : '';
             if($hasCaption) {
-              $innerHtml .= '<div style="padding:6px 10px 4px;">'.$content.'</div>';
-            } else {
-              $imgOnly = !$replyHtml;
+              // 2 bubble riêng: ảnh + caption
+              $avatarHtml = $mine ? '' : '<div class="msg-avatar-wrap">'.$av.'</div>';
+              echo <<<HTML
+<div class="msg-row {$side}" id="m-{$mid}">
+  {$avatarHtml}
+  <div class="msg-body">
+    <div class="msg-sender">{$m['name']}</div>
+    <div class="msg-bubble {$side}{$imgImgOnlyClass}">
+      {$replyHtml}<img src="{$safeData}" class="msg-image" onclick="openLightbox(this.src)" alt="{$fileName}">
+      <div class="msg-actions">{$actions}</div>
+    </div>
+    <div class="msg-bubble {$side}" style="margin-top:4px;">{$content}</div>
+    <div class="msg-meta"><span class="msg-time">{$time}</span></div>
+  </div>
+</div>
+HTML;
+              continue;
             }
+            $innerHtml = $replyHtml.'<img src="'.$safeData.'" class="msg-image" onclick="openLightbox(this.src)" alt="'.$fileName.'">';
+            $imgOnly = !$replyHtml;
           } elseif($msgType==='voice' && $fileData) {
             $safeJs = addslashes($fileData);
             $innerHtml = $replyHtml.'<div class="voice-msg"><button class="voice-play-btn" onclick="playVoice(this,\''. $safeJs .'\')">▶</button><div class="voice-waveform"></div></div>';
@@ -764,9 +779,20 @@ function appendMsg(m){
   let imgOnly=false;
   if(t==='image'&&m.file_data){
     const hasCaption=m.content&&m.content!==m.file_name;
-    if(!m.reply&&!hasCaption) imgOnly=true;
+    imgOnly=!m.reply;
     inner=replyHtml+`<img src="${m.file_data}" class="msg-image" onclick="openLightbox(this.src)" alt="">`;
-    if(hasCaption) inner+=`<div style="margin-top:6px;padding:0 4px;">${m.content}</div>`;
+    if(hasCaption){
+      // Render ảnh + caption thành 2 bubble riêng
+      const side=m.mine?'mine':'theirs';
+      const avatarHtml=m.mine?'':`<div class="msg-avatar-wrap">${m.avatar}</div>`;
+      div.innerHTML=`${avatarHtml}<div class="msg-body">
+        <div class="msg-sender">${m.user}</div>
+        <div class="msg-bubble ${side} img-only">${replyHtml}<img src="${m.file_data}" class="msg-image" onclick="openLightbox(this.src)" alt=""><div class="msg-actions">${actions}</div></div>
+        <div class="msg-bubble ${side}" style="margin-top:4px;">${m.content}</div>
+        <div class="msg-meta"><span class="msg-time" title="${m.fulltime||''}">${m.time}</span></div>
+      </div>`;
+      return div;
+    }
   } else if(t==='voice'&&m.file_data){
     const sd=m.file_data.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     inner=replyHtml+`<div class="voice-msg"><button class="voice-play-btn" onclick="playVoice(this,'${sd}')">▶</button><div class="voice-waveform" id="wf-${m.id}"></div></div>`;
