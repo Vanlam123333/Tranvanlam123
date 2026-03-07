@@ -94,6 +94,29 @@ $firstName = end($nameArr);
 .quick-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);text-decoration:none;color:var(--text2);font-size:11px;font-weight:700;transition:all .15s;text-align:center}
 .quick-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
 .quick-btn-icon{font-size:22px}
+
+/* ── Hero feature cards ── */
+.hero-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.2rem;}
+.hero-card{position:relative;border-radius:16px;padding:22px 22px 20px;text-decoration:none;
+  display:flex;flex-direction:column;gap:10px;overflow:hidden;transition:transform .18s,box-shadow .18s;}
+.hero-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.18);}
+.hero-card-mindmap{background:linear-gradient(135deg,#3b5bdb 0%,#6741d9 100%);}
+.hero-card-math{background:linear-gradient(135deg,#0f766e 0%,#0891b2 100%);}
+.hero-card-icon{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;}
+.hero-card-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.hero-card-title{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.hero-card-sub{font-size:12px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.4;}
+.hero-card-arrow{margin-top:auto;align-self:flex-start;background:rgba(255,255,255,.2);color:#fff;
+  border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 14px;
+  font-size:12px;font-weight:700;font-family:var(--font);}
+.hero-card:hover .hero-card-arrow{background:rgba(255,255,255,.3);}
+/* decorative circle */
+.hero-card::after{content:'';position:absolute;right:-30px;top:-30px;
+  width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none;}
+@media(max-width:600px){
+  .hero-cards{grid-template-columns:1fr;}
+}
 @media(max-width:768px){.stat-strip{grid-template-columns:repeat(2,1fr)}.dash-name{font-size:1.5rem}}
 </style>
 </head>
@@ -129,6 +152,26 @@ $firstName = end($nameArr);
     <div class="stat-tile"><div class="stat-tile-icon blue">🍅</div><div><div class="stat-tile-val"><?= $pomo_today['c'] ?></div><div class="stat-tile-label">Pomodoro hôm nay</div></div></div>
     <div class="stat-tile"><div class="stat-tile-icon gold">⏱️</div><div><div class="stat-tile-val"><?= $pomo_today['m'] ?>p</div><div class="stat-tile-label">Phút học hôm nay</div></div></div>
     <div class="stat-tile"><div class="stat-tile-icon red">🗒️</div><div><div class="stat-tile-val"><?= $notes_count ?></div><div class="stat-tile-label">Ghi chú đã tạo</div></div></div>
+  </div>
+
+  <!-- HERO FEATURE CARDS -->
+  <div class="hero-cards">
+    <a href="mindmap.php" class="hero-card hero-card-mindmap">
+      <div class="hero-card-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="15"/><line x1="9" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="15" y2="12"/><circle cx="12" cy="3" r="1.5"/><circle cx="12" cy="21" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="21" cy="12" r="1.5"/></svg>
+      </div>
+      <div class="hero-card-title">Mind Map</div>
+      <div class="hero-card-sub">Sơ đồ tư duy trực quan · Kết nối ý tưởng · Ghi nhớ sâu hơn</div>
+      <div class="hero-card-arrow">Mở Mind Map →</div>
+    </a>
+    <a href="math.php" class="hero-card hero-card-math">
+      <div class="hero-card-icon">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="7" x2="10" y2="7"/><line x1="14" y1="17" x2="19" y2="17"/></svg>
+      </div>
+      <div class="hero-card-title">Toán học</div>
+      <div class="hero-card-sub">Giải toán tức thì · Vẽ đồ thị · Luyện tập mỗi ngày</div>
+      <div class="hero-card-arrow">Mở Toán học →</div>
+    </a>
   </div>
 
   <!-- MAIN GRID -->
