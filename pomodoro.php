@@ -300,7 +300,8 @@ for ($i = 6; $i >= 0; $i--) {
         <div class="card-header"><div class="card-title">📈 Hoạt động 7 ngày</div></div>
         <div class="card-body">
           <?php
-          $maxCount = max(array_column($chart_data, 'count'), 1);
+          $counts = array_column($chart_data, 'count');
+          $maxCount = max(array_merge([1], $counts));
           ?>
           <div class="chart-wrap">
             <?php foreach ($chart_data as $d): ?>
