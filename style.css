@@ -94,16 +94,36 @@ body {
   font-weight: 700; font-size: 1rem;
   letter-spacing: -0.4px; text-decoration: none;
   color: var(--text); flex-shrink: 0;
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 9px;
+  transition: opacity .15s;
 }
+.logo:hover { opacity: .85; }
 .logo-mark {
-  width: 26px; height: 26px; background: var(--accent);
-  border-radius: 7px; display: flex; align-items: center;
-  justify-content: center;
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #3b5bdb 0%, #6741d9 100%);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(59, 91, 219, .45);
+  flex-shrink: 0;
+  transition: box-shadow .2s;
 }
-.logo-mark svg { width: 14px; height: 14px; fill: #fff; }
-.logo-name { font-weight: 700; color: var(--text); }
-.logo-name span { color: var(--accent); }
+.logo:hover .logo-mark {
+  box-shadow: 0 4px 18px rgba(59, 91, 219, .65);
+}
+.logo-mark svg { width: 20px; height: 20px; }
+.logo-name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  line-height: 1;
+}
+.logo-name span {
+  background: linear-gradient(90deg, #3b5bdb, #6741d9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 .nav-links {
   display: flex; gap: 1px; align-items: center;
@@ -337,11 +357,24 @@ select.form-input { cursor: pointer; }
   box-shadow: var(--shadow-lg); position: relative; z-index: 1;
 }
 .auth-logo {
-  font-size: 1.3rem; font-weight: 700; letter-spacing: -0.4px;
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
   text-align: center; margin-bottom: 4px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
 }
-.auth-logo span { color: var(--accent); }
+.auth-logo-mark {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #3b5bdb 0%, #6741d9 100%);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(59,91,219,.4);
+}
+.auth-logo-mark svg { width: 22px; height: 22px; }
+.auth-logo span {
+  background: linear-gradient(90deg, #3b5bdb, #6741d9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .auth-sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 1.6rem; }
 .auth-footer { text-align: center; margin-top: 1rem; font-size: 13px; color: var(--muted); }
 .auth-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }

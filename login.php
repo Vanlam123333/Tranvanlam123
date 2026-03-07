@@ -29,7 +29,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <div class="auth-wrap">
   <div class="auth-box">
-    <div class="auth-logo">Mind<span>Spark</span></div>
+    <div class="auth-logo">
+    <div class="auth-logo-mark">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="4" fill="#fff" opacity="0.95"/>
+        <line x1="16" y1="4"  x2="16" y2="11" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="16" y1="21" x2="16" y2="28" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="4"  y1="16" x2="11" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="21" y1="16" x2="28" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="7.5"  y1="7.5"  x2="12.2" y2="12.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="19.8" y1="19.8" x2="24.5" y2="24.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="24.5" y1="7.5"  x2="19.8" y2="12.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="12.2" y1="19.8" x2="7.5"  y2="24.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    Mind<span>Spark</span>
+  </div>
     <div class="auth-sub">Chào mừng trở lại! 👋</div>
     <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <form method="POST">

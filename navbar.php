@@ -59,7 +59,20 @@ function navIcon($name) {
 <!-- DESKTOP NAVBAR -->
 <nav class="navbar">
   <a href="dashboard.php" class="logo">
-    <div class="logo-mark"><?=navIcon('logo')?></div>
+    <div class="logo-mark">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+        <!-- Spark / neural node icon -->
+        <circle cx="16" cy="16" r="4" fill="#fff" opacity="0.95"/>
+        <line x1="16" y1="4"  x2="16" y2="11" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="16" y1="21" x2="16" y2="28" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="4"  y1="16" x2="11" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="21" y1="16" x2="28" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="7.5"  y1="7.5"  x2="12.2" y2="12.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="19.8" y1="19.8" x2="24.5" y2="24.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="24.5" y1="7.5"  x2="19.8" y2="12.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="12.2" y1="19.8" x2="7.5"  y2="24.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
     <div class="logo-name">Mind<span>Spark</span></div>
   </a>
 
@@ -123,7 +136,20 @@ function navIcon($name) {
 <!-- MOBILE TOP BAR -->
 <div class="mobile-topbar">
   <a href="dashboard.php" class="logo">
-    <div class="logo-mark"><?=navIcon('logo')?></div>
+    <div class="logo-mark">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+        <!-- Spark / neural node icon -->
+        <circle cx="16" cy="16" r="4" fill="#fff" opacity="0.95"/>
+        <line x1="16" y1="4"  x2="16" y2="11" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="16" y1="21" x2="16" y2="28" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="4"  y1="16" x2="11" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="21" y1="16" x2="28" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+        <line x1="7.5"  y1="7.5"  x2="12.2" y2="12.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="19.8" y1="19.8" x2="24.5" y2="24.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="24.5" y1="7.5"  x2="19.8" y2="12.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+        <line x1="12.2" y1="19.8" x2="7.5"  y2="24.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
     <div class="logo-name">Mind<span>Spark</span></div>
   </a>
   <div style="display:flex;align-items:center;gap:8px;">
