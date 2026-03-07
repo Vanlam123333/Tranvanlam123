@@ -135,6 +135,59 @@ CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\"
     }
     echo json_encode(['result' => $result]);
 
+} elseif ($type === 'mindmap_content') {
+    $content = mb_substr(trim($input['content'] ?? ''), 0, 6000); // max 6000 chars
+    $depth   = max(1, min(10, (int)($input['depth'] ?? 3)));
+
+    $depthGuide = $depth <= 2
+        ? "Chỉ tạo nhánh chính, KHÔNG có children."
+        : "Tạo cây $depth cấp lồng nhau. Mỗi node có 3-5 con. Càng sâu càng cụ thể.";
+
+    $system = <<<'SYS'
+Bạn là chuyên gia phân tích và tóm tắt nội dung học thuật. Nhiệm vụ: đọc văn bản người dùng cung cấp, tự động xác định chủ đề chính, rồi tạo sơ đồ tư duy (mind map) CÓ NỘI DUNG THỰC CHẤT từ chính văn bản đó.
+
+QUY TẮC:
+1. Đọc và HIỂU nội dung → xác định chủ đề trung tâm → phân tách thành các nhóm ý chính.
+2. Nhánh chính = các ý lớn/chủ đề con thực sự có trong văn bản.
+3. Nhánh con = thông tin CỤ THỂ trích từ nội dung (định nghĩa, số liệu, tên gọi, ví dụ thật).
+4. KHÔNG bịa thêm thông tin ngoài văn bản.
+5. Tên node ngắn gọn (2-5 từ), giữ nguyên thuật ngữ quan trọng.
+6. Trả về 2 thứ trong JSON: "title" (tên chủ đề tự xác định) và "tree" (cây mind map).
+7. CHỈ JSON thuần túy, KHÔNG markdown, KHÔNG giải thích.
+Schema: {"title":"Tên chủ đề","tree":{"name":"Tên chủ đề","children":[...]}}
+SYS;
+
+    $messages = [
+        ['role' => 'system', 'content' => $system],
+        ['role' => 'user',   'content' =>
+            "Nội dung cần phân tích:\n\n" . $content . "\n\n" .
+            "Cấu trúc yêu cầu: $depthGuide\n" .
+            "CHỈ JSON, không text thêm."
+        ]
+    ];
+
+    $raw   = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 4000);
+    $clean = preg_replace('/```json|```/i', '', $raw);
+    $s     = strpos($clean, '{');
+    $e     = strrpos($clean, '}');
+    if ($s === false) {
+        echo json_encode(['error' => 'AI không trả về JSON. Thử lại hoặc rút ngắn nội dung.']);
+        exit;
+    }
+    $result = json_decode(substr($clean, $s, $e - $s + 1), true);
+    if (!$result) {
+        echo json_encode(['error' => 'Lỗi parse JSON. Thử lại.']);
+        exit;
+    }
+    // Hỗ trợ cả 2 format: {title, tree} hoặc trực tiếp {name, children}
+    if (isset($result['tree'])) {
+        echo json_encode(['tree' => $result['tree'], 'title' => $result['title'] ?? '']);
+    } elseif (isset($result['name'])) {
+        echo json_encode(['tree' => $result, 'title' => $result['name'] ?? '']);
+    } else {
+        echo json_encode(['error' => 'Cấu trúc JSON không hợp lệ.']);
+    }
+
 } elseif ($type === 'mindmap') {
     $topic = $input['topic'] ?? '';
     $depth = max(1, min(10, (int)($input['depth'] ?? 2)));
