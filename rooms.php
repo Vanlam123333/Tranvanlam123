@@ -298,28 +298,29 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
    MOBILE OVERRIDES
 ═══════════════════════════════════ */
 @media(max-width:640px){
-  /* Remove page padding — chat goes full width */
   .page{padding:0 !important;}
   .page-header{display:none;}
 
-  /* The whole layout stacks: room list drawer on top, chat fills rest */
+  /* Switch from grid to flex column so sidebar doesn't stretch */
   .rooms-layout{
-    grid-template-columns:1fr;
+    display:flex;
+    flex-direction:column;
     border:none;
     border-radius:0;
-    height:calc(100vh - 66px); /* full viewport minus bottom nav */
+    height:calc(100vh - 66px);
     min-height:0;
   }
 
-  /* Room list: horizontal pill tabs, compact */
+  /* Sidebar: fixed compact height, never stretches */
   .rooms-sidebar{
+    flex-shrink:0;
     height:auto;
-    min-height:0;
+    max-height:130px;
     border-right:none;
     border-bottom:1px solid var(--border);
-    flex-shrink:0;
+    overflow:hidden;
   }
-  .sidebar-header{padding:10px 14px 8px;}
+  .sidebar-header{padding:8px 14px 6px;}
   .rooms-list{
     display:flex;
     flex-direction:row;
@@ -329,54 +330,54 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
     gap:6px;
     scrollbar-width:none;
     -webkit-overflow-scrolling:touch;
+    height:auto;
   }
   .rooms-list::-webkit-scrollbar{display:none;}
   .room-item{
     flex-direction:column;
     align-items:center;
-    padding:8px 12px;
+    padding:7px 10px;
     border-radius:12px;
-    min-width:72px;
-    max-width:90px;
-    gap:5px;
+    min-width:68px;
+    max-width:85px;
+    height:auto !important;
+    gap:4px;
     margin-bottom:0;
     flex-shrink:0;
     background:var(--surface2);
     border:1.5px solid transparent;
+    position:relative;
   }
   .room-item.active{
     background:var(--accent-soft);
     border-color:var(--accent);
   }
-  .room-avatar{width:32px;height:32px;}
+  .room-avatar{width:30px;height:30px;flex-shrink:0;}
   .room-item.active .room-avatar{background:var(--accent-soft);}
   .room-item.active .room-avatar svg{stroke:var(--accent);}
   .room-info{width:100%;text-align:center;}
   .room-name{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .room-item.active .room-name{color:var(--accent);font-weight:700;}
   .room-preview{display:none;}
-  .room-badge{
-    position:absolute;top:-5px;right:-5px;
-    min-width:16px;height:16px;font-size:9px;
-  }
-  .room-item{position:relative;}
-  .sidebar-footer{
-    display:flex;align-items:center;flex-shrink:0;padding:0 10px 10px;
-  }
-  .new-room-btn{width:auto;padding:8px 14px;border-radius:12px;font-size:11px;white-space:nowrap;}
+  .room-badge{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;font-size:9px;}
+  .sidebar-footer{flex-shrink:0;padding:0 10px 8px;}
+  .new-room-btn{width:auto;padding:7px 12px;border-radius:10px;font-size:11px;white-space:nowrap;}
 
-  /* Chat main: fills remaining vertical space */
+  /* Chat main: takes all remaining space */
   .chat-main{
     flex:1;
-    height:0; /* force flex to control height */
+    min-height:0;
     overflow:hidden;
+    display:flex;
+    flex-direction:column;
   }
-  .chat-header{padding:10px 14px;min-height:50px;}
+  .chat-header{padding:10px 14px;min-height:48px;flex-shrink:0;}
   .chat-room-name{font-size:14px;}
   .chat-room-desc{font-size:10px;}
 
-  /* Messages: full scroll */
   .messages{
+    flex:1;
+    min-height:0;
     padding:10px 12px;
     gap:2px;
   }
@@ -384,8 +385,8 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   .msg-bubble{font-size:14px;padding:9px 13px;}
   .msg-image{max-width:200px;max-height:160px;}
 
-  /* Input: bigger touch targets */
   .chat-input-area{
+    flex-shrink:0;
     padding:8px 10px;
     padding-bottom:max(10px, env(safe-area-inset-bottom));
   }
