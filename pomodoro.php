@@ -54,7 +54,7 @@ for ($i = 6; $i >= 0; $i--) {
   position: relative; width: 240px; height: 240px;
   filter: drop-shadow(0 8px 32px rgba(79,110,247,0.25));
 }
-.pomo-svg { transform: rotate(-90deg); }
+.pomo-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
 .pomo-track { fill: none; stroke: var(--surface2); stroke-width: 10; }
 .pomo-progress {
   fill: none; stroke-width: 10;

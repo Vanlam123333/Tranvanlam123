@@ -302,8 +302,8 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   border-radius:6px;padding:5px 8px;margin-bottom:6px;font-size:11px;opacity:.85;}
 .msg-bubble.theirs .reply-preview{background:var(--surface);border-left-color:var(--accent);}
 
-.msg-image{max-width:260px;max-height:220px;border-radius:12px;display:block;cursor:pointer;border:none;outline:none;}
-.msg-bubble.img-only{background:transparent !important;padding:0 !important;border-radius:12px;}
+.msg-image{width:100%;max-width:260px;max-height:260px;object-fit:cover;display:block;cursor:pointer;border:none;outline:none;}
+.msg-bubble.img-only{background:transparent !important;padding:0 !important;border-radius:12px;overflow:hidden;}
 
 .msg-file{display:flex;align-items:center;gap:8px;padding:9px 11px;background:rgba(0,0,0,.1);
   border-radius:10px;text-decoration:none;color:inherit;font-size:12px;font-weight:600;min-width:160px;}
@@ -401,15 +401,17 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
     height:calc(100vh - 66px);min-height:0;
   }
   .rooms-sidebar{
-    flex-shrink:0;height:auto;max-height:120px;
+    flex-shrink:0;height:auto;max-height:140px;
     border-right:none;border-bottom:1px solid var(--border);overflow:hidden;
   }
+  .sidebar-header{padding:8px 12px 4px;}
+  .sidebar-title{font-size:13px;margin-bottom:4px;}
   .sidebar-header{padding:8px 12px 6px;}
   .sidebar-title{font-size:13px;margin-bottom:6px;}
   .sidebar-search{display:none;}
   .rooms-list{
     display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;
-    padding:0 10px 8px;gap:8px;scrollbar-width:none;
+    padding:4px 10px 8px;gap:8px;scrollbar-width:none;
   }
   .rooms-list::-webkit-scrollbar{display:none;}
   .room-item{
@@ -425,7 +427,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   .room-name{font-size:11px;font-weight:600;color:var(--text2);}
   .room-item.active .room-name{color:var(--accent);font-weight:700;}
   .room-preview{display:none;}
-  .room-badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;font-size:9px;}
+  .room-badge{position:absolute;top:0px;right:0px;min-width:16px;height:16px;font-size:9px;}
   .room-meta{display:none;}
   .sidebar-footer{padding:0 10px 8px;}
   .new-room-btn{padding:6px 12px;font-size:11px;width:auto;}
@@ -537,10 +539,16 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
           $actions = ($mine?'<button class="msg-action-btn" onclick="deleteMsg('.$mid.',event)" title="Xoá">'.$delSvg.'</button>':'')
             .'<button class="msg-action-btn" onclick="setReply('.$mid.',\''.addslashes(htmlspecialchars($m['name'])).'\',\''.addslashes(mb_substr(htmlspecialchars($m['content']),0,60)).'\')" title="Reply">'.$replySvg.'</button>';
 
+          $imgOnly = false;
           if($msgType==='image' && $fileData) {
             $safeData = htmlspecialchars($fileData);
+            $hasCaption = $content && ($m['content'] !== ($m['file_name']??''));
             $innerHtml = $replyHtml.'<img src="'.$safeData.'" class="msg-image" onclick="openLightbox(this.src)" alt="'.$fileName.'">';
-            if($content && $content!==$fileName) $innerHtml.='<div style="margin-top:4px;">'.$content.'</div>';
+            if($hasCaption) {
+              $innerHtml .= '<div style="padding:6px 10px 4px;">'.$content.'</div>';
+            } else {
+              $imgOnly = !$replyHtml;
+            }
           } elseif($msgType==='voice' && $fileData) {
             $safeJs = addslashes($fileData);
             $innerHtml = $replyHtml.'<div class="voice-msg"><button class="voice-play-btn" onclick="playVoice(this,\''. $safeJs .'\')">▶</button><div class="voice-waveform"></div></div>';
@@ -554,13 +562,14 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
             $innerHtml = $replyHtml.$content;
           }
 
+          $imgOnlyClass = $imgOnly ? ' img-only' : '';
           $avatarHtml = $mine ? '' : '<div class="msg-avatar-wrap">'.$av.'</div>';
           echo <<<HTML
 <div class="msg-row {$side}" id="m-{$mid}">
   {$avatarHtml}
   <div class="msg-body">
     <div class="msg-sender">{$m['name']}</div>
-    <div class="msg-bubble {$side}">
+    <div class="msg-bubble {$side}{$imgOnlyClass}">
       {$innerHtml}
       <div class="msg-actions">{$actions}</div>
     </div>
