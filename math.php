@@ -194,22 +194,144 @@ canvas#graphCanvas {
 .solve-output .step:last-child { border-bottom: none; margin-bottom: 0; }
 .step-num { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
 
-.calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
-.calc-btn {
-  padding: 14px; border-radius: 10px; border: none;
-  font-family: var(--font); font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.15s;
+/* ════════════════════════════════════
+   CASIO FX-880BTG REPLICA
+════════════════════════════════════ */
+.cx-wrap { display:flex; justify-content:center; padding:16px 0 24px; }
+.cx-body {
+  background: linear-gradient(170deg,#1c2c44 0%,#0e1a28 100%);
+  border-radius: 14px 14px 24px 24px;
+  padding: 12px 10px 18px;
+  width: 296px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7),
+              inset 0 1px 0 rgba(255,255,255,0.07),
+              inset 0 -3px 0 rgba(0,0,0,0.4);
+  user-select: none;
+  -webkit-user-select: none;
 }
-.calc-btn:active { transform: scale(0.95); }
-.calc-num { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-.calc-op  { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(79,110,247,0.2); }
-.calc-eq  { background: var(--accent); color: #fff; }
-.calc-clr { background: var(--red-soft); color: var(--red); border: 1px solid rgba(220,38,38,0.2); }
-.calc-display {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px; margin-bottom: 10px; text-align: right;
+/* Header */
+.cx-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4px; margin-bottom: 8px;
 }
-.calc-expr { font-family: var(--mono); font-size: 12px; color: var(--muted); min-height: 1.2em; word-break: break-all; }
-.calc-result { font-family: var(--font); font-weight: 800; font-size: 2rem; color: var(--text); margin-top: 4px; }
+.cx-brand { font-size:17px; font-weight:900; color:#e8501a; letter-spacing:3px; font-style:italic; font-family:'Arial Black',sans-serif; }
+.cx-solar { width:44px; height:9px; background:linear-gradient(90deg,#0d220d,#1a4a1a,#0d220d); border-radius:2px; border:1px solid #091209; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5); }
+.cx-model { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:0.5px; font-family:'Arial',sans-serif; }
+/* Display */
+.cx-display {
+  background: #c2d48e;
+  border-radius: 5px 5px 3px 3px;
+  padding: 6px 8px 5px;
+  margin-bottom: 9px;
+  border: 2px solid #8a9a60;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.08);
+  min-height: 68px;
+}
+.cx-ind-bar {
+  display:flex; gap:5px; margin-bottom:3px; align-items:center;
+}
+.cx-ind {
+  font-size:7.5px; font-weight:800; color:#1e2e08;
+  opacity:0.2; letter-spacing:0.3px; font-family:'Courier New',monospace;
+  transition:opacity 0.1s;
+}
+.cx-ind.on { opacity:1; }
+.cx-ind-mode { font-size:7.5px; font-weight:800; color:#1e2e08; opacity:0.55; margin-left:auto; font-family:'Courier New',monospace; }
+.cx-disp-expr {
+  font-family:'Courier New',monospace; font-size:12.5px; color:#1a2a05;
+  text-align:right; min-height:17px; line-height:1.3;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.cx-disp-result {
+  font-family:'Courier New',monospace; font-size:19px; font-weight:700;
+  color:#1a2a05; text-align:right; min-height:23px; margin-top:1px;
+}
+/* Key structure */
+.cx-rows { display:flex; flex-direction:column; gap:0; }
+.cx-row { display:flex; gap:3px; margin-bottom:3px; }
+.cx-row-gap { margin-bottom:5px; }
+.cx-divider { height:1px; background:rgba(255,255,255,0.05); margin: 3px 2px 6px; }
+/* Base key */
+.cx-key {
+  position:relative; flex:1;
+  height:30px; border:none; border-radius:4px;
+  cursor:pointer;
+  background: linear-gradient(180deg,#3c4e64 0%,#2a3848 100%);
+  box-shadow: 0 3px 0 #111c2a, 0 1px 0 rgba(255,255,255,0.07) inset;
+  color:#dce4f0; font-family:'Arial',sans-serif;
+  font-size:10px; font-weight:700;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end;
+  padding-bottom:4px; outline:none;
+  transition:filter 0.07s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cx-key:active { transform:translateY(2px); box-shadow:0 1px 0 #111c2a; filter:brightness(1.15); }
+/* Shift label (yellow, top inside key) */
+.cx-sl {
+  position:absolute; top:2px; left:50%; transform:translateX(-50%);
+  font-size:6.5px; font-weight:800; color:#e8b800;
+  white-space:nowrap; pointer-events:none; line-height:1;
+  font-family:'Arial',sans-serif; letter-spacing:0.2px;
+}
+/* Alpha label (red, top-right) */
+.cx-al {
+  position:absolute; top:2px; right:3px;
+  font-size:6px; font-weight:800; color:#ff6a6a;
+  pointer-events:none; line-height:1; font-family:'Arial',sans-serif;
+}
+/* Main key text */
+.cx-kl { font-size:10px; font-weight:700; line-height:1; }
+.cx-kl-sm { font-size:8.5px; font-weight:700; line-height:1; }
+.cx-kl-lg { font-size:12px; font-weight:800; line-height:1; }
+/* Key variants */
+.cx-k-shift {
+  background:linear-gradient(180deg,#c49000 0%,#9a6e00 100%) !important;
+  box-shadow:0 3px 0 #5a3e00, 0 1px 0 rgba(255,255,255,0.15) inset !important;
+  color:#fff !important; flex:1.05 !important;
+}
+.cx-k-alpha {
+  background:linear-gradient(180deg,#b83030 0%,#881818 100%) !important;
+  box-shadow:0 3px 0 #480808, 0 1px 0 rgba(255,255,255,0.1) inset !important;
+  color:#fff !important; flex:1.05 !important;
+}
+.cx-k-on {
+  background:linear-gradient(180deg,#cc2020 0%,#991010 100%) !important;
+  box-shadow:0 3px 0 #550000, 0 1px 0 rgba(255,255,255,0.1) inset !important;
+  color:#fff !important;
+}
+.cx-k-eq {
+  background:linear-gradient(180deg,#1a4dcc 0%,#113499 100%) !important;
+  box-shadow:0 4px 0 #091a66, 0 1px 0 rgba(255,255,255,0.15) inset !important;
+  color:#fff !important; height:34px !important; flex:1 !important;
+}
+.cx-k-del {
+  background:linear-gradient(180deg,#4a3a60 0%,#382a50 100%) !important;
+  box-shadow:0 3px 0 #18082a !important;
+}
+.cx-k-ac {
+  background:linear-gradient(180deg,#364e2c 0%,#253820 100%) !important;
+  box-shadow:0 3px 0 #0a1808 !important;
+  color:#a0e080 !important;
+}
+.cx-k-op {
+  background:linear-gradient(180deg,#263d58 0%,#182c44 100%) !important;
+  box-shadow:0 3px 0 #080f1e !important;
+}
+.cx-k-mem {
+  background:linear-gradient(180deg,#2c3a50 0%,#1e2c40 100%) !important;
+  box-shadow:0 3px 0 #080f1e !important;
+  color:#90aacc !important;
+}
+/* Active glow on shift/alpha state */
+.cx-shift-on .cx-k-shift { box-shadow:0 3px 0 #5a3e00, 0 0 8px #e8b800 !important; }
+.cx-alpha-on .cx-k-alpha { box-shadow:0 3px 0 #480808, 0 0 8px #ff6060 !important; }
+.cx-hyp-on .cx-key[data-key="hyp"] { box-shadow:0 3px 0 #111c2a, 0 0 6px #60c0ff !important; color:#60c0ff !important; }
+/* Casio key accent */
+.cx-k-num {
+  background:linear-gradient(180deg,#344258 0%,#222e44 100%) !important;
+  box-shadow:0 3px 0 #0c1422 !important;
+}
 
 .loading { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -313,50 +435,256 @@ canvas#graphCanvas {
     </div>
   </div>
 
-  <!-- ══════════ TAB: CALCULATOR ══════════ -->
+  <!-- ══════════ TAB: CALCULATOR (CASIO FX-880BTG) ══════════ -->
   <div id="tab-calc" style="display:none">
-    <div style="max-width:360px;margin:0 auto;">
-      <div class="card">
-        <div class="card-body">
-          <div class="calc-display">
-            <div class="calc-expr" id="calcExpr"></div>
-            <div class="calc-result" id="calcResult">0</div>
-          </div>
-          <div class="calc-grid">
-            <button class="calc-btn calc-clr" onclick="calcClear()" style="grid-column:span 2">AC</button>
-            <button class="calc-btn calc-op" onclick="calcDel()">⌫</button>
-            <button class="calc-btn calc-op" onclick="calcInput('/')">÷</button>
-            <button class="calc-btn calc-num" onclick="calcInput('7')">7</button>
-            <button class="calc-btn calc-num" onclick="calcInput('8')">8</button>
-            <button class="calc-btn calc-num" onclick="calcInput('9')">9</button>
-            <button class="calc-btn calc-op" onclick="calcInput('*')">×</button>
-            <button class="calc-btn calc-num" onclick="calcInput('4')">4</button>
-            <button class="calc-btn calc-num" onclick="calcInput('5')">5</button>
-            <button class="calc-btn calc-num" onclick="calcInput('6')">6</button>
-            <button class="calc-btn calc-op" onclick="calcInput('-')">−</button>
-            <button class="calc-btn calc-num" onclick="calcInput('1')">1</button>
-            <button class="calc-btn calc-num" onclick="calcInput('2')">2</button>
-            <button class="calc-btn calc-num" onclick="calcInput('3')">3</button>
-            <button class="calc-btn calc-op" onclick="calcInput('+')">+</button>
-            <button class="calc-btn calc-num" onclick="calcInput('0')" style="grid-column:span 2">0</button>
-            <button class="calc-btn calc-num" onclick="calcInput('.')">.</button>
-            <button class="calc-btn calc-eq" onclick="calcEval()">=</button>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;">
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('sin(')">sin</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('cos(')">cos</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('tan(')">tan</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('sqrt(')">√</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('^')">xⁿ</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('log(')">log</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('pi')">π</button>
-            <button class="calc-btn calc-op" style="font-size:12px;" onclick="calcInput('(')">( )</button>
-          </div>
+    <div class="cx-wrap">
+      <div class="cx-body" id="cxBody">
+
+        <!-- BRAND HEADER -->
+        <div class="cx-header">
+          <span class="cx-brand">CASIO</span>
+          <div class="cx-solar"></div>
+          <span class="cx-model">fx-880BTG</span>
         </div>
-      </div>
-    </div>
+
+        <!-- DISPLAY -->
+        <div class="cx-display">
+          <div class="cx-ind-bar">
+            <span class="cx-ind" id="cxIS">S</span>
+            <span class="cx-ind" id="cxIA">A</span>
+            <span class="cx-ind" id="cxIM">M</span>
+            <span class="cx-ind" id="cxIH">HYP</span>
+            <span class="cx-ind on" id="cxID">D</span>
+            <span class="cx-ind" id="cxIR">R</span>
+            <span class="cx-ind" id="cxIG">G</span>
+            <span class="cx-ind-mode" id="cxModeLabel">COMP</span>
+          </div>
+          <div class="cx-disp-expr" id="cxExpr">0</div>
+          <div class="cx-disp-result" id="cxResult">&nbsp;</div>
+        </div>
+
+        <!-- KEYS -->
+        <div class="cx-rows">
+
+          <!-- ── ROW 1: SHIFT ALPHA MODE ON ── -->
+          <div class="cx-row cx-row-gap">
+            <button class="cx-key cx-k-shift" id="cxBtnShift" onclick="cx('shift')">
+              <span class="cx-kl">SHIFT</span>
+            </button>
+            <button class="cx-key cx-k-alpha" id="cxBtnAlpha" onclick="cx('alpha')">
+              <span class="cx-kl">ALPHA</span>
+            </button>
+            <button class="cx-key" onclick="cx('mode')">
+              <span class="cx-sl">SETUP</span>
+              <span class="cx-kl">MODE</span>
+            </button>
+            <button class="cx-key cx-k-on" onclick="cx('on')">
+              <span class="cx-sl" style="color:#ff9090;">CLR</span>
+              <span class="cx-kl">ON</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 2: CALC ∫dx SOLVE STO ── -->
+          <div class="cx-row cx-row-gap">
+            <button class="cx-key" onclick="cx('calc')">
+              <span class="cx-sl">d/dx</span>
+              <span class="cx-kl-sm">CALC</span>
+            </button>
+            <button class="cx-key" onclick="cx('integ')">
+              <span class="cx-sl">Σ</span>
+              <span class="cx-kl-sm">∫dx</span>
+            </button>
+            <button class="cx-key" onclick="cx('solve')">
+              <span class="cx-sl">Ref</span>
+              <span class="cx-kl-sm">SOLVE</span>
+            </button>
+            <button class="cx-key cx-k-mem" onclick="cx('sto')">
+              <span class="cx-sl">RCL</span>
+              <span class="cx-kl-sm">STO▶</span>
+            </button>
+          </div>
+
+          <div class="cx-divider"></div>
+
+          <!-- ── ROW 3: x² x⁻¹ sin cos tan ── -->
+          <div class="cx-row">
+            <button class="cx-key" onclick="cx('x2')">
+              <span class="cx-sl">√</span>
+              <span class="cx-kl">x²</span>
+            </button>
+            <button class="cx-key" onclick="cx('xinv')">
+              <span class="cx-sl">x!</span>
+              <span class="cx-kl">x⁻¹</span>
+            </button>
+            <button class="cx-key" onclick="cx('sin')">
+              <span class="cx-sl">sin⁻¹</span>
+              <span class="cx-kl">sin</span>
+            </button>
+            <button class="cx-key" onclick="cx('cos')">
+              <span class="cx-sl">cos⁻¹</span>
+              <span class="cx-kl">cos</span>
+            </button>
+            <button class="cx-key" onclick="cx('tan')">
+              <span class="cx-sl">tan⁻¹</span>
+              <span class="cx-kl">tan</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 4: ^ log ln ( ) ── -->
+          <div class="cx-row">
+            <button class="cx-key" onclick="cx('pow')">
+              <span class="cx-sl">ˣ√</span>
+              <span class="cx-kl">^</span>
+            </button>
+            <button class="cx-key" onclick="cx('log')">
+              <span class="cx-sl">10ˣ</span>
+              <span class="cx-kl">log</span>
+            </button>
+            <button class="cx-key" onclick="cx('ln')">
+              <span class="cx-sl">eˣ</span>
+              <span class="cx-kl">ln</span>
+            </button>
+            <button class="cx-key" onclick="cx('lpar')">
+              <span class="cx-sl">Abs</span>
+              <span class="cx-kl">(</span>
+            </button>
+            <button class="cx-key" onclick="cx('rpar')">
+              <span class="cx-sl">)</span>
+              <span class="cx-kl">)</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 5: S⟺D (-) °'" hyp Ran# ── -->
+          <div class="cx-row cx-row-gap">
+            <button class="cx-key" onclick="cx('std')">
+              <span class="cx-sl">←</span>
+              <span class="cx-kl-sm">S⟺D</span>
+            </button>
+            <button class="cx-key" onclick="cx('neg')">
+              <span class="cx-sl">d/c</span>
+              <span class="cx-kl-sm">(-)</span>
+            </button>
+            <button class="cx-key" onclick="cx('dms')">
+              <span class="cx-sl">←°'"</span>
+              <span class="cx-kl">°'"</span>
+            </button>
+            <button class="cx-key" data-key="hyp" id="cxBtnHyp" onclick="cx('hyp')">
+              <span class="cx-sl">HYP⁻¹</span>
+              <span class="cx-kl">hyp</span>
+            </button>
+            <button class="cx-key" onclick="cx('ran')">
+              <span class="cx-sl">π</span>
+              <span class="cx-kl-sm">Ran#</span>
+            </button>
+          </div>
+
+          <div class="cx-divider"></div>
+
+          <!-- ── ROW 6: 7 8 9 DEL AC ── -->
+          <div class="cx-row">
+            <button class="cx-key cx-k-num" onclick="cx('7')">
+              <span class="cx-sl">nPr</span>
+              <span class="cx-kl-lg">7</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('8')">
+              <span class="cx-sl">nCr</span>
+              <span class="cx-kl-lg">8</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('9')">
+              <span class="cx-sl">Pol(</span>
+              <span class="cx-kl-lg">9</span>
+            </button>
+            <button class="cx-key cx-k-del" onclick="cx('del')">
+              <span class="cx-sl">INS</span>
+              <span class="cx-kl">DEL</span>
+            </button>
+            <button class="cx-key cx-k-ac" onclick="cx('ac')">
+              <span class="cx-sl" style="color:#ff9090;">OFF</span>
+              <span class="cx-kl">AC</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 7: 4 5 6 × M+ ── -->
+          <div class="cx-row">
+            <button class="cx-key cx-k-num" onclick="cx('4')">
+              <span class="cx-sl">Rec(</span>
+              <span class="cx-kl-lg">4</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('5')">
+              <span class="cx-sl">→r θ</span>
+              <span class="cx-kl-lg">5</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('6')">
+              <span class="cx-sl">→x y</span>
+              <span class="cx-kl-lg">6</span>
+            </button>
+            <button class="cx-key cx-k-op" onclick="cx('mul')">
+              <span class="cx-sl">÷</span>
+              <span class="cx-kl">×</span>
+            </button>
+            <button class="cx-key cx-k-mem" onclick="cx('mplus')">
+              <span class="cx-sl">M–</span>
+              <span class="cx-kl">M+</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 8: 1 2 3 - RCL ── -->
+          <div class="cx-row">
+            <button class="cx-key cx-k-num" onclick="cx('1')">
+              <span class="cx-sl">←ENG</span>
+              <span class="cx-kl-lg">1</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('2')">
+              <span class="cx-sl" style="font-size:5.5px;">Ran#Int</span>
+              <span class="cx-kl-lg">2</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('3')">
+              <span class="cx-al">C</span>
+              <span class="cx-kl-lg">3</span>
+            </button>
+            <button class="cx-key cx-k-op" onclick="cx('sub')">
+              <span class="cx-kl">–</span>
+            </button>
+            <button class="cx-key cx-k-mem" onclick="cx('rcl')">
+              <span class="cx-sl">STO</span>
+              <span class="cx-kl">RCL</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 9: 0 . EXP + Ans ── -->
+          <div class="cx-row">
+            <button class="cx-key cx-k-num" onclick="cx('0')" style="flex:1.4;">
+              <span class="cx-sl" style="font-size:5.5px;">Ran#Int</span>
+              <span class="cx-kl-lg">0</span>
+            </button>
+            <button class="cx-key cx-k-num" onclick="cx('dot')">
+              <span class="cx-sl">:</span>
+              <span class="cx-kl-lg">.</span>
+            </button>
+            <button class="cx-key cx-k-op" onclick="cx('exp')">
+              <span class="cx-sl">×10ˣ</span>
+              <span class="cx-kl-sm">EXP</span>
+            </button>
+            <button class="cx-key cx-k-op" onclick="cx('add')">
+              <span class="cx-kl">+</span>
+            </button>
+            <button class="cx-key cx-k-mem" onclick="cx('ans')">
+              <span class="cx-sl">%</span>
+              <span class="cx-kl">Ans</span>
+            </button>
+          </div>
+
+          <!-- ── ROW 10: = ── -->
+          <div class="cx-row" style="margin-top:2px;">
+            <button class="cx-key cx-k-eq" onclick="cx('eq')">
+              <span class="cx-kl-lg">=</span>
+            </button>
+          </div>
+
+        </div><!-- /cx-rows -->
+      </div><!-- /cx-body -->
+    </div><!-- /cx-wrap -->
   </div>
-</div>
 
 <script>
 // ══════════════════════════════════════
@@ -374,7 +702,7 @@ function showTab(t) {
 }
 
 // ══════════════════════════════════════
-//  GRAPH ENGINE (legacy canvas — disabled, GeoGebra is used instead)
+//  GRAPH ENGINE
 // ══════════════════════════════════════
 const COLORS = ['#4f6ef7','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
 let fns = [{ expr: 'x^2 - 3*x + 2', color: COLORS[0], visible: true, id: 0 }];
@@ -387,10 +715,9 @@ let activeTool = 'move';
 let touchDist = null;
 
 const canvas = document.getElementById('graphCanvas');
-const ctx = canvas ? canvas.getContext('2d') : null;
+const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
-  if (!canvas) return;
   const wrap = canvas.parentElement;
   canvas.width = wrap.clientWidth;
   canvas.height = wrap.clientHeight - 40 - 30; // toolbar + statusbar
@@ -471,7 +798,6 @@ function niceStep(rough) {
 }
 
 function drawAll() {
-  if (!canvas || !ctx) return;
   resizeCanvas();
   const W = canvas.width, H = canvas.height;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -779,7 +1105,6 @@ function exportPNG() {
 }
 
 // ── Mouse events ──
-if (canvas) {
 canvas.addEventListener('mousedown', e => {
   dragging = true;
   lastMouse = { x: e.offsetX, y: e.offsetY };
@@ -867,7 +1192,6 @@ new ResizeObserver(() => { resizeCanvas(); drawAll(); }).observe(canvas.parentEl
 // Init
 renderFnList();
 setTimeout(() => { resizeCanvas(); drawAll(); }, 100);
-} // end if (canvas)
 
 
 // ══════════════════════════════════════
@@ -1034,38 +1358,388 @@ function renderFormulas(cat) {
 }
 
 // ══════════════════════════════════════
-//  CALCULATOR
+//  CASIO FX-880BTG CALCULATOR ENGINE
 // ══════════════════════════════════════
-let calcExpr = '';
-function calcInput(v) {
-  if (v === '(') calcExpr += calcExpr.length && /[\d)]$/.test(calcExpr) ? '*(' : '(';
-  else calcExpr += v;
-  document.getElementById('calcExpr').textContent = calcExpr;
-  try {
-    const r = math.evaluate(calcExpr.replace(/\^/g, '**'));
-    document.getElementById('calcResult').textContent = +r.toFixed(10);
-  } catch {}
+const cxS = {
+  expr:      '',      // display expression string
+  isShift:   false,
+  isAlpha:   false,
+  isHyp:     false,
+  angleMode: 0,       // 0=DEG 1=RAD 2=GRAD
+  memory:    0,
+  lastAns:   0,
+  newEntry:  true,    // start fresh after =
+  errState:  false,
+};
+
+/* ── Angle-aware trig scope ── */
+function cxScope() {
+  const toR = cxS.angleMode===0 ? Math.PI/180 : cxS.angleMode===2 ? Math.PI/200 : 1;
+  const frR = 1/toR;
+  const nPr = (n,r)=>{ let p=1; for(let i=0;i<r;i++) p*=(n-i); return p; };
+  const nCr = (n,r)=>{ let p=1,k=Math.min(r,n-r); for(let i=0;i<k;i++) p*=(n-i)/(i+1); return Math.round(p); };
+  return {
+    sin:x=>Math.sin(x*toR),  cos:x=>Math.cos(x*toR),  tan:x=>Math.tan(x*toR),
+    asin:x=>Math.asin(x)*frR, acos:x=>Math.acos(x)*frR, atan:x=>Math.atan(x)*frR,
+    sinh:Math.sinh, cosh:Math.cosh, tanh:Math.tanh,
+    asinh:Math.asinh, acosh:Math.acosh, atanh:Math.atanh,
+    log:x=>Math.log10(x),   /* Casio: log = log10 */
+    ln:x=>Math.log(x),
+    sqrt:Math.sqrt,  cbrt:Math.cbrt,
+    abs:Math.abs,    sign:Math.sign,
+    ceil:Math.ceil,  floor:Math.floor, round:Math.round,
+    pi:Math.PI, e:Math.E,
+    Ans:cxS.lastAns, MR:cxS.memory,
+    nPr, nCr,
+  };
 }
-function calcClear() {
-  calcExpr = '';
-  document.getElementById('calcExpr').textContent = '';
-  document.getElementById('calcResult').textContent = '0';
+
+/* ── Preprocess display string → evaluable string ── */
+function cxPrep(s) {
+  s = s.replace(/Ans/g, '('+cxS.lastAns+')');
+  s = s.replace(/MR/g,  '('+cxS.memory+')');
+  s = s.replace(/π/g,   '(pi)');
+  s = s.replace(/×/g,   '*');
+  s = s.replace(/÷/g,   '/');
+  s = s.replace(/–/g,   '-');
+  s = s.replace(/×10\^/g,'*10^');
+  s = s.replace(/√\(/g, 'sqrt(');
+  s = s.replace(/∛\(/g, 'cbrt(');
+  s = s.replace(/%/g,   '/100');
+  s = s.replace(/°/g,   '');
+  return s;
 }
-function calcDel() {
-  calcExpr = calcExpr.slice(0, -1);
-  document.getElementById('calcExpr').textContent = calcExpr;
-}
-function calcEval() {
-  try {
-    const r = math.evaluate(calcExpr.replace(/\^/g, '**'));
-    const res = +r.toFixed(10);
-    document.getElementById('calcResult').textContent = res;
-    calcExpr = String(res);
-    document.getElementById('calcExpr').textContent = '';
-  } catch {
-    document.getElementById('calcResult').textContent = 'Lỗi';
+
+/* ── Format result for display ── */
+function cxFmt(n) {
+  if (!isFinite(n)) return 'Math ERROR';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 1e10 || (abs < 1e-4 && abs > 0)) {
+    const e = n.toExponential(7).replace(/\.?0+e/,'e');
+    return e.replace('e+','×10^').replace('e','×10^');
   }
+  let s = n.toPrecision(10).replace(/\.?0+$/, '');
+  // remove redundant leading 0 issues
+  return s;
 }
+
+/* ── Convert decimal → fraction string (best effort) ── */
+function cxFrac(n) {
+  if (Number.isInteger(n)) return String(n);
+  const tol = 1e-9; let h1=1,h2=0,k1=0,k2=1,b=Math.abs(n);
+  for (let i=0;i<40;i++) {
+    const a=Math.floor(b); let t;
+    t=h1; h1=a*h1+h2; h2=t;
+    t=k1; k1=a*k1+k2; k2=t;
+    b=1/(b-a); if (Math.abs(Math.abs(n)-h1/k1)<tol) break;
+  }
+  if (k1>9999) return null;
+  return (n<0?'-':'')+(h1>k1 ? Math.floor(h1/k1)+'⌐'+(h1%k1)+'/'+k1 : h1+'/'+k1);
+}
+
+/* ── Update UI ── */
+function cxRender() {
+  const el_e = document.getElementById('cxExpr');
+  const el_r = document.getElementById('cxResult');
+  if (!el_e) return;
+
+  el_e.textContent = cxS.expr || '0';
+
+  // Live preview
+  if (cxS.expr && !cxS.errState) {
+    try {
+      const r = math.evaluate(cxPrep(cxS.expr), cxScope());
+      if (typeof r === 'number' && isFinite(r)) {
+        el_r.textContent = cxFmt(r);
+      } else { el_r.textContent = '\u00a0'; }
+    } catch { el_r.textContent = '\u00a0'; }
+  } else if (!cxS.expr) {
+    el_r.textContent = '\u00a0';
+  }
+
+  // Indicators
+  const tog = (id,on) => document.getElementById(id)?.classList.toggle('on',on);
+  tog('cxIS', cxS.isShift);
+  tog('cxIA', cxS.isAlpha);
+  tog('cxIM', cxS.memory !== 0);
+  tog('cxIH', cxS.isHyp);
+  tog('cxID', cxS.angleMode === 0);
+  tog('cxIR', cxS.angleMode === 1);
+  tog('cxIG', cxS.angleMode === 2);
+
+  const body = document.getElementById('cxBody');
+  if (body) {
+    body.classList.toggle('cx-shift-on', cxS.isShift);
+    body.classList.toggle('cx-alpha-on', cxS.isAlpha);
+    body.classList.toggle('cx-hyp-on',  cxS.isHyp);
+  }
+
+  // SHIFT/ALPHA button brightness
+  const bs = document.getElementById('cxBtnShift');
+  const ba = document.getElementById('cxBtnAlpha');
+  const bh = document.getElementById('cxBtnHyp');
+  if (bs) bs.style.filter = cxS.isShift ? 'brightness(1.3) drop-shadow(0 0 5px #ffcc00)' : '';
+  if (ba) ba.style.filter = cxS.isAlpha ? 'brightness(1.3) drop-shadow(0 0 5px #ff6060)' : '';
+  if (bh) bh.style.filter = cxS.isHyp  ? 'brightness(1.3) drop-shadow(0 0 5px #60c0ff)' : '';
+
+  const modes = ['DEG','RAD','GRAD'];
+  const ml = document.getElementById('cxModeLabel');
+  if (ml) ml.textContent = modes[cxS.angleMode];
+}
+
+/* ── Append to expression ── */
+function cxAppend(s) {
+  if (cxS.newEntry) {
+    // If continuing with an operator, keep result; else start fresh
+    if (/^[+\-×÷^]/.test(s)) { cxS.expr = cxFmt(cxS.lastAns) + s; }
+    else { cxS.expr = s; }
+    cxS.newEntry = false;
+  } else {
+    cxS.expr += s;
+  }
+  cxS.errState = false;
+}
+
+/* ── Clear last token (smart DEL) ── */
+function cxDel() {
+  const toks = ['asin(','acos(','atan(','asinh(','acosh(','atanh(','sinh(','cosh(','tanh(',
+                'sin(','cos(','tan(','sqrt(','cbrt(','log(','ln(','abs(',
+                '×10^','nPr(','nCr(','Pol(','Rec(','Ans','MR','pi','(-'];
+  for (const t of toks) {
+    if (cxS.expr.endsWith(t)) { cxS.expr = cxS.expr.slice(0,-t.length); return; }
+  }
+  cxS.expr = cxS.expr.slice(0,-1);
+}
+
+/* ── Main key handler ── */
+function cx(key) {
+  const sh = cxS.isShift;
+  const hy = cxS.isHyp;
+
+  // Reset modifiers (except hyp, handled separately)
+  if (key !== 'shift' && key !== 'alpha' && key !== 'hyp') {
+    cxS.isShift = false;
+    cxS.isAlpha = false;
+  }
+  if (key !== 'hyp' && !['sin','cos','tan'].includes(key)) cxS.isHyp = false;
+
+  if (cxS.errState && !['ac','on','del'].includes(key)) {
+    cxS.expr=''; cxS.errState=false; cxS.newEntry=true;
+  }
+
+  switch(key) {
+
+    /* ── CONTROL ── */
+    case 'shift': cxS.isShift = !cxS.isShift; if(cxS.isShift) cxS.isAlpha=false; break;
+    case 'alpha': cxS.isAlpha = !cxS.isAlpha; if(cxS.isAlpha) cxS.isShift=false; break;
+    case 'hyp':   cxS.isHyp   = !cxS.isHyp;  break;
+
+    case 'on':
+    case 'ac':
+      cxS.expr=''; cxS.isShift=false; cxS.isAlpha=false;
+      cxS.isHyp=false; cxS.newEntry=true; cxS.errState=false;
+      document.getElementById('cxResult').textContent='\u00a0';
+      break;
+
+    case 'del':
+      if (sh) { cxS.expr=''; cxS.newEntry=true; }
+      else cxDel();
+      break;
+
+    case 'mode':
+      cxS.angleMode = (cxS.angleMode+1)%3;
+      break;
+
+    /* ── DIGITS ── */
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      if (sh) {
+        const sm={'7':'nPr(','8':'nCr(','9':'Pol(','4':'Rec('};
+        if (sm[key]) { cxAppend(sm[key]); break; }
+      }
+      cxAppend(key);
+      break;
+
+    case 'dot': cxAppend('.'); break;
+
+    /* ── OPERATORS ── */
+    case 'add': cxAppend('+'); break;
+    case 'sub': cxAppend('–'); break;
+    case 'mul': cxAppend(sh ? '÷' : '×'); break;
+    case 'neg': cxAppend('(–'); break;
+    case 'lpar': cxAppend(sh ? 'abs(' : '('); break;
+    case 'rpar': cxAppend(')'); break;
+
+    /* ── POWER / ROOT ── */
+    case 'pow':
+      cxAppend(sh ? '^(1÷' : '^');
+      break;
+
+    case 'x2':
+      if (sh) cxAppend('√(');
+      else    cxAppend('^2');
+      break;
+
+    case 'xinv':
+      if (sh) cxAppend('!');
+      else    cxAppend('^(–1)');
+      break;
+
+    /* ── TRIG ── */
+    case 'sin':
+      if (sh && hy)       cxAppend('asinh(');
+      else if (sh)        cxAppend('asin(');
+      else if (hy)        cxAppend('sinh(');
+      else                cxAppend('sin(');
+      cxS.isHyp = false;
+      break;
+
+    case 'cos':
+      if (sh && hy)       cxAppend('acosh(');
+      else if (sh)        cxAppend('acos(');
+      else if (hy)        cxAppend('cosh(');
+      else                cxAppend('cos(');
+      cxS.isHyp = false;
+      break;
+
+    case 'tan':
+      if (sh && hy)       cxAppend('atanh(');
+      else if (sh)        cxAppend('atan(');
+      else if (hy)        cxAppend('tanh(');
+      else                cxAppend('tan(');
+      cxS.isHyp = false;
+      break;
+
+    /* ── LOG ── */
+    case 'log':
+      cxAppend(sh ? '10^(' : 'log(');
+      break;
+
+    case 'ln':
+      cxAppend(sh ? 'e^(' : 'ln(');
+      break;
+
+    /* ── EXP / PI / ANS ── */
+    case 'exp':
+      cxAppend('×10^');
+      break;
+
+    case 'ran':
+      if (sh) cxAppend('π');
+      else    cxAppend(parseFloat(Math.random().toFixed(3)).toString());
+      break;
+
+    case 'ans':
+      if (sh) cxAppend('%');
+      else    cxAppend('Ans');
+      break;
+
+    /* ── DMS ── */
+    case 'dms':
+      // Insert degree symbol or convert result
+      if (cxS.expr) cxAppend('°');
+      break;
+
+    /* ── S⟺D (fraction/decimal toggle) ── */
+    case 'std':
+      if (cxS.expr) {
+        try {
+          const r = math.evaluate(cxPrep(cxS.expr), cxScope());
+          if (typeof r==='number' && isFinite(r)) {
+            const frac = cxFrac(r);
+            const resultEl = document.getElementById('cxResult');
+            if (frac && frac !== cxFmt(r)) {
+              resultEl.textContent = frac;
+            } else {
+              resultEl.textContent = cxFmt(r);
+            }
+          }
+        } catch {}
+      }
+      cxRender(); return;
+
+    /* ── MEMORY ── */
+    case 'mplus':
+      try {
+        const r = math.evaluate(cxPrep(cxS.expr||'0'), cxScope());
+        if (typeof r==='number' && isFinite(r)) cxS.memory += sh ? -r : r;
+      } catch {}
+      break;
+
+    case 'rcl':
+      if (sh) {
+        // STO: store result
+        try {
+          const r = math.evaluate(cxPrep(cxS.expr||'0'), cxScope());
+          if (typeof r==='number' && isFinite(r)) cxS.memory = r;
+        } catch {}
+      } else {
+        // RCL: paste memory value
+        cxAppend(cxFmt(cxS.memory));
+      }
+      break;
+
+    case 'sto':
+      if (sh) {
+        // RCL in shift mode
+        cxAppend(cxFmt(cxS.memory));
+      } else {
+        try {
+          const r = math.evaluate(cxPrep(cxS.expr||'0'), cxScope());
+          if (typeof r==='number' && isFinite(r)) cxS.memory = r;
+        } catch {}
+      }
+      break;
+
+    /* ── UNIMPLEMENTED PLACEHOLDERS ── */
+    case 'calc': case 'integ': case 'solve':
+      // Show brief message
+      document.getElementById('cxResult').textContent = sh ?
+        (key==='calc'?'d/dx':key==='integ'?'Σ':'Refresh') : key.toUpperCase()+' N/A';
+      setTimeout(()=>cxRender(), 1400);
+      break;
+
+    /* ── EQUALS ── */
+    case 'eq':
+      if (!cxS.expr) break;
+      try {
+        const r = math.evaluate(cxPrep(cxS.expr), cxScope());
+        if (typeof r === 'number' && isFinite(r)) {
+          cxS.lastAns = r;
+          const res = cxFmt(r);
+          document.getElementById('cxExpr').textContent = cxS.expr;
+          document.getElementById('cxResult').textContent = res;
+          cxS.expr = res;
+          cxS.newEntry = true;
+          cxS.errState = false;
+          cxRender(); return;
+        } else { throw new Error(); }
+      } catch {
+        document.getElementById('cxExpr').textContent = cxS.expr;
+        document.getElementById('cxResult').textContent = 'Math ERROR';
+        cxS.expr = ''; cxS.newEntry = true; cxS.errState = true;
+        cxRender(); return;
+      }
+  }
+
+  cxRender();
+}
+
+// Keyboard support for calculator tab
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('tab-calc').style.display === 'none') return;
+  const map = {
+    '0':'0','1':'1','2':'2','3':'3','4':'4',
+    '5':'5','6':'6','7':'7','8':'8','9':'9',
+    '.':'dot','+':'add','-':'sub','*':'mul','/':e.shiftKey?'':'mul',
+    'Enter':'eq','=':'eq','Backspace':'del','Escape':'ac',
+  };
+  if (e.key === '/') { e.preventDefault(); cx('mul'); return; }
+  if (map[e.key]) { e.preventDefault(); cx(map[e.key]); }
+  if (e.key === '(' || (e.key === '9' && e.shiftKey)) { e.preventDefault(); cx('lpar'); }
+  if (e.key === ')' || (e.key === '0' && e.shiftKey)) { e.preventDefault(); cx('rpar'); }
+});
 </script>
 </body>
 </html>
