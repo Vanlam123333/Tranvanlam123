@@ -266,6 +266,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   display:inline-block;
   width:fit-content;
   max-width:100%;
+  align-self:flex-start;
 }
 .msg-bubble.theirs{
   background:var(--surface2);
@@ -276,6 +277,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
   background:var(--accent);
   color:#fff;
   border-radius:18px 4px 18px 18px;
+  align-self:flex-end;
 }
 /* consecutive bubble rounding */
 .msg-row.theirs.has-next .msg-bubble.theirs{border-radius:4px 18px 18px 4px;}
@@ -401,7 +403,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
     height:calc(100vh - 66px);min-height:0;
   }
   .rooms-sidebar{
-    flex-shrink:0;height:auto;max-height:140px;
+    flex-shrink:0;height:auto;max-height:155px;
     border-right:none;border-bottom:1px solid var(--border);
     overflow-x:hidden;overflow-y:visible;
   }
