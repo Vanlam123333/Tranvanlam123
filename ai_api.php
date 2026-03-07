@@ -15,6 +15,8 @@ function callGroq($messages, $key, $url, $model) {
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_HTTPHEADER => [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $key
@@ -27,9 +29,28 @@ function callGroq($messages, $key, $url, $model) {
         ])
     ]);
     $res = curl_exec($ch);
+    $curlError = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
+    if ($curlError) {
+        return 'Loi ket noi: ' . $curlError;
+    }
+    if ($httpCode === 401) {
+        return 'API key khong hop le hoac da het han.';
+    }
+    if ($httpCode === 429) {
+        return 'Qua nhieu yeu cau, vui long thu lai sau it giay.';
+    }
+    if ($httpCode !== 200) {
+        return 'Loi server AI (HTTP ' . $httpCode . ').';
+    }
+
     $data = json_decode($res, true);
-    return $data['choices'][0]['message']['content'] ?? 'Lỗi từ AI';
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return 'Loi parse response tu AI.';
+    }
+    return $data['choices'][0]['message']['content'] ?? 'Loi tu AI';
 }
 
 if ($type === 'chat') {
