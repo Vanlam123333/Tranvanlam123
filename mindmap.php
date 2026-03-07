@@ -230,25 +230,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
       <div class="mm-sidebar-head">✨ Tạo mới</div>
 
       <div class="mm-generate-area">
-        <textarea id="mmTopic" placeholder="Nhập chủ đề cụ thể...&#10;VD: Quang hợp ở thực vật&#10;VD: Sinh 10 Bài 11 - Tế bào nhân thực&#10;VD: Chiến tranh thế giới thứ 2&#10;VD: Đạo hàm và ứng dụng&#10;VD: Python cơ bản"></textarea>
-
-        <!-- Gợi ý nhanh -->
-        <div style="margin:6px 0 8px;">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Thử ngay:</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;">
-            <span class="mm-chip" onclick="setTopic('Tế bào nhân thực - Sinh 10')">🔬 Tế bào</span>
-            <span class="mm-chip" onclick="setTopic('Quang hợp ở thực vật')">🌿 Quang hợp</span>
-            <span class="mm-chip" onclick="setTopic('Cách mạng tháng 8 năm 1945')">🏛️ Lịch sử</span>
-            <span class="mm-chip" onclick="setTopic('Đạo hàm - Toán 11')">📐 Đạo hàm</span>
-            <span class="mm-chip" onclick="setTopic('Machine Learning cơ bản')">🤖 ML</span>
-            <span class="mm-chip" onclick="setTopic('Bảng tuần hoàn nguyên tố hóa học')">⚗️ Hóa học</span>
-          </div>
-        </div>
+        <textarea id="mmTopic" placeholder="Nhập chủ đề cụ thể...&#10;VD: Sinh 10 Bài 11 - Tế bào nhân thực&#10;VD: Chiến tranh thế giới thứ 2&#10;VD: Đạo hàm và ứng dụng - Toán 12&#10;VD: https://vietjack.com/..."></textarea>
 
         <div class="mm-depth-row">
           <span>Độ sâu:</span>
-          <input type="range" id="mmDepth" min="1" max="3" value="2" oninput="document.getElementById('mmDepthVal').textContent=this.value">
-          <span id="mmDepthVal" style="font-weight:700;color:var(--accent);min-width:12px;">2</span>
+          <input type="range" id="mmDepth" min="1" max="10" value="2" oninput="document.getElementById('mmDepthVal').textContent=this.value">
+          <span id="mmDepthVal" style="font-weight:700;color:var(--accent);min-width:16px;">2</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin:-4px 0 8px;padding:0 2px;">
+          1–3: tổng quan · 4–6: chi tiết · 7–10: siêu sâu 🔬
         </div>
 
         <div class="mm-style-row">
