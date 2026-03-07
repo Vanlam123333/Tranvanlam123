@@ -10,7 +10,7 @@ $MODEL = 'llama-3.3-70b-versatile';
 $input = json_decode(file_get_contents('php://input'), true);
 $type = $input['type'] ?? 'chat';
 
-function callGroq($messages, $key, $url, $model) {
+function callGroq($messages, $key, $url, $model, $maxTokens = 1500) {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -26,7 +26,7 @@ function callGroq($messages, $key, $url, $model) {
         CURLOPT_POSTFIELDS => json_encode([
             'model'       => $model,
             'messages'    => $messages,
-            'max_tokens'  => 1500,
+            'max_tokens'  => $maxTokens,
             'temperature' => 0.7
         ])
     ]);
@@ -137,13 +137,11 @@ CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\"
 
 } elseif ($type === 'mindmap') {
     $topic = $input['topic'] ?? '';
-    $depth = max(1, min(3, (int)($input['depth'] ?? 2)));
+    $depth = max(1, min(10, (int)($input['depth'] ?? 2)));
 
-    $depthGuide = [
-        1 => "Chỉ tạo các nhánh chính (4-6 nhánh), mỗi nhánh KHÔNG có children.",
-        2 => "Tạo nhánh chính (4-6 nhánh), mỗi nhánh có 3-5 nhánh con cụ thể.",
-        3 => "Tạo nhánh chính (4-6 nhánh), mỗi nhánh có 3-5 nhánh con, mỗi nhánh con có 2-3 nhánh cháu."
-    ][$depth];
+    $depthGuide = $depth <= 2
+        ? "Tạo nhánh chính (4-6 nhánh), mỗi nhánh có " . ($depth == 1 ? "KHÔNG có children." : "3-5 nhánh con cụ thể.")
+        : "Tạo cây $depth cấp lồng nhau. Mỗi node có 3-5 con. Càng sâu càng cụ thể và chi tiết hơn. Đào sâu đến mức chi tiết nhất có thể (số liệu, công thức, ví dụ cụ thể, tên gọi chính xác).";
 
     $system = <<<'SYS'
 Bạn là chuyên gia giáo dục và tri thức bách khoa. Nhiệm vụ: tạo sơ đồ tư duy (mind map) có nội dung THỰC CHẤT, CHÍNH XÁC về chủ đề được yêu cầu.
@@ -171,7 +169,7 @@ SYS;
         ]
     ];
 
-    $raw   = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    $raw   = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 4000);
     $clean = preg_replace('/```json|```/i', '', $raw);
     $s     = strpos($clean, '{');
     $e     = strrpos($clean, '}');
