@@ -14,43 +14,38 @@ function callGroq($messages, $key, $url, $model) {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_TIMEOUT => 30,
+        CURLOPT_POST           => true,
+        CURLOPT_TIMEOUT        => 30,
         CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_HTTPHEADER => [
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_HTTPHEADER     => [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $key
         ],
         CURLOPT_POSTFIELDS => json_encode([
-            'model' => $model,
-            'messages' => $messages,
-            'max_tokens' => 1500,
+            'model'       => $model,
+            'messages'    => $messages,
+            'max_tokens'  => 1500,
             'temperature' => 0.7
         ])
     ]);
-    $res = curl_exec($ch);
-    $curlError = curl_error($ch);
+    $res  = curl_exec($ch);
+    $errno = curl_errno($ch);
+    $errmsg = curl_error($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($curlError) {
-        return 'Loi ket noi: ' . $curlError;
-    }
-    if ($httpCode === 401) {
-        return 'API key khong hop le hoac da het han.';
-    }
-    if ($httpCode === 429) {
-        return 'Qua nhieu yeu cau, vui long thu lai sau it giay.';
+    if ($errno) {
+        return "Lỗi cURL ($errno): $errmsg";
     }
     if ($httpCode !== 200) {
-        return 'Loi server AI (HTTP ' . $httpCode . ').';
+        $errData = json_decode($res, true);
+        $detail  = $errData['error']['message'] ?? $res;
+        return "Lỗi API (HTTP $httpCode): $detail";
     }
-
     $data = json_decode($res, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return 'Loi parse response tu AI.';
-    }
-    return $data['choices'][0]['message']['content'] ?? 'Loi tu AI';
+    return $data['choices'][0]['message']['content'] ?? 'Lỗi: Không có phản hồi từ AI';
 }
 
 if ($type === 'chat') {
@@ -132,7 +127,12 @@ CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\"
         ['role'=>'system','content'=>'Bạn là giáo viên Toán cấp 3 giỏi. Giải toán từng bước rõ ràng bằng tiếng Việt. Dùng LaTeX cho công thức: inline dùng $...$, display dùng $$...$$. Mỗi bước đặt trong thẻ <div class="step"><div class="step-num">Bước N</div>nội dung</div>. Kết quả cuối đặt trong <div class="step" style="border-color:rgba(52,211,153,0.4);"><div class="step-num" style="color:var(--green)">✅ Kết quả</div>nội dung</div>'],
         ['role'=>'user','content'=>"$prompt\n\nBài toán: $problem"]
     ];
-    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL)]);
+    $result = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    // Nếu trả về lỗi (không phải HTML), bọc vào div để hiển thị đẹp
+    if (strpos($result, 'Lỗi') === 0) {
+        $result = '<div class="step"><div class="step-num" style="color:var(--red)">⚠️ Lỗi</div>' . htmlspecialchars($result) . '</div>';
+    }
+    echo json_encode(['result' => $result]);
 
 } elseif ($type === 'quiz') {
     $topic = $input['topic'] ?? '';
