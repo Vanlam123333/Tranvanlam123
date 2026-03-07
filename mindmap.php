@@ -51,6 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
+/* ── QUICK CHIPS ── */
+.mm-chip {
+  display: inline-block; padding: 3px 8px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.mm-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
 /* ── LAYOUT ── */
 .mm-layout {
   display: grid;
@@ -221,7 +230,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
       <div class="mm-sidebar-head">✨ Tạo mới</div>
 
       <div class="mm-generate-area">
-        <textarea id="mmTopic" placeholder="Nhập chủ đề...&#10;VD: Quang hợp, Cách mạng Pháp, Machine Learning, Blockchain..."></textarea>
+        <textarea id="mmTopic" placeholder="Nhập chủ đề cụ thể...&#10;VD: Quang hợp ở thực vật&#10;VD: Sinh 10 Bài 11 - Tế bào nhân thực&#10;VD: Chiến tranh thế giới thứ 2&#10;VD: Đạo hàm và ứng dụng&#10;VD: Python cơ bản"></textarea>
+
+        <!-- Gợi ý nhanh -->
+        <div style="margin:6px 0 8px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;">Thử ngay:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            <span class="mm-chip" onclick="setTopic('Tế bào nhân thực - Sinh 10')">🔬 Tế bào</span>
+            <span class="mm-chip" onclick="setTopic('Quang hợp ở thực vật')">🌿 Quang hợp</span>
+            <span class="mm-chip" onclick="setTopic('Cách mạng tháng 8 năm 1945')">🏛️ Lịch sử</span>
+            <span class="mm-chip" onclick="setTopic('Đạo hàm - Toán 11')">📐 Đạo hàm</span>
+            <span class="mm-chip" onclick="setTopic('Machine Learning cơ bản')">🤖 ML</span>
+            <span class="mm-chip" onclick="setTopic('Bảng tuần hoàn nguyên tố hóa học')">⚗️ Hóa học</span>
+          </div>
+        </div>
 
         <div class="mm-depth-row">
           <span>Độ sâu:</span>
@@ -310,6 +332,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
 <div class="mm-tooltip" id="mmTooltip"></div>
 
 <script>
+// ── Quick topic setter ──
+function setTopic(t) {
+  document.getElementById('mmTopic').value = t;
+  document.getElementById('mmTopic').focus();
+}
+
 // ══════════════════════════════════════
 //  MIND MAP ENGINE
 // ══════════════════════════════════════
