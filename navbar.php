@@ -72,6 +72,8 @@ function navIcon($name) {
     <a href="pomodoro.php"  class="nav-link <?=$current=='pomodoro.php'?'active':''?>">Pomodoro</a>
     <a href="community.php" class="nav-link <?=$current=='community.php'?'active':''?>">Cộng đồng</a>
     <a href="rooms.php"     class="nav-link <?=$current=='rooms.php'?'active':''?>">Chat</a>
+    <a href="mindmap.php"   class="nav-link <?=$current=='mindmap.php'?'active':''?>" style="font-weight:700;color:var(--accent)">Mind Map</a>
+    <a href="math.php"      class="nav-link <?=$current=='math.php'?'active':''?>" style="font-weight:700;color:var(--accent)">Toán học</a>
   </div>
 
   <div class="nav-user">
@@ -150,13 +152,13 @@ function navIcon($name) {
     <div class="bottom-nav-icon"><?=navIcon('ai')?></div>
     <span class="bottom-nav-label">AI</span>
   </a>
-  <a href="community.php" class="bottom-nav-item <?=$current=='community.php'?'active':''?>">
-    <div class="bottom-nav-icon"><?=navIcon('community')?></div>
-    <span class="bottom-nav-label">Cộng đồng</span>
+  <a href="mindmap.php" class="bottom-nav-item <?=$current=='mindmap.php'?'active':''?>">
+    <div class="bottom-nav-icon"><?=navIcon('mindmap')?></div>
+    <span class="bottom-nav-label">Mind Map</span>
   </a>
-  <a href="rooms.php" class="bottom-nav-item <?=$current=='rooms.php'?'active':''?>">
-    <div class="bottom-nav-icon"><?=navIcon('chat')?></div>
-    <span class="bottom-nav-label">Chat</span>
+  <a href="math.php" class="bottom-nav-item <?=$current=='math.php'?'active':''?>">
+    <div class="bottom-nav-icon"><?=navIcon('math')?></div>
+    <span class="bottom-nav-label">Toán học</span>
   </a>
   <button class="bottom-nav-item" onclick="toggleDropdown(event)">
     <div class="bottom-nav-icon"><?=navIcon('menu')?></div>
@@ -171,6 +173,8 @@ function navIcon($name) {
   <a href="notes.php"     ><?=navIcon('notes')?>     Ghi chú</a>
   <a href="planner.php"   ><?=navIcon('planner')?>   Kế hoạch</a>
   <a href="pomodoro.php"  ><?=navIcon('pomodoro')?>  Pomodoro</a>
+  <a href="community.php" ><?=navIcon('community')?> Cộng đồng</a>
+  <a href="rooms.php"     ><?=navIcon('chat')?>      Chat phòng</a>
   <a href="mindmap.php"   ><?=navIcon('mindmap')?>   Mind Map</a>
   <a href="math.php"      ><?=navIcon('math')?>      Toán học</a>
   <a href="quiz.php"      ><?=navIcon('quiz')?>      Quiz</a>
