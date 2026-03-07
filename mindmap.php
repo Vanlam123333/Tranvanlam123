@@ -51,6 +51,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
+/* ── INPUT MODE TABS ── */
+.mm-input-tabs {
+  display: flex; gap: 3px; background: var(--surface2);
+  border-radius: 10px; padding: 3px; margin-bottom: 10px;
+}
+.mm-input-tab {
+  flex: 1; padding: 7px 6px; border-radius: 8px; border: none;
+  background: transparent; color: var(--muted); cursor: pointer;
+  font-family: var(--font); font-weight: 700; font-size: 11px;
+  transition: all 0.15s; text-align: center;
+}
+.mm-input-tab.active {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 2px 8px rgba(79,110,247,0.3);
+}
+
 /* ── QUICK CHIPS ── */
 .mm-chip {
   display: inline-block; padding: 3px 8px; border-radius: 20px;
@@ -230,12 +246,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
       <div class="mm-sidebar-head">✨ Tạo mới</div>
 
       <div class="mm-generate-area">
-        <textarea id="mmTopic" placeholder="Nhập chủ đề cụ thể...&#10;VD: Sinh 10 Bài 11 - Tế bào nhân thực&#10;VD: Chiến tranh thế giới thứ 2&#10;VD: Đạo hàm và ứng dụng - Toán 12&#10;VD: https://vietjack.com/..."></textarea>
+
+        <!-- Input mode tabs -->
+        <div class="mm-input-tabs">
+          <button class="mm-input-tab active" id="tabContent" onclick="switchInputTab('content')">📄 Dán nội dung</button>
+          <button class="mm-input-tab" id="tabTopic" onclick="switchInputTab('topic')">🔍 Nhập chủ đề</button>
+        </div>
+
+        <!-- Tab: Dán nội dung -->
+        <div id="panelContent">
+          <textarea id="mmContent" placeholder="Dán nội dung vào đây...&#10;&#10;VD: đoạn văn bản, bài học, ghi chú, tóm tắt sách, nội dung website...&#10;&#10;AI sẽ tự phân tích và tạo sơ đồ tư duy từ nội dung của bạn." style="min-height:130px;"></textarea>
+          <div style="font-size:10px;color:var(--muted);margin:2px 0 8px;display:flex;justify-content:space-between;">
+            <span>Hỗ trợ: văn bản, bài học, ghi chú</span>
+            <span id="charCount">0 ký tự</span>
+          </div>
+        </div>
+
+        <!-- Tab: Nhập chủ đề -->
+        <div id="panelTopic" style="display:none;">
+          <textarea id="mmTopic" placeholder="Nhập chủ đề cụ thể...&#10;VD: Sinh 10 Bài 11 - Tế bào nhân thực&#10;VD: Chiến tranh thế giới thứ 2&#10;VD: Đạo hàm và ứng dụng - Toán 12" style="min-height:80px;"></textarea>
+        </div>
 
         <div class="mm-depth-row">
           <span>Độ sâu:</span>
-          <input type="range" id="mmDepth" min="1" max="10" value="2" oninput="document.getElementById('mmDepthVal').textContent=this.value">
-          <span id="mmDepthVal" style="font-weight:700;color:var(--accent);min-width:16px;">2</span>
+          <input type="range" id="mmDepth" min="1" max="10" value="3" oninput="document.getElementById('mmDepthVal').textContent=this.value">
+          <span id="mmDepthVal" style="font-weight:700;color:var(--accent);min-width:16px;">3</span>
         </div>
         <div style="font-size:10px;color:var(--muted);margin:-4px 0 8px;padding:0 2px;">
           1–3: tổng quan · 4–6: chi tiết · 7–10: siêu sâu 🔬
@@ -322,8 +357,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
 <div class="mm-tooltip" id="mmTooltip"></div>
 
 <script>
+// ── Input tab switching ──
+let inputMode = 'content'; // 'content' | 'topic'
+
+function switchInputTab(mode) {
+  inputMode = mode;
+  document.getElementById('tabContent').classList.toggle('active', mode === 'content');
+  document.getElementById('tabTopic').classList.toggle('active', mode === 'topic');
+  document.getElementById('panelContent').style.display = mode === 'content' ? '' : 'none';
+  document.getElementById('panelTopic').style.display  = mode === 'topic'   ? '' : 'none';
+}
+
+// Char counter
+document.getElementById('mmContent')?.addEventListener('input', function() {
+  document.getElementById('charCount').textContent = this.value.length.toLocaleString() + ' ký tự';
+});
+
 // ── Quick topic setter ──
 function setTopic(t) {
+  switchInputTab('topic');
   document.getElementById('mmTopic').value = t;
   document.getElementById('mmTopic').focus();
 }
@@ -354,29 +406,43 @@ function setStyle(s) {
 
 // ── Generate via AI ──
 async function generateMap() {
-  const topic = document.getElementById('mmTopic').value.trim();
-  if (!topic) { alert('Vui lòng nhập chủ đề!'); return; }
   const depth = parseInt(document.getElementById('mmDepth').value);
+  let payload, displayLabel;
+
+  if (inputMode === 'content') {
+    const content = document.getElementById('mmContent').value.trim();
+    if (!content) { alert('Vui lòng dán nội dung vào ô văn bản!'); return; }
+    if (content.length < 30) { alert('Nội dung quá ngắn, hãy dán thêm văn bản!'); return; }
+    payload = { type: 'mindmap_content', content, depth };
+    displayLabel = content.slice(0, 40) + (content.length > 40 ? '...' : '');
+  } else {
+    const topic = document.getElementById('mmTopic').value.trim();
+    if (!topic) { alert('Vui lòng nhập chủ đề!'); return; }
+    payload = { type: 'mindmap', topic, depth };
+    displayLabel = topic;
+  }
 
   document.getElementById('mmEmpty').style.display = 'none';
   document.getElementById('mmLoading').classList.add('show');
-  document.getElementById('mmLoadingText').textContent = 'AI đang phân tích "' + topic + '"...';
+  document.getElementById('mmLoadingText').textContent = inputMode === 'content'
+    ? 'AI đang đọc và phân tích nội dung...'
+    : 'AI đang phân tích "' + displayLabel + '"...';
 
   try {
     const res = await fetch('ai_api.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'mindmap', topic, depth })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (!data.tree) throw new Error('Không nhận được dữ liệu từ AI');
+    if (!data.tree) throw new Error(data.error || 'Không nhận được dữ liệu từ AI');
 
     currentData = data.tree;
     currentMapId = null;
-    document.getElementById('mmTitleInput').value = 'Mind Map: ' + topic;
+    document.getElementById('mmTitleInput').value = 'Mind Map: ' + (data.title || displayLabel);
     document.getElementById('mmSaveBtn').style.display = '';
     renderMap(currentData);
-    document.getElementById('mmTopicLabel').textContent = '🗺️ ' + topic;
+    document.getElementById('mmTopicLabel').textContent = '🗺️ ' + displayLabel;
 
   } catch(e) {
     alert('Lỗi tạo mind map: ' + e.message);
