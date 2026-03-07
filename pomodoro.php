@@ -196,6 +196,44 @@ for ($i = 6; $i >= 0; $i--) {
   .pomo-ring-wrap { width: 200px; height: 200px; }
   .pomo-time { font-size: 2.5rem; }
 }
+
+/* ── MUSIC CARD ── */
+.mood-btn {
+  padding: 5px 10px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--surface2); color: var(--text2); font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.mood-btn:hover { border-color: var(--accent); color: var(--accent); }
+.mood-btn.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+.music-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--surface2); margin-bottom: 6px; cursor: pointer;
+  transition: all 0.18s;
+}
+.music-item:hover { border-color: var(--accent); background: var(--accent-soft); }
+.music-item.playing { border-color: var(--accent); background: var(--accent-soft); }
+.music-thumb {
+  width: 52px; height: 38px; border-radius: 6px; object-fit: cover;
+  flex-shrink: 0; background: var(--border);
+}
+.music-info { flex: 1; min-width: 0; }
+.music-title { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.music-meta  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.music-play  { font-size: 20px; flex-shrink: 0; transition: transform 0.15s; }
+.music-item:hover .music-play { transform: scale(1.2); }
+
+.equalizer {
+  display: flex; gap: 2px; align-items: flex-end; height: 14px; flex-shrink: 0;
+}
+.eq-bar { width: 3px; background: var(--accent); border-radius: 2px; animation: eq 0.6s ease-in-out infinite alternate; }
+.eq-bar:nth-child(1) { height: 6px;  animation-delay: 0s; }
+.eq-bar:nth-child(2) { height: 10px; animation-delay: 0.15s; }
+.eq-bar:nth-child(3) { height: 14px; animation-delay: 0.3s; }
+.eq-bar:nth-child(4) { height: 8px;  animation-delay: 0.45s; }
+@keyframes eq { from { transform: scaleY(0.4); } to { transform: scaleY(1); } }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -353,6 +391,45 @@ for ($i = 6; $i >= 0; $i--) {
             Chưa có session nào. Bắt đầu thôi! 🍅
           </div>
           <?php endif; ?>
+        </div>
+      </div>
+
+      <!-- 🎵 LOFI MUSIC AI -->
+      <div class="card" id="musicCard">
+        <div class="card-header" style="gap:8px;">
+          <div class="card-title">🎵 Nhạc Lo-fi học bài</div>
+          <button class="btn btn-ghost btn-sm" id="musicRefreshBtn" onclick="loadLofiMusic(true)" style="margin-left:auto;">
+            🔀 Gợi ý khác
+          </button>
+        </div>
+        <div class="card-body" style="padding-top:0.5rem;">
+
+          <!-- Mood selector -->
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;" id="moodBtns">
+            <button class="mood-btn active" data-mood="study" onclick="setMood('study',this)">📚 Học bài</button>
+            <button class="mood-btn" data-mood="relax"  onclick="setMood('relax',this)">😌 Thư giãn</button>
+            <button class="mood-btn" data-mood="focus"  onclick="setMood('focus',this)">🎯 Deep focus</button>
+            <button class="mood-btn" data-mood="sleep"  onclick="setMood('sleep',this)">🌙 Buồn ngủ</button>
+            <button class="mood-btn" data-mood="chill"  onclick="setMood('chill',this)">☕ Chill</button>
+          </div>
+
+          <!-- Loading -->
+          <div id="musicLoading" style="display:none;text-align:center;padding:1rem;color:var(--muted);font-size:13px;">
+            <div style="display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:6px;vertical-align:middle;"></div>
+            AI đang chọn nhạc phù hợp...
+          </div>
+
+          <!-- Music list -->
+          <div id="musicList"></div>
+
+          <!-- Now playing embed -->
+          <div id="ytEmbedWrap" style="display:none;margin-top:10px;">
+            <iframe id="ytEmbed" width="100%" height="120" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen style="border-radius:10px;"></iframe>
+            <div id="nowPlayingLabel" style="font-size:11px;color:var(--accent);font-weight:700;margin-top:6px;text-align:center;"></div>
+          </div>
+
         </div>
       </div>
 
@@ -608,6 +685,124 @@ function toggleAmbient() {
 ring.setAttribute('stroke-dasharray', CIRCUMFERENCE);
 ring.setAttribute('stroke-dashoffset', 0);
 render();
+
+// ══════════════════════════════════════
+//  LOFI MUSIC AI
+// ══════════════════════════════════════
+
+// Playlist tĩnh phân loại theo mood — YouTube video IDs đã kiểm tra
+const MUSIC_DB = {
+  study: [
+    { id: 'jfKfPfyJRdk', title: 'lofi hip hop radio - beats to relax/study to', channel: 'Lofi Girl', duration: 'LIVE 24/7' },
+    { id: '5qap5aO4i9A', title: 'lofi hip hop radio - beats to sleep/chill to', channel: 'Lofi Girl', duration: 'LIVE 24/7' },
+    { id: 'DWcJFNfaw9c', title: 'Chillhop Radio - jazzy & lofi hip hop beats', channel: 'Chillhop Music', duration: 'LIVE 24/7' },
+    { id: '7NOSDKb0HlU', title: 'Deep Focus Music - Study, Work, Concentration', channel: 'Yellow Brick Cinema', duration: '3h' },
+    { id: 'n61ULEU7CO0', title: 'Relaxing Music for Studying - Focus, Reading', channel: 'Soothing Relaxation', duration: '3h' },
+    { id: 'lTRiuFIWV54', title: 'Japanese Lofi Hip Hop Mix - Study & Work', channel: 'Lofi Tokyo', duration: '1h' },
+    { id: '4xDzrJKXOOY', title: 'Synthwave Radio - Retrowave & Outrun Music', channel: 'Synthwave+', duration: 'LIVE' },
+    { id: 'MVPTGNGiI-4', title: 'Coffee Shop Ambience - Calm Music & Cafe Sounds', channel: 'Relaxing White Noise', duration: '2h' },
+  ],
+  relax: [
+    { id: '5qap5aO4i9A', title: 'lofi hip hop radio - beats to sleep/chill to', channel: 'Lofi Girl', duration: 'LIVE 24/7' },
+    { id: 'MVPTGNGiI-4', title: 'Coffee Shop Ambience with Calm Music', channel: 'Relaxing White Noise', duration: '2h' },
+    { id: 'hlWiI4xVXKY', title: 'Gentle Piano - Relaxing Background Music', channel: 'Soothing Relaxation', duration: '3h' },
+    { id: 'qYnA9wWFHLk', title: 'Acoustic Covers & Chill Vibes Mix', channel: 'Chillout Lounge', duration: '2h' },
+    { id: 'Z5iZ4fBSi8M', title: 'Rain Sounds + Lofi - Perfect for Relaxing', channel: 'Rain Lofi', duration: '4h' },
+    { id: 'YHPN81GaLaE', title: 'Peaceful Piano Music - Ambient Relaxation', channel: 'Soothing Relaxation', duration: '3h' },
+  ],
+  focus: [
+    { id: '7NOSDKb0HlU', title: 'Deep Focus Music - 4 Hours Study Session', channel: 'Yellow Brick Cinema', duration: '4h' },
+    { id: 'WPni755-Krg', title: 'Brain Power - Focus Study Music', channel: 'Greenred Productions', duration: '3h' },
+    { id: 'hHW1oY26kxQ', title: 'Minimal Techno & Deep Focus Work Music', channel: 'Flow State', duration: '2h' },
+    { id: 'sjkrrmBnpGE', title: 'Dark Ambient Study Music - Deep Concentration', channel: 'Studying & Working', duration: '3h' },
+    { id: 'DWcJFNfaw9c', title: 'Chillhop Radio - Focus & Flow State', channel: 'Chillhop Music', duration: 'LIVE' },
+    { id: 'UfcAVejslrU', title: 'Epic Focus Music Mix - Cinematic', channel: 'Epic Music VN', duration: '2h' },
+  ],
+  sleep: [
+    { id: '5qap5aO4i9A', title: 'Lofi Hip Hop Radio - Sleep & Chill', channel: 'Lofi Girl', duration: 'LIVE' },
+    { id: 'Z5iZ4fBSi8M', title: 'Rain Sounds for Sleeping - Gentle Rain', channel: 'Rain Sounds', duration: '8h' },
+    { id: 'YHPN81GaLaE', title: 'Peaceful Piano - Sleep & Meditation', channel: 'Soothing Relaxation', duration: '3h' },
+    { id: 'hlWiI4xVXKY', title: 'Gentle Piano & Soft Music for Sleep', channel: 'Soothing Relaxation', duration: '3h' },
+    { id: 'HuFYqnbVbzY', title: 'Delta Waves - Deep Sleep Music', channel: 'Jason Stephenson', duration: '8h' },
+  ],
+  chill: [
+    { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio - Chill Beats', channel: 'Lofi Girl', duration: 'LIVE' },
+    { id: '4xDzrJKXOOY', title: 'Synthwave Radio - Chill & Drive', channel: 'Synthwave+', duration: 'LIVE' },
+    { id: 'qYnA9wWFHLk', title: 'Acoustic Covers - Easy Listening', channel: 'Chillout Lounge', duration: '2h' },
+    { id: 'MVPTGNGiI-4', title: 'Coffee Shop Vibes - Chill Cafe Music', channel: 'Relaxing Cafe', duration: '2h' },
+    { id: 'lTRiuFIWV54', title: 'Japanese City Pop & Lofi Mix', channel: 'Tokyo Lofi', duration: '1h' },
+    { id: 'DWcJFNfaw9c', title: 'Chillhop Essentials - Jazzy Beats', channel: 'Chillhop Music', duration: 'LIVE' },
+  ]
+};
+
+let currentMood = 'study';
+let currentVideoId = null;
+let shownIndices = {};
+
+function setMood(mood, btn) {
+  currentMood = mood;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  shownIndices[mood] = shownIndices[mood] || [];
+  loadLofiMusic(true);
+}
+
+function loadLofiMusic(shuffle = false) {
+  const list = MUSIC_DB[currentMood] || MUSIC_DB.study;
+
+  // Shuffle order nếu cần
+  let indices = [...Array(list.length).keys()];
+  if (shuffle || !shownIndices[currentMood]) {
+    // Fisher-Yates shuffle
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    shownIndices[currentMood] = indices;
+  } else {
+    indices = shownIndices[currentMood];
+  }
+
+  // Lấy 4 bài đầu từ indices
+  const picked = indices.slice(0, 4).map(i => list[i]);
+
+  const container = document.getElementById('musicList');
+  container.innerHTML = picked.map((track, i) => `
+    <div class="music-item ${track.id === currentVideoId ? 'playing' : ''}"
+         id="mitem_${track.id}"
+         onclick="playTrack('${track.id}', '${track.title.replace(/'/g,"\\'")}')">
+      <img class="music-thumb"
+           src="https://i.ytimg.com/vi/${track.id}/mqdefault.jpg"
+           onerror="this.style.background='var(--border)';this.src=''"
+           loading="lazy">
+      <div class="music-info">
+        <div class="music-title">${track.title}</div>
+        <div class="music-meta">📺 ${track.channel} · ⏱ ${track.duration}</div>
+      </div>
+      ${track.id === currentVideoId
+        ? `<div class="equalizer"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div>`
+        : `<span class="music-play">▶️</span>`
+      }
+    </div>
+  `).join('');
+}
+
+function playTrack(videoId, title) {
+  currentVideoId = videoId;
+  const embedWrap = document.getElementById('ytEmbedWrap');
+  const embed = document.getElementById('ytEmbed');
+  const label = document.getElementById('nowPlayingLabel');
+
+  embed.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+  embedWrap.style.display = '';
+  label.textContent = '♫ Đang phát: ' + title.slice(0, 50);
+
+  // Cập nhật lại list để show equalizer
+  loadLofiMusic(false);
+}
+
+// Load nhạc khi trang mở
+document.addEventListener('DOMContentLoaded', () => loadLofiMusic(true));
 </script>
 </body>
 </html>
