@@ -132,159 +132,265 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
 <title><?=htmlspecialchars($activeRoom['name']??'Phòng chat')?> — MindSpark</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.rooms-layout{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 120px);min-height:500px;
-  border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface);}
+/* ═══════════════════════════════════
+   ROOMS — DESKTOP LAYOUT
+═══════════════════════════════════ */
+.rooms-layout{
+  display:grid;grid-template-columns:260px 1fr;
+  height:calc(100vh - 112px);min-height:520px;
+  border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;background:var(--surface);
+}
 
+/* Sidebar */
 .rooms-sidebar{background:var(--surface2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-.sidebar-header{padding:14px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.sidebar-title{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.sidebar-header{padding:14px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+.sidebar-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;}
 .rooms-list{flex:1;overflow-y:auto;padding:6px;}
-.room-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s;margin-bottom:2px;}
+.room-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:background .12s;margin-bottom:2px;}
 .room-item:hover{background:var(--surface);}
-.room-item.active{background:var(--accent);color:#fff;}
-.room-icon{font-size:18px;flex-shrink:0;width:30px;text-align:center;}
+.room-item.active{background:var(--accent);}
+.room-avatar{width:36px;height:36px;border-radius:10px;background:var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;}
+.room-avatar svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.room-item.active .room-avatar{background:rgba(255,255,255,.2);}
+.room-item.active .room-avatar svg{stroke:rgba(255,255,255,.9);}
 .room-info{flex:1;min-width:0;}
-.room-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.room-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.1px;}
 .room-item.active .room-name{color:#fff;}
-.room-preview{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
-.room-item.active .room-preview{color:rgba(255,255,255,.7);}
-.room-cnt{font-size:9px;font-weight:800;color:var(--muted);}
-.room-item.active .room-cnt{color:rgba(255,255,255,.7);}
-.sidebar-footer{padding:10px;border-top:1px solid var(--border);flex-shrink:0;}
-.new-room-btn{width:100%;padding:9px;border-radius:10px;border:1.5px dashed var(--border);
-  background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font);font-weight:700;font-size:12px;transition:all .15s;}
+.room-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.room-item.active .room-preview{color:rgba(255,255,255,.65);}
+.room-badge{min-width:18px;height:18px;border-radius:9px;background:var(--border2);
+  font-size:10px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0 5px;}
+.room-item.active .room-badge{background:rgba(255,255,255,.25);color:#fff;}
+.sidebar-footer{padding:8px;border-top:1px solid var(--border);flex-shrink:0;}
+.new-room-btn{width:100%;padding:9px 12px;border-radius:9px;border:1.5px dashed var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font);font-weight:600;font-size:12px;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .new-room-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+.new-room-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
 
+/* Chat main */
 .chat-main{display:flex;flex-direction:column;overflow:hidden;}
-.chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.chat-room-name{font-size:15px;font-weight:800;color:var(--text);}
+.chat-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:56px;}
+.chat-header-icon{width:36px;height:36px;border-radius:9px;background:var(--accent-soft);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;}
+.chat-header-icon svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.chat-room-name{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
 .chat-room-desc{font-size:11px;color:var(--muted);margin-top:1px;}
-.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px var(--green);}
+.online-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;flex-shrink:0;box-shadow:0 0 5px #22c55e;}
 
-/* ── Fixed message layout ── */
-.messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:4px;}
-
+/* Messages */
+.messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:3px;}
 .msg-row{display:flex;align-items:flex-end;gap:8px;width:100%;}
 .msg-row.mine{flex-direction:row-reverse;}
-
-.msg-avatar-wrap{flex-shrink:0;width:34px;align-self:flex-end;}
+.msg-avatar-wrap{flex-shrink:0;width:32px;align-self:flex-end;}
 .msg-row.mine .msg-avatar-wrap{display:none;}
-
-.msg-body{display:flex;flex-direction:column;max-width:65%;}
+.msg-body{display:flex;flex-direction:column;max-width:68%;}
 .msg-row.mine .msg-body{align-items:flex-end;}
 .msg-row.theirs .msg-body{align-items:flex-start;}
-
-.msg-sender{font-size:10px;font-weight:800;color:var(--accent);margin-bottom:3px;padding:0 2px;}
+.msg-sender{font-size:10px;font-weight:700;color:var(--accent);margin-bottom:3px;padding:0 4px;letter-spacing:.1px;}
 .msg-row.mine .msg-sender{display:none;}
-
-.msg-bubble{position:relative;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.55;
+.msg-bubble{position:relative;padding:9px 13px;border-radius:16px;font-size:13.5px;line-height:1.55;
   word-break:break-word;cursor:pointer;display:inline-block;max-width:100%;}
 .msg-bubble.theirs{background:var(--surface2);border-radius:4px 16px 16px 16px;color:var(--text);}
 .msg-bubble.mine{background:var(--accent);color:#fff;border-radius:16px 4px 16px 16px;}
 .msg-bubble:hover .msg-actions{opacity:1;pointer-events:all;}
-
-.msg-meta{margin-top:3px;padding:0 2px;}
-.msg-time{font-size:9px;color:var(--muted);}
-
-.msg-actions{position:absolute;top:-32px;right:4px;display:flex;gap:3px;opacity:0;pointer-events:none;
+.msg-meta{margin-top:3px;padding:0 4px;}
+.msg-time{font-size:10px;color:var(--muted);}
+.msg-actions{position:absolute;top:-34px;right:4px;display:flex;gap:2px;opacity:0;pointer-events:none;
   transition:opacity .15s;background:var(--surface);border:1px solid var(--border);
-  border-radius:8px;padding:3px 6px;box-shadow:var(--shadow);z-index:10;white-space:nowrap;}
+  border-radius:8px;padding:4px 6px;box-shadow:var(--shadow-lg);z-index:10;white-space:nowrap;}
 .msg-row.mine .msg-bubble .msg-actions{right:auto;left:4px;}
-.msg-action-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:1px 4px;border-radius:4px;}
+.msg-action-btn{background:none;border:none;cursor:pointer;padding:2px 5px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;}
 .msg-action-btn:hover{background:var(--surface2);}
-
-.reply-preview{background:rgba(0,0,0,.08);border-left:3px solid rgba(255,255,255,.5);
+.msg-action-btn svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.reply-preview{background:rgba(0,0,0,.07);border-left:3px solid rgba(255,255,255,.4);
   border-radius:6px;padding:5px 8px;margin-bottom:6px;font-size:11px;opacity:.85;}
 .msg-bubble.theirs .reply-preview{background:var(--surface);border-left-color:var(--accent);}
-
-/* Image messages */
 .msg-image{max-width:220px;max-height:180px;border-radius:10px;display:block;cursor:pointer;}
-
-/* File messages */
-.msg-file{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,0,0,.1);
+.msg-file{display:flex;align-items:center;gap:8px;padding:9px 11px;background:rgba(0,0,0,.1);
   border-radius:10px;text-decoration:none;color:inherit;font-size:12px;font-weight:600;min-width:150px;}
-.msg-file-icon{font-size:20px;}
-.msg-bubble.mine .msg-file{background:rgba(255,255,255,.2);color:#fff;}
-
-/* Voice messages */
+.msg-file svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+.msg-bubble.mine .msg-file{background:rgba(255,255,255,.18);color:#fff;}
 .voice-msg{display:flex;align-items:center;gap:8px;min-width:180px;}
-.voice-play-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);
-  border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:#fff;}
-.msg-bubble.theirs .voice-play-btn{background:var(--accent);color:#fff;}
-.voice-play-btn:hover{opacity:.8;}
-.voice-waveform{flex:1;height:26px;border-radius:13px;background:rgba(255,255,255,.15);
+.voice-play-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+.voice-play-btn svg{width:12px;height:12px;fill:currentColor;}
+.msg-bubble.theirs .voice-play-btn{background:var(--accent);}
+.voice-waveform{flex:1;height:26px;border-radius:13px;background:rgba(255,255,255,.12);
   display:flex;align-items:center;padding:0 6px;gap:2px;overflow:hidden;}
 .msg-bubble.theirs .voice-waveform{background:var(--surface);}
-.wave-bar{width:3px;border-radius:2px;background:rgba(255,255,255,.7);flex-shrink:0;}
+.wave-bar{width:3px;border-radius:2px;background:rgba(255,255,255,.6);flex-shrink:0;}
 .msg-bubble.theirs .wave-bar{background:var(--accent);}
 
 /* Reply bar */
-.reply-bar{padding:8px 16px;background:var(--accent-soft);border-top:1px solid var(--border);
+.reply-bar{padding:8px 14px;background:var(--accent-soft);border-top:1px solid var(--border);
   display:none;align-items:center;gap:10px;flex-shrink:0;}
 .reply-bar.show{display:flex;}
 .reply-bar-text{flex:1;font-size:12px;color:var(--text2);}
-.reply-bar-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;}
+.reply-bar-close{background:none;border:none;cursor:pointer;color:var(--muted);
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.reply-bar-close:hover{background:var(--border);}
+.reply-bar-close svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;}
 
 /* Attach preview */
-.attach-preview{display:none;align-items:center;gap:8px;padding:6px 14px;background:var(--accent-soft);
-  font-size:12px;border-top:1px solid var(--border);}
+.attach-preview{display:none;align-items:center;gap:8px;padding:8px 14px;background:var(--accent-soft);
+  font-size:12px;border-top:1px solid var(--border);flex-shrink:0;}
 .attach-preview.show{display:flex;}
 .attach-preview-name{flex:1;font-weight:600;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.attach-preview-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;}
+.attach-preview-remove{background:none;border:none;cursor:pointer;color:var(--muted);}
+.attach-preview-remove svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;}
 
 /* Input area */
-.chat-input-area{padding:10px 14px 12px;border-top:1px solid var(--border);flex-shrink:0;}
-.chat-input-row{display:flex;gap:7px;align-items:flex-end;}
+.chat-input-area{padding:10px 12px 12px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface);}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end;}
 .chat-input-wrap{flex:1;display:flex;align-items:center;border:1.5px solid var(--border);
-  border-radius:22px;background:var(--surface2);transition:border-color .15s;padding:4px 10px;gap:2px;}
+  border-radius:24px;background:var(--surface2);transition:border-color .15s;padding:5px 10px;gap:4px;}
 .chat-input-wrap:focus-within{border-color:var(--accent);background:var(--surface);}
 .chat-input{flex:1;border:none;background:transparent;outline:none;font-family:var(--font);
-  font-size:13px;color:var(--text);padding:6px 6px;resize:none;min-height:36px;max-height:120px;line-height:1.5;}
-.attach-btn{background:none;border:none;cursor:pointer;font-size:16px;padding:3px 4px;
-  color:var(--muted);border-radius:6px;transition:color .15s;flex-shrink:0;line-height:1;}
+  font-size:14px;color:var(--text);padding:5px 4px;resize:none;min-height:34px;max-height:120px;line-height:1.5;}
+.attach-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);
+  border-radius:7px;transition:color .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.attach-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;}
 .attach-btn:hover{color:var(--accent);}
 .send-btn{width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;
-  color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:all .15s;flex-shrink:0;}
+.send-btn svg{width:16px;height:16px;fill:#fff;}
 .send-btn:hover{background:var(--accent-hover);transform:scale(1.05);}
-.send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.send-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 .voice-btn{width:40px;height:40px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);
-  color:var(--muted);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:all .15s;flex-shrink:0;}
+.voice-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;}
 .voice-btn:hover{border-color:var(--accent);color:var(--accent);}
 .voice-btn.recording{background:#ef4444;border-color:#ef4444;color:#fff;animation:pulse-rec 1s infinite;}
 @keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
-.rec-status{font-size:10px;color:var(--muted);margin-top:4px;padding-left:48px;min-height:14px;}
+.rec-status{font-size:11px;color:var(--muted);margin-top:5px;text-align:center;min-height:16px;}
 
 /* Lightbox */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;
   display:none;align-items:center;justify-content:center;cursor:pointer;}
 .lightbox.show{display:flex;}
-.lightbox img{max-width:90vw;max-height:90vh;border-radius:12px;}
+.lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;}
 
 /* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;
-  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);display:none;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
+  align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);display:none;}
 .modal-overlay.show{display:flex;}
-.modal-box{background:var(--surface);border-radius:16px;padding:24px;width:380px;max-width:90vw;box-shadow:0 24px 48px rgba(0,0,0,.2);}
-.modal-title{font-size:16px;font-weight:800;margin-bottom:16px;}
-.icon-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
-.icon-opt{width:36px;height:36px;border-radius:8px;border:2px solid var(--border);
-  background:var(--surface2);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.icon-opt:hover,.icon-opt.sel{border-color:var(--accent);background:var(--accent-soft);}
+.modal-box{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 32px;
+  width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,.2);}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:16px;letter-spacing:-.2px;}
 
-.date-divider{text-align:center;font-size:10px;font-weight:700;color:var(--muted);margin:10px 0;
-  display:flex;align-items:center;gap:8px;}
+.date-divider{text-align:center;font-size:10px;font-weight:600;color:var(--muted);margin:10px 0;
+  display:flex;align-items:center;gap:8px;letter-spacing:.2px;}
 .date-divider::before,.date-divider::after{content:'';flex:1;height:1px;background:var(--border);}
 
-.messages::-webkit-scrollbar,.rooms-list::-webkit-scrollbar{width:4px;}
-.messages::-webkit-scrollbar-thumb,.rooms-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.messages::-webkit-scrollbar,.rooms-list::-webkit-scrollbar{width:3px;}
+.messages::-webkit-scrollbar-thumb,.rooms-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
+/* ═══════════════════════════════════
+   MOBILE OVERRIDES
+═══════════════════════════════════ */
 @media(max-width:640px){
-  .rooms-layout{grid-template-columns:1fr;height:auto;}
-  .rooms-sidebar{height:auto;border-right:none;border-bottom:1px solid var(--border);}
-  .rooms-list{max-height:160px;}
-  .chat-main{height:calc(100vh - 320px);min-height:300px;}
+  /* Remove page padding — chat goes full width */
+  .page{padding:0 !important;}
+  .page-header{display:none;}
+
+  /* The whole layout stacks: room list drawer on top, chat fills rest */
+  .rooms-layout{
+    grid-template-columns:1fr;
+    border:none;
+    border-radius:0;
+    height:calc(100vh - 66px); /* full viewport minus bottom nav */
+    min-height:0;
+  }
+
+  /* Room list: horizontal pill tabs, compact */
+  .rooms-sidebar{
+    height:auto;
+    min-height:0;
+    border-right:none;
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .sidebar-header{padding:10px 14px 8px;}
+  .rooms-list{
+    display:flex;
+    flex-direction:row;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:0 10px 10px;
+    gap:6px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .rooms-list::-webkit-scrollbar{display:none;}
+  .room-item{
+    flex-direction:column;
+    align-items:center;
+    padding:8px 12px;
+    border-radius:12px;
+    min-width:72px;
+    max-width:90px;
+    gap:5px;
+    margin-bottom:0;
+    flex-shrink:0;
+    background:var(--surface2);
+    border:1.5px solid transparent;
+  }
+  .room-item.active{
+    background:var(--accent-soft);
+    border-color:var(--accent);
+  }
+  .room-avatar{width:32px;height:32px;}
+  .room-item.active .room-avatar{background:var(--accent-soft);}
+  .room-item.active .room-avatar svg{stroke:var(--accent);}
+  .room-info{width:100%;text-align:center;}
+  .room-name{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .room-item.active .room-name{color:var(--accent);font-weight:700;}
+  .room-preview{display:none;}
+  .room-badge{
+    position:absolute;top:-5px;right:-5px;
+    min-width:16px;height:16px;font-size:9px;
+  }
+  .room-item{position:relative;}
+  .sidebar-footer{
+    display:flex;align-items:center;flex-shrink:0;padding:0 10px 10px;
+  }
+  .new-room-btn{width:auto;padding:8px 14px;border-radius:12px;font-size:11px;white-space:nowrap;}
+
+  /* Chat main: fills remaining vertical space */
+  .chat-main{
+    flex:1;
+    height:0; /* force flex to control height */
+    overflow:hidden;
+  }
+  .chat-header{padding:10px 14px;min-height:50px;}
+  .chat-room-name{font-size:14px;}
+  .chat-room-desc{font-size:10px;}
+
+  /* Messages: full scroll */
+  .messages{
+    padding:10px 12px;
+    gap:2px;
+  }
+  .msg-body{max-width:78%;}
+  .msg-bubble{font-size:14px;padding:9px 13px;}
+  .msg-image{max-width:200px;max-height:160px;}
+
+  /* Input: bigger touch targets */
+  .chat-input-area{
+    padding:8px 10px;
+    padding-bottom:max(10px, env(safe-area-inset-bottom));
+  }
+  .chat-input{font-size:15px;min-height:38px;}
+  .send-btn{width:42px;height:42px;}
+  .voice-btn{width:42px;height:42px;}
+  .attach-btn svg{width:20px;height:20px;}
 }
 </style>
 </head>
@@ -293,7 +399,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
 <div class="page">
   <div class="page-header">
     <div class="page-eyebrow">Cộng đồng</div>
-    <h1 class="page-title">💬 Phòng Chat</h1>
+    <h1 class="page-title">Phòng Chat</h1>
     <div class="page-sub">Chat theo nhóm · Hỏi đáp bài tập · Trò chuyện thoải mái</div>
   </div>
 
@@ -301,31 +407,36 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
     <!-- SIDEBAR -->
     <div class="rooms-sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-title">📡 Phòng Chat</div>
+        <div class="sidebar-title">Phòng Chat</div>
       </div>
       <div class="rooms-list" id="roomsList">
         <?php foreach($rooms as $r): ?>
         <div class="room-item <?=$r['id']==$activeRid?'active':''?>"
-             id="ri-<?=$r['id']?>" onclick="switchRoom(<?=$r['id']?>,'<?=htmlspecialchars($r['icon'])?> <?=htmlspecialchars($r['name'])?>','<?=htmlspecialchars($r['description']??'')?>')">
-          <div class="room-icon"><?=htmlspecialchars($r['icon'])?></div>
+             id="ri-<?=$r['id']?>" onclick="switchRoom(<?=$r['id']?>,'<?=htmlspecialchars($r['name'])?>','<?=htmlspecialchars($r['description']??'')?>')">
+          <div class="room-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <div class="room-info">
             <div class="room-name"><?=htmlspecialchars($r['name'])?></div>
             <div class="room-preview"><?=htmlspecialchars(mb_substr($r['last_msg']??'Chưa có tin nhắn',0,30))?></div>
           </div>
-          <div class="room-cnt"><?=$r['msg_count']?></div>
+          <?php if($r['msg_count']>0): ?><div class="room-badge"><?=$r['msg_count']?></div><?php endif; ?>
         </div>
         <?php endforeach; ?>
       </div>
       <div class="sidebar-footer">
-        <button class="new-room-btn" onclick="document.getElementById('newRoomModal').classList.add('show')">+ Tạo phòng mới</button>
+        <button class="new-room-btn" onclick="document.getElementById('newRoomModal').classList.add('show')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tạo phòng mới
+        </button>
       </div>
     </div>
 
     <!-- CHAT MAIN -->
     <div class="chat-main">
       <div class="chat-header">
-        <div style="font-size:22px;" id="chatIcon"><?=htmlspecialchars($activeRoom['icon']??'💬')?></div>
-        <div style="flex:1;">
+        <div class="chat-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke:var(--accent)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
           <div class="chat-room-name" id="chatName"><?=htmlspecialchars($activeRoom['name']??'Phòng chat')?></div>
           <div class="chat-room-desc" id="chatDesc"><?=htmlspecialchars($activeRoom['description']??'')?></div>
         </div>
@@ -355,8 +466,10 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
           $time     = timeAgo($m['created_at']);
           $mid      = (int)$m['id'];
 
-          $actions = ($mine?'<button class="msg-action-btn" onclick="deleteMsg('.$mid.',event)" title="Xoá">🗑️</button>':'')
-            .'<button class="msg-action-btn" onclick="setReply('.$mid.',\''.addslashes(htmlspecialchars($m['name'])).'\',\''.addslashes(mb_substr(htmlspecialchars($m['content']),0,60)).'\')" title="Reply">↩</button>';
+          $delSvg   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6M9,6V4h6v2"/></svg>';
+          $replySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="9,17 4,12 9,7"/><path d="M20,18v-2a4,4,0,0,0-4-4H4"/></svg>';
+          $actions = ($mine?'<button class="msg-action-btn" onclick="deleteMsg('.$mid.',event)" title="Xoá">'.$delSvg.'</button>':'')
+            .'<button class="msg-action-btn" onclick="setReply('.$mid.',\''.addslashes(htmlspecialchars($m['name'])).'\',\''.addslashes(mb_substr(htmlspecialchars($m['content']),0,60)).'\')" title="Reply">'.$replySvg.'</button>';
 
           if($msgType==='image' && $fileData) {
             $safeData = htmlspecialchars($fileData);
@@ -390,7 +503,7 @@ $lastId = empty($msgs) ? 0 : (int)end($msgs)['id'];
 </div>
 HTML;
         endforeach;
-        if(empty($msgs)) echo '<div style="text-align:center;color:var(--muted);padding:2rem;font-size:13px;font-weight:600;">👋 Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!</div>';
+        if(empty($msgs)) echo '<div style="text-align:center;color:var(--muted);padding:2rem;font-size:13px;">Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!</div>';
         ?>
       </div>
 
@@ -398,14 +511,14 @@ HTML;
       <div class="reply-bar" id="replyBar">
         <div style="font-size:14px;">↩</div>
         <div class="reply-bar-text" id="replyBarText">Đang trả lời...</div>
-        <button class="reply-bar-close" onclick="clearReply()">✕</button>
+        <button class="reply-bar-close" onclick="clearReply()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:12px;height:12px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <!-- Attach preview -->
       <div class="attach-preview" id="attachPreview">
         <span id="attachPreviewIcon" style="font-size:18px;">📎</span>
         <span class="attach-preview-name" id="attachPreviewName"></span>
-        <button class="attach-preview-remove" onclick="clearAttach()">✕</button>
+        <button class="attach-preview-remove" onclick="clearAttach()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <!-- Input area -->
@@ -413,15 +526,23 @@ HTML;
         <div class="chat-input-row">
           <?=userAvatar($user,36)?>
           <div class="chat-input-wrap">
-            <button class="attach-btn" title="Gửi ảnh" onclick="document.getElementById('imgInput').click()">🖼️</button>
+            <button class="attach-btn" title="Gửi ảnh" onclick="document.getElementById('imgInput').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            </button>
             <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="onFileChosen(this,'image')">
-            <button class="attach-btn" title="Gửi file" onclick="document.getElementById('fileInput').click()">📎</button>
+            <button class="attach-btn" title="Gửi file" onclick="document.getElementById('fileInput').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
             <input type="file" id="fileInput" style="display:none" onchange="onFileChosen(this,'file')">
-            <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn... (Enter để gửi)"
+            <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..."
               onkeydown="inputKey(event)" rows="1" maxlength="4000"></textarea>
           </div>
-          <button class="voice-btn" id="voiceBtn" title="Ghi âm" onclick="toggleRecording()">🎤</button>
-          <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+          <button class="voice-btn" id="voiceBtn" title="Ghi âm" onclick="toggleRecording()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+          <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+          </button>
         </div>
         <div class="rec-status" id="recStatus"></div>
       </div>
@@ -437,7 +558,7 @@ HTML;
 <!-- New Room Modal -->
 <div class="modal-overlay" id="newRoomModal" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="modal-box">
-    <div class="modal-title">➕ Tạo phòng chat mới</div>
+    <div class="modal-handle"></div><div class="modal-title">Tạo phòng chat mới</div>
     <div style="margin-bottom:12px;">
       <label style="font-size:11px;font-weight:800;color:var(--muted);display:block;margin-bottom:5px;">ICON PHÒNG</label>
       <div class="icon-picker" id="iconPicker">
@@ -455,7 +576,7 @@ HTML;
       <input type="text" id="newRoomDesc" class="form-input" placeholder="Phòng dành cho..." maxlength="120">
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary" style="flex:1;" onclick="createRoom()">➕ Tạo phòng</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="createRoom()">Tạo phòng</button>
       <button class="btn btn-ghost" onclick="document.getElementById('newRoomModal').classList.remove('show')">Huỷ</button>
     </div>
   </div>
@@ -610,7 +731,7 @@ async function toggleRecording(){
         if(replyToId) fd.append('reply_to',replyToId);
         clearReply();
         document.getElementById('sendBtn').disabled=true;
-        document.getElementById('recStatus').textContent='⏳ Đang gửi...';
+        document.getElementById('recStatus').textContent='Đang gửi...';
         try{
           const res=await fetch('rooms.php',{method:'POST',body:fd});
           const data=await res.json();
@@ -622,11 +743,11 @@ async function toggleRecording(){
       mediaRecorder.start();
       isRecording=true;
       document.getElementById('voiceBtn').classList.add('recording');
-      document.getElementById('voiceBtn').textContent='⏹';
+      // recording
       let sec=0;
       window._recTimer=setInterval(()=>{
         sec++;
-        document.getElementById('recStatus').textContent='🔴 Đang ghi âm '+sec+'s — bấm ⏹ để gửi';
+        document.getElementById('recStatus').textContent='Đang ghi âm '+sec+'s — nhấn nút mic để dừng';
       },1000);
     }catch(e){alert('Không thể truy cập microphone. Vui lòng cấp quyền mic.');}
   } else {
@@ -634,7 +755,7 @@ async function toggleRecording(){
     mediaRecorder.stop();
     isRecording=false;
     document.getElementById('voiceBtn').classList.remove('recording');
-    document.getElementById('voiceBtn').textContent='🎤';
+    // not recording
   }
 }
 
@@ -678,22 +799,20 @@ function clearReply(){
 }
 
 /* Switch room */
-async function switchRoom(rid,nameWithIcon,desc){
+async function switchRoom(rid,name,desc){
   clearTimeout(pollTimer);
   currentRoom=rid; lastMsgId=0;
   document.querySelectorAll('.room-item').forEach(r=>r.classList.toggle('active',r.id==='ri-'+rid));
-  const parts=nameWithIcon.split(' ');
-  document.getElementById('chatIcon').textContent=parts[0];
-  document.getElementById('chatName').textContent=parts.slice(1).join(' ');
+  document.getElementById('chatName').textContent=name;
   document.getElementById('chatDesc').textContent=desc;
   const ml=document.getElementById('msgList');
-  ml.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;">⏳ Đang tải...</div>';
+  ml.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:13px;">Đang tải...</div>';
   const fd=new FormData(); fd.append('action','poll'); fd.append('room_id',rid); fd.append('after_id',0);
   const res=await fetch('rooms.php',{method:'POST',body:fd});
   const data=await res.json();
   ml.innerHTML='';
-  if(!data.messages.length) ml.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:13px;font-weight:600;">👋 Bắt đầu chat thôi!</div>';
-  else{ data.messages.forEach(m=>{appendMsg(m); lastMsgId=Math.max(lastMsgId,m.id);}); }
+  if(!data.messages.length) ml.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:13px;">Bắt đầu chat thôi!</div>';
+  else { data.messages.forEach(m=>{appendMsg(m); lastMsgId=Math.max(lastMsgId,m.id);}); }
   ml.scrollTop=ml.scrollHeight;
   poll();
 }
@@ -719,8 +838,8 @@ async function createRoom(){
     const list=document.getElementById('roomsList');
     const div=document.createElement('div');
     div.className='room-item'; div.id='ri-'+data.id;
-    div.onclick=()=>switchRoom(data.id,data.icon+' '+data.name,data.desc);
-    div.innerHTML=`<div class="room-icon">${data.icon}</div><div class="room-info"><div class="room-name">${data.name}</div><div class="room-preview">Vừa tạo</div></div><div class="room-cnt">0</div>`;
+    div.onclick=()=>switchRoom(data.id,data.name,data.desc);
+    div.innerHTML=`<div class="room-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="room-info"><div class="room-name">${data.name}</div><div class="room-preview">Vừa tạo</div></div>`;
     list.appendChild(div);
     switchRoom(data.id,data.icon+' '+data.name,data.desc);
     document.getElementById('newRoomName').value='';

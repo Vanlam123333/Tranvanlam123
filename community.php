@@ -293,6 +293,68 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
 
 /* Empty */
 .empty-feed{text-align:center;padding:3rem 1rem;color:var(--muted);}
+
+/* ═══════════════════════════════════
+   MOBILE OVERRIDES
+═══════════════════════════════════ */
+@media(max-width:640px){
+  .page{padding:0 !important;}
+  .page-header{padding:14px 14px 10px !important;text-align:left !important;margin-bottom:0;}
+  .page-header h1{font-size:1.3rem !important;}
+
+  .feed-wrap{
+    max-width:100%;
+    padding:10px 12px 100px; /* extra bottom for nav */
+  }
+
+  /* Compose card */
+  .compose-card{border-radius:12px;padding:12px;}
+  .compose-top{gap:8px;}
+  .compose-fake-input{font-size:13px;padding:9px 14px;}
+  .compose-tool{font-size:12px;padding:7px 6px;}
+  .compose-tool .ti{font-size:16px;}
+
+  /* Compose modal */
+  .compose-modal{align-items:flex-end;padding:0;}
+  .compose-modal-box{
+    width:100%;
+    border-radius:20px 20px 0 0;
+    padding-bottom:max(16px, env(safe-area-inset-bottom));
+  }
+  .compose-textarea{font-size:16px;}
+
+  /* Post cards */
+  .post-card{border-radius:12px;margin-bottom:10px;}
+  .post-header{padding:12px 14px 8px;}
+  .post-user-name{font-size:13.5px;}
+  .post-content{padding:4px 14px 10px;font-size:14px;}
+  .post-image{max-height:320px;}
+
+  /* Reaction summary */
+  .reaction-summary{padding:5px 14px;}
+
+  /* Action buttons */
+  .post-actions{overflow:hidden;}
+  .post-action-btn{font-size:12px;padding:10px 4px;}
+  .post-action-btn .ba{font-size:15px;}
+
+  /* Comments */
+  .comments-section{padding:0 12px 12px;}
+  .comment-bubble{border-radius:14px;padding:8px 12px;}
+  .comment-text{font-size:13px;}
+  .comment-input-area{gap:6px;}
+  .comment-input{font-size:15px;} /* prevent zoom */
+  .comment-send-btn{width:38px;height:38px;}
+
+  /* Reaction picker */
+  .reaction-picker{left:0;transform:translateX(0) translateY(8px) scale(.9);}
+  .reaction-picker.show{transform:translateX(0) translateY(0) scale(1);}
+  .rpick{font-size:24px;}
+
+  /* Load more */
+  .load-more-btn{padding:12px 20px;}
+}
+
 </style>
 </head>
 <body>
