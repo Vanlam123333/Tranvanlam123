@@ -254,13 +254,12 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
   position:relative;
   width:44px;height:44px;
   border-radius:50%;border:none;background:transparent;
-  cursor:pointer;padding:0;
+  cursor:pointer;padding:4px;
   transition:transform .18s cubic-bezier(.34,1.56,.64,1);
   display:flex;align-items:center;justify-content:center;
-  font-size:0;line-height:0;
 }
 .rpick:hover{transform:scale(1.5) translateY(-6px);}
-.rpick img{width:36px;height:36px;display:block;pointer-events:none;}
+.rpick img{width:36px;height:36px;display:block;pointer-events:none;border-radius:50%;}
 .rpick::after{
   content:attr(data-label);
   position:absolute;top:-30px;left:50%;transform:translateX(-50%);
@@ -370,13 +369,16 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
     <div class="compose-divider"></div>
     <div class="compose-tools">
       <button class="compose-tool" onclick="openCompose(true)">
-        <span class="ti">🖼️</span> Ảnh/Video
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:#45bd62"><rect x="3" y="3" width="18" height="18" rx="3" ry="3" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><polyline points="21 15 16 10 5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="color:#45bd62">Ảnh/Video</span>
       </button>
       <button class="compose-tool" onclick="openCompose()">
-        <span class="ti">😊</span> Cảm xúc
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:#f7b928"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 13s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="9" x2="9.01" y2="9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span style="color:#f7b928">Cảm xúc</span>
       </button>
       <button class="compose-tool" onclick="openCompose()">
-        <span class="ti">✍️</span> Bài viết
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:#f02849"><path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="color:#f02849">Bài viết</span>
       </button>
     </div>
   </div>
@@ -465,21 +467,22 @@ function renderPost($p, $REACTIONS) {
 
     // Current user's reaction display
     $REACTION_LABELS_PHP = ['like'=>'Thích','love'=>'Yêu thích','haha'=>'Haha','wow'=>'Wow','sad'=>'Buồn','angry'=>'Phẫn nộ'];
+    // Use Twemoji CDN (Twitter emoji - high quality, open source)
     $REACTION_IMGS_PHP = [
-      'like'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t4c/2/32/1f44d.png',
-      'love'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tb4/2/32/2764.png',
-      'haha'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t93/2/32/1f606.png',
-      'wow'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tf3/2/32/1f62e.png',
-      'sad'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t13/2/32/1f622.png',
-      'angry' => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t73/2/32/1f620.png',
+      'like'  => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png',
+      'love'  => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png',
+      'haha'  => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f606.png',
+      'wow'   => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62e.png',
+      'sad'   => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png',
+      'angry' => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f621.png',
     ];
     $REACTION_COLORS_PHP = ['like'=>'#1877f2','love'=>'#f33e58','haha'=>'#f7b731','wow'=>'#f7b731','sad'=>'#f7b731','angry'=>'#e05900'];
     if ($myRx && isset($REACTION_IMGS_PHP[$myRx])) {
-      $myRxEmoji = '<img src="' . $REACTION_IMGS_PHP[$myRx] . '" style="width:20px;height:20px;vertical-align:middle" alt="">';
+      $myRxEmoji = '<img src="' . $REACTION_IMGS_PHP[$myRx] . '" style="width:20px;height:20px;border-radius:50%;vertical-align:middle" alt="">';
     } elseif ($myRx) {
       $myRxEmoji = $REACTIONS[$myRx] ?? '👍';
     } else {
-      $myRxEmoji = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 13v3h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+      $myRxEmoji = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 13v3h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
     }
     $reactLabel = $myRx ? ($REACTION_LABELS_PHP[$myRx] ?? ucfirst($myRx)) : 'Thích';
     $rxColor = $reacted ? ($REACTION_COLORS_PHP[$myRx] ?? '#1877f2') : '';
@@ -721,7 +724,14 @@ async function doReact(pid, reaction){
     const cnt=document.getElementById('likeCount-'+pid);
     const emojisEl=document.getElementById('react-emojis-'+pid);
     cnt.textContent=d.count;
-    const REACT_IMGS = {"like": "https://static.xx.fbcdn.net/images/emoji.php/v9/t4c/2/32/1f44d.png", "love": "https://static.xx.fbcdn.net/images/emoji.php/v9/tb4/2/32/2764.png", "haha": "https://static.xx.fbcdn.net/images/emoji.php/v9/t93/2/32/1f606.png", "wow": "https://static.xx.fbcdn.net/images/emoji.php/v9/tf3/2/32/1f62e.png", "sad": "https://static.xx.fbcdn.net/images/emoji.php/v9/t13/2/32/1f622.png", "angry": "https://static.xx.fbcdn.net/images/emoji.php/v9/t73/2/32/1f620.png"};
+    const REACT_IMGS = {
+      like:  'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png',
+      love:  'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png',
+      haha:  'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f606.png',
+      wow:   'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62e.png',
+      sad:   'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png',
+      angry: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f621.png',
+    };
     const REACT_LABELS = {"like": "Thích", "love": "Yêu thích", "haha": "Haha", "wow": "Wow", "sad": "Buồn", "angry": "Phẫn nộ"};
     const REACT_COLORS = {"like": "#1877f2", "love": "#f33e58", "haha": "#f7b731", "wow": "#f7b731", "sad": "#f7b731", "angry": "#e05900"};
     if(d.my_reaction){
@@ -730,7 +740,7 @@ async function doReact(pid, reaction){
       const col = REACT_COLORS[d.my_reaction]||'#1877f2';
       btn.style.color = col;
       const img = REACT_IMGS[d.my_reaction];
-      icon.innerHTML = img ? `<img src="${img}" style="width:20px;height:20px;vertical-align:middle">` : REACTIONS[d.my_reaction]||'👍';
+      icon.innerHTML = img ? `<img src="${img}" style="width:20px;height:20px;border-radius:50%;vertical-align:middle">` : REACTIONS[d.my_reaction]||'👍';
       label.textContent = REACT_LABELS[d.my_reaction]||d.my_reaction;
       label.style.color = col;
     } else {
