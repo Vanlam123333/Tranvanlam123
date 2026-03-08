@@ -285,6 +285,23 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
 .comment-meta button{background:none;border:none;cursor:pointer;font-size:12px;color:var(--muted);font-weight:600;padding:0;}
 .comment-meta button:hover{color:#ef4444;text-decoration:underline;}
 
+/* ── Comment like/reply features ── */
+.cmt-action-btn{background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);padding:0;transition:color .12s;}
+.cmt-action-btn:hover{color:var(--text);}
+.cmt-action-btn.cmt-liked{color:#1877f2;font-weight:800;}
+.cmt-like-float{
+  position:absolute;bottom:-10px;right:6px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:1px 6px 1px 4px;
+  font-size:12px;font-weight:700;color:var(--text);
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+  display:flex;align-items:center;gap:2px;
+  white-space:nowrap;
+}
+.reply-item{padding-left:0;}
+.reply-thread{margin-left:0;margin-top:4px;display:flex;flex-direction:column;gap:6px;}
+.reply-input-wrap{margin-left:0;}
+
 /* Comment input */
 .comment-input-area{display:flex;gap:8px;align-items:flex-end;margin-top:8px;}
 .comment-input-wrap{flex:1;background:var(--surface2);border:1.5px solid var(--border);
@@ -578,12 +595,18 @@ HTML;
         <div class="comment-input-wrap">
           <textarea class="comment-input" placeholder="Viết bình luận..." id="cmtInput-{$pid}"
             onkeydown="cmtKey(event,{$pid})" rows="1" oninput="autoResizeCmt(this)"></textarea>
-          <button class="cmt-attach" title="Gửi ảnh" onclick="document.getElementById('cmtImgInput-{$pid}').click()">🖼️</button>
-          <button class="emoji-picker-btn" onclick="toggleCmtEmoji({$pid})">😊</button>
+          <button class="cmt-attach" title="Gửi ảnh" onclick="document.getElementById('cmtImgInput-{$pid}').click()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#45bd62" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="#45bd62" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg>
+          </button>
+          <button class="emoji-picker-btn" onclick="toggleCmtEmoji({$pid})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f7b928" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 13s1.5 2 4 2 4-2 4-2" stroke="#f7b928" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="9" x2="9.01" y2="9" stroke="#f7b928" stroke-width="2.5" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke="#f7b928" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
           <input type="file" id="cmtImgInput-{$pid}" accept="image/*" style="display:none" onchange="attachCmtImg(this,{$pid})">
         </div>
       </div>
-      <button class="comment-send-btn" onclick="submitComment({$pid})" id="cmtBtn-{$pid}">➤</button>
+      <button class="comment-send-btn" onclick="submitComment({$pid})" id="cmtBtn-{$pid}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
     </div>
   </div>
 </div>
@@ -780,18 +803,43 @@ async function loadComments(pid){
   list.innerHTML=d.comments.map(c=>renderComment(c,pid)).join('');
 }
 
-function renderComment(c, pid){
+function renderComment(c, pid, isReply=false){
   const imgHtml = c.image_data ? `<img src="${c.image_data}" class="comment-img" onclick="openLightbox(this.src)">` : '';
   const delBtn  = c.mine ? `<button onclick="deleteComment(${c.id},${pid})">Xoá</button>` : '';
-  return `<div class="comment-item" id="cm-${c.id}">
+  const likeCount = c.like_count || 0;
+  const likedClass = c.liked ? 'cmt-liked' : '';
+  const likedColor = c.liked ? 'color:#1877f2;font-weight:800;' : '';
+  const likeCountHtml = likeCount > 0 ? `<span class="cmt-like-badge" id="cm-lc-${c.id}">${likeCount}</span>` : `<span class="cmt-like-badge" id="cm-lc-${c.id}" style="display:none">${likeCount}</span>`;
+  const replyBtn = !isReply ? `<button onclick="focusReply(${pid}, ${c.id}, '${(c.user||'').replace(/'/g,"\'")}')">Trả lời</button>` : '';
+  return `<div class="comment-item${isReply?' reply-item':''}" id="cm-${c.id}">
     ${c.avatar}
     <div class="comment-body">
-      <div class="comment-bubble">
+      <div class="comment-bubble" style="position:relative;">
         <div class="comment-user">${c.user}</div>
         <div class="comment-text">${c.content}</div>
         ${imgHtml}
+        ${likeCount > 0 ? `<div class="cmt-like-float" id="cm-lf-${c.id}">❤️ ${likeCount}</div>` : `<div class="cmt-like-float" id="cm-lf-${c.id}" style="display:none">❤️ ${likeCount}</div>`}
       </div>
-      <div class="comment-meta"><span>${c.time}</span>${delBtn}</div>
+      <div class="comment-meta">
+        <span>${c.time}</span>
+        <button class="cmt-action-btn ${likedClass}" style="${likedColor}" id="cm-lb-${c.id}" onclick="likeComment(${c.id},${pid})">Thích</button>
+        ${replyBtn}
+        ${delBtn}
+      </div>
+      <div class="reply-thread" id="replies-${c.id}"></div>
+      ${!isReply ? `<div class="reply-input-wrap" id="reply-input-${c.id}" style="display:none">
+        <div class="comment-input-area" style="margin-top:6px;">
+          <div class="comment-input-wrap" style="border-radius:20px;">
+            <textarea class="comment-input" placeholder="Trả lời ${c.user}..." id="replyInput-${c.id}" rows="1" oninput="autoResizeCmt(this)" onkeydown="replyKey(event,${pid},${c.id})"></textarea>
+            <button class="emoji-picker-btn" onclick="toggleReplyEmoji(${c.id})">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f7b928" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/></svg>
+            </button>
+          </div>
+          <button class="comment-send-btn" style="width:30px;height:30px;font-size:12px;" onclick="submitReply(${pid},${c.id})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>` : ''}
     </div>
   </div>`;
 }
@@ -865,6 +913,94 @@ async function deleteComment(cid,pid){
   document.getElementById('cm-'+cid)?.remove();
   const lbl=document.getElementById('cmtLabel-'+pid);
   if(lbl){ const n=Math.max(0,(parseInt(lbl.textContent)||0)-1); lbl.textContent=n+' bình luận'; }
+}
+
+/* ── Like comment (client-side toggle, no DB for now) ── */
+const cmtLikes = {}; // cid -> liked bool, count
+function likeComment(cid, pid){
+  if(!cmtLikes[cid]) cmtLikes[cid] = {liked:false, count:0};
+  const s = cmtLikes[cid];
+  s.liked = !s.liked;
+  s.count += s.liked ? 1 : -1;
+  const btn = document.getElementById('cm-lb-'+cid);
+  const float = document.getElementById('cm-lf-'+cid);
+  if(btn){
+    btn.classList.toggle('cmt-liked', s.liked);
+    btn.style.color = s.liked ? '#1877f2' : '';
+    btn.style.fontWeight = s.liked ? '800' : '';
+  }
+  if(float){
+    if(s.count > 0){
+      float.style.display = 'flex';
+      float.innerHTML = '❤️ ' + s.count;
+    } else {
+      float.style.display = 'none';
+    }
+  }
+}
+
+/* ── Reply to comment ── */
+function focusReply(pid, cid, userName){
+  // Hide all other reply inputs first
+  document.querySelectorAll('.reply-input-wrap').forEach(el=>{
+    if(el.id !== 'reply-input-'+cid) el.style.display='none';
+  });
+  const wrap = document.getElementById('reply-input-'+cid);
+  if(!wrap) return;
+  const isVisible = wrap.style.display !== 'none';
+  wrap.style.display = isVisible ? 'none' : 'block';
+  if(!isVisible){
+    const ta = document.getElementById('replyInput-'+cid);
+    if(ta){ ta.focus(); ta.placeholder = 'Trả lời ' + userName + '...'; }
+  }
+}
+
+function replyKey(e, pid, cid){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); submitReply(pid, cid); }
+}
+
+async function submitReply(pid, cid){
+  const input = document.getElementById('replyInput-'+cid);
+  const content = input?.value.trim();
+  if(!content) return;
+  // Submit as normal comment for now (replies stored as comments)
+  const fd = new FormData();
+  fd.append('action','comment'); fd.append('post_id',pid);
+  fd.append('content', '@reply: ' + content);
+  const res = await fetch('community.php',{method:'POST',body:fd});
+  const d = await res.json();
+  if(d.ok){
+    input.value=''; input.style.height='auto';
+    document.getElementById('reply-input-'+cid).style.display='none';
+    // Render in reply thread
+    const thread = document.getElementById('replies-'+cid);
+    if(thread){
+      // Format the reply display (strip @reply: prefix for display)
+      const rc = {...d.comment, content: content};
+      thread.insertAdjacentHTML('beforeend', renderComment(rc, pid, true));
+    }
+    // Update comment count label
+    const lbl=document.getElementById('cmtLabel-'+pid);
+    if(lbl) lbl.textContent=(parseInt(lbl.textContent)||0)+1+' bình luận';
+  }
+}
+
+function toggleReplyEmoji(cid){
+  const emojis=['😀','😂','🥰','😎','🤔','❤️','🔥','👍','🎉','💪'];
+  let panel=document.getElementById('replyEmojiPanel-'+cid);
+  if(!panel){
+    panel=document.createElement('div');
+    panel.id='replyEmojiPanel-'+cid;
+    panel.style.cssText='display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);margin-top:4px;position:absolute;z-index:50;';
+    emojis.forEach(em=>{
+      const b=document.createElement('button');
+      b.textContent=em; b.style.cssText='background:none;border:none;cursor:pointer;font-size:20px;padding:4px;border-radius:6px;';
+      b.onclick=()=>{const ta=document.getElementById('replyInput-'+cid);ta.value+=em;ta.focus();panel.remove();};
+      panel.appendChild(b);
+    });
+    document.getElementById('replyInput-'+cid)?.parentElement.appendChild(panel);
+    setTimeout(()=>document.addEventListener('click',()=>panel.remove(),{once:true}),0);
+  } else { panel.remove(); }
 }
 
 /* ── Load more ── */
