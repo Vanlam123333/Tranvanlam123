@@ -254,12 +254,13 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
   position:relative;
   width:44px;height:44px;
   border-radius:50%;border:none;background:transparent;
-  cursor:pointer;padding:4px;
+  cursor:pointer;padding:2px;
   transition:transform .18s cubic-bezier(.34,1.56,.64,1);
   display:flex;align-items:center;justify-content:center;
 }
-.rpick:hover{transform:scale(1.5) translateY(-6px);}
-.rpick img{width:36px;height:36px;display:block;pointer-events:none;border-radius:50%;}
+.rpick:hover{transform:scale(1.45) translateY(-6px);}
+.rpick svg{width:40px;height:40px;display:block;pointer-events:none;}
+.rpick img{width:38px;height:38px;display:block;pointer-events:none;border-radius:50%;}
 .rpick::after{
   content:attr(data-label);
   position:absolute;top:-30px;left:50%;transform:translateX(-50%);
@@ -482,22 +483,29 @@ function renderPost($p, $REACTIONS) {
         $topHtml .= '<span class="reaction-emoji-badge">'.$em.'</span>';
     }
 
-    // Current user's reaction display
+    // All reactions as inline SVG — no CDN, works offline
+    $REACTION_COLORS_PHP = ['like'=>'#1877f2','love'=>'#f33e58','haha'=>'#f7b928','wow'=>'#f7b928','sad'=>'#f7b928','angry'=>'#e05900'];
     $REACTION_LABELS_PHP = ['like'=>'Thích','love'=>'Yêu thích','haha'=>'Haha','wow'=>'Wow','sad'=>'Buồn','angry'=>'Phẫn nộ'];
-    // Use Twemoji CDN (Twitter emoji - high quality, open source)
-    $REACTION_IMGS_PHP = [
-      'like'  => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png',
-      'love'  => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png',
-      'haha'  => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f606.png',
-      'wow'   => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62e.png',
-      'sad'   => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png',
-      'angry' => 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f621.png',
+
+    $REACTION_SVG_PICK = [
+      'like'  => '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#1877f2"/><path d="M21.5 12.5c0-1.1-.9-2-2-2s-2 .9-2 2v5H13c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h10.5c.8 0 1.5-.5 1.8-1.2l2.5-5.5c.1-.3.2-.5.2-.8V17c0-1.1-.9-2-2-2H21.5v-2.5z" fill="white"/><rect x="10" y="22" width="2" height="7" rx="1" fill="white"/></svg>',
+      'love'  => '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f33e58"/><path d="M20 29s-9.5-6-9.5-12a5.5 5.5 0 0 1 9.5-3.7A5.5 5.5 0 0 1 29.5 17c0 6-9.5 12-9.5 12z" fill="white"/></svg>',
+      'haha'  => '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="16" cy="18" rx="1.8" ry="2.2" fill="#664500"/><ellipse cx="24" cy="18" rx="1.8" ry="2.2" fill="#664500"/><path d="M13.5 23c.5 3.5 3 5.5 6.5 5.5s6-2 6.5-5.5z" fill="#664500"/><path d="M13 17c.8-1.8 2.5-2.5 4-2M27 17c-.8-1.8-2.5-2.5-4-2" stroke="#664500" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>',
+      'wow'   => '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="15.5" cy="17" rx="2.5" ry="3" fill="#664500"/><ellipse cx="24.5" cy="17" rx="2.5" ry="3" fill="#664500"/><ellipse cx="15.5" cy="16.5" rx="1.2" ry="1.8" fill="white"/><ellipse cx="24.5" cy="16.5" rx="1.2" ry="1.8" fill="white"/><ellipse cx="20" cy="25.5" rx="3" ry="4" fill="#664500"/><path d="M13 14.5c.8-2 2.5-3 4.5-2.5M27 14.5c-.8-2-2.5-3-4.5-2.5" stroke="#664500" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>',
+      'sad'   => '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="16" cy="18" rx="1.8" ry="2.2" fill="#664500"/><ellipse cx="24" cy="18" rx="1.8" ry="2.2" fill="#664500"/><path d="M14.5 26.5c1-2.5 3-4 5.5-4s4.5 1.5 5.5 4" stroke="#664500" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M13 16c.8-1.8 2.5-2.5 4-2M27 16c-.8-1.8-2.5-2.5-4-2" stroke="#664500" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M15 29 Q14.5 32 13 32.5" stroke="#92d3f5" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M25 29 Q25.5 32 27 32.5" stroke="#92d3f5" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>',
+      'angry' => '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#e05900"/><circle cx="20" cy="21" r="11" fill="#f4900c"/><ellipse cx="16" cy="19.5" rx="1.8" ry="2.2" fill="#3e1d00"/><ellipse cx="24" cy="19.5" rx="1.8" ry="2.2" fill="#3e1d00"/><path d="M14.5 27c1-2.5 3-4 5.5-4s4.5 1.5 5.5 4" stroke="#3e1d00" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M13 15.5c1.5-2 4-2.5 5.5-1M27 15.5c-1.5-2-4-2.5-5.5-1" stroke="#3e1d00" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>',
     ];
-    $REACTION_COLORS_PHP = ['like'=>'#1877f2','love'=>'#f33e58','haha'=>'#f7b731','wow'=>'#f7b731','sad'=>'#f7b731','angry'=>'#e05900'];
-    if ($myRx && isset($REACTION_IMGS_PHP[$myRx])) {
-      $myRxEmoji = '<img src="' . $REACTION_IMGS_PHP[$myRx] . '" style="width:20px;height:20px;border-radius:50%;vertical-align:middle" alt="">';
-    } elseif ($myRx) {
-      $myRxEmoji = $REACTIONS[$myRx] ?? '👍';
+    $REACTION_SVG_SMALL = [
+      'like'  => '<svg width="20" height="20" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#1877f2"/><path d="M21.5 12.5c0-1.1-.9-2-2-2s-2 .9-2 2v5H13c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h10.5c.8 0 1.5-.5 1.8-1.2l2.5-5.5c.1-.3.2-.5.2-.8V17c0-1.1-.9-2-2-2H21.5v-2.5z" fill="white"/><rect x="10" y="22" width="2" height="7" rx="1" fill="white"/></svg>',
+      'love'  => '<svg width="20" height="20" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f33e58"/><path d="M20 29s-9.5-6-9.5-12a5.5 5.5 0 0 1 9.5-3.7A5.5 5.5 0 0 1 29.5 17c0 6-9.5 12-9.5 12z" fill="white"/></svg>',
+      'haha'  => '<svg width="20" height="20" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="16" cy="18" rx="1.8" ry="2.2" fill="#664500"/><ellipse cx="24" cy="18" rx="1.8" ry="2.2" fill="#664500"/><path d="M13.5 23c.5 3.5 3 5.5 6.5 5.5s6-2 6.5-5.5z" fill="#664500"/></svg>',
+      'wow'   => '<svg width="20" height="20" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="15.5" cy="17" rx="2.5" ry="3" fill="#664500"/><ellipse cx="24.5" cy="17" rx="2.5" ry="3" fill="#664500"/><ellipse cx="20" cy="25.5" rx="3" ry="4" fill="#664500"/></svg>',
+      'sad'   => '<svg width="20" height="20" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="16" cy="18" rx="1.8" ry="2.2" fill="#664500"/><ellipse cx="24" cy="18" rx="1.8" ry="2.2" fill="#664500"/><path d="M14.5 26.5c1-2.5 3-4 5.5-4s4.5 1.5 5.5 4" stroke="#664500" stroke-width="1.5" fill="none"/></svg>',
+      'angry' => '<svg width="20" height="20" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#e05900"/><circle cx="20" cy="21" r="11" fill="#f4900c"/><ellipse cx="16" cy="19.5" rx="1.8" ry="2.2" fill="#3e1d00"/><ellipse cx="24" cy="19.5" rx="1.8" ry="2.2" fill="#3e1d00"/><path d="M14.5 27c1-2.5 3-4 5.5-4s4.5 1.5 5.5 4" stroke="#3e1d00" stroke-width="1.5" fill="none"/></svg>',
+    ];
+
+    if ($myRx && isset($REACTION_SVG_SMALL[$myRx])) {
+      $myRxEmoji = $REACTION_SVG_SMALL[$myRx];
     } else {
       $myRxEmoji = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 13v3h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
     }
@@ -506,23 +514,11 @@ function renderPost($p, $REACTIONS) {
     $rxColorStyle = $rxColor ? 'color:'.$rxColor.';font-size:14px;font-weight:700;' : 'font-size:14px;font-weight:700;';
     $reactClass = $reacted ? 'reacted' : '';
 
-    // Reaction picker buttons — FB emoji CDN style
-    $REACTION_IMGS = [
-      'like'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t4c/2/32/1f44d.png',
-      'love'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tb4/2/32/2764.png',
-      'haha'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t93/2/32/1f606.png',
-      'wow'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tf3/2/32/1f62e.png',
-      'sad'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t13/2/32/1f622.png',
-      'angry' => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t73/2/32/1f620.png',
-    ];
-    $REACTION_LABELS = [
-      'like'=>'Thích','love'=>'Yêu thích','haha'=>'Haha','wow'=>'Wow','sad'=>'Buồn','angry'=>'Phẫn nộ'
-    ];
     $rpickHtml = '';
     foreach($REACTIONS as $k=>$em) {
-        $img = $REACTION_IMGS[$k] ?? '';
-        $lbl = $REACTION_LABELS[$k] ?? ucfirst($k);
-        $rpickHtml .= '<button class="rpick" onclick="doReact('.$pid.',\''.$k.'\')" data-label="'.$lbl.'"><img src="'.$img.'" alt="'.$lbl.'" onerror="this.parentNode.textContent=\''.addslashes($em).'\'"></button>';
+        $svg = $REACTION_SVG_PICK[$k] ?? $em;
+        $lbl = $REACTION_LABELS_PHP[$k] ?? ucfirst($k);
+        $rpickHtml .= '<button class="rpick" onclick="doReact('.$pid.',\''.$k.'\')" data-label="'.$lbl.'">'.$svg.'</button>';
     }
 
     echo <<<HTML
@@ -747,14 +743,16 @@ async function doReact(pid, reaction){
     const cnt=document.getElementById('likeCount-'+pid);
     const emojisEl=document.getElementById('react-emojis-'+pid);
     cnt.textContent=d.count;
-    const REACT_IMGS = {
-      like:  'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png',
-      love:  'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png',
-      haha:  'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f606.png',
-      wow:   'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62e.png',
-      sad:   'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png',
-      angry: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f621.png',
+    // Inline SVG for active reaction icon (no CDN)
+    const REACT_SVGS = {
+      like:  '<svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#1877f2"/><path d="M21.5 12.5c0-1.1-.9-2-2-2s-2 .9-2 2v5H13c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h10.5c.8 0 1.5-.5 1.8-1.2l2.5-5.5c.1-.3.2-.5.2-.8V17c0-1.1-.9-2-2-2H21.5v-2.5z" fill="white"/><rect x="10" y="22" width="2" height="7" rx="1" fill="white"/></svg>',
+      love:  '<svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#f33e58"/><path d="M20 29s-9.5-6-9.5-12a5.5 5.5 0 0 1 9.5-3.7A5.5 5.5 0 0 1 29.5 17c0 6-9.5 12-9.5 12z" fill="white"/></svg>',
+      haha:  '<svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="16" cy="18" rx="1.8" ry="2.2" fill="#664500"/><ellipse cx="24" cy="18" rx="1.8" ry="2.2" fill="#664500"/><path d="M13.5 23c.5 3.5 3 5.5 6.5 5.5s6-2 6.5-5.5z" fill="#664500"/></svg>',
+      wow:   '<svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="15.5" cy="17" rx="2.5" ry="3" fill="#664500"/><ellipse cx="24.5" cy="17" rx="2.5" ry="3" fill="#664500"/><ellipse cx="20" cy="25.5" rx="3" ry="4" fill="#664500"/></svg>',
+      sad:   '<svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#f7b928"/><circle cx="20" cy="21" r="11" fill="#ffdd67"/><ellipse cx="16" cy="18" rx="1.8" ry="2.2" fill="#664500"/><ellipse cx="24" cy="18" rx="1.8" ry="2.2" fill="#664500"/><path d="M14.5 26.5c1-2.5 3-4 5.5-4s4.5 1.5 5.5 4" stroke="#664500" stroke-width="1.5" fill="none"/></svg>',
+      angry: '<svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#e05900"/><circle cx="20" cy="21" r="11" fill="#f4900c"/><ellipse cx="16" cy="19.5" rx="1.8" ry="2.2" fill="#3e1d00"/><ellipse cx="24" cy="19.5" rx="1.8" ry="2.2" fill="#3e1d00"/><path d="M14.5 27c1-2.5 3-4 5.5-4s4.5 1.5 5.5 4" stroke="#3e1d00" stroke-width="1.5" fill="none"/></svg>',
     };
+    const REACT_IMGS = REACT_SVGS; // alias
     const REACT_LABELS = {"like": "Thích", "love": "Yêu thích", "haha": "Haha", "wow": "Wow", "sad": "Buồn", "angry": "Phẫn nộ"};
     const REACT_COLORS = {"like": "#1877f2", "love": "#f33e58", "haha": "#f7b731", "wow": "#f7b731", "sad": "#f7b731", "angry": "#e05900"};
     if(d.my_reaction){
@@ -763,7 +761,7 @@ async function doReact(pid, reaction){
       const col = REACT_COLORS[d.my_reaction]||'#1877f2';
       btn.style.color = col;
       const img = REACT_IMGS[d.my_reaction];
-      icon.innerHTML = img ? `<img src="${img}" style="width:20px;height:20px;border-radius:50%;vertical-align:middle">` : REACTIONS[d.my_reaction]||'👍';
+      icon.innerHTML = (REACT_SVGS[d.my_reaction] || REACTIONS[d.my_reaction] || '👍');
       label.textContent = REACT_LABELS[d.my_reaction]||d.my_reaction;
       label.style.color = col;
     } else {
