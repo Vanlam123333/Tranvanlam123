@@ -272,6 +272,16 @@ for ($i = 6; $i >= 0; $i--) {
 .yt-embed-close { position:absolute; top:6px; right:6px; background:rgba(0,0,0,.65); border:none; color:#fff; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:13px; z-index:2; display:flex; align-items:center; justify-content:center; }
 
 @keyframes spin { to{transform:rotate(360deg)} }
+
+/* ── FULLSCREEN TIMER ── */
+#fsTimerOverlay {
+  background: var(--bg);
+}
+#fsTime {
+  text-shadow: 0 4px 40px rgba(79,110,247,0.3);
+}
+#fsPlayBtn:hover { transform: scale(1.07); }
+#fsPlayBtn:active { transform: scale(0.96); }
 </style>
 </head>
 <body>
@@ -358,11 +368,16 @@ for ($i = 6; $i >= 0; $i--) {
         <!-- Custom time -->
         <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem;">
           <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Tuỳ chỉnh thời gian</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="number" id="customMin" min="1" max="120" value="25" class="form-input" style="width:72px;text-align:center;" oninput="setCustom()">
-            <span style="color:var(--muted);font-size:13px;">phút</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="customMin" min="1" value="25" class="form-input" style="width:80px;text-align:center;" oninput="">
+            <!-- Unit toggle -->
+            <div style="display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px;">
+              <button id="unitMin" onclick="setUnit('min')" style="padding:5px 10px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">phút</button>
+              <button id="unitHour" onclick="setUnit('hour')" style="padding:5px 10px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">giờ</button>
+            </div>
             <button class="btn btn-ghost btn-sm" onclick="setCustom()">Áp dụng</button>
           </div>
+          <div id="customHint" style="font-size:10px;color:var(--muted);margin-top:5px;">Tối đa không giới hạn · hiện tại: <span id="customPreview">25 phút</span></div>
         </div>
 
       </div>
@@ -499,6 +514,37 @@ for ($i = 6; $i >= 0; $i--) {
   </div>
 </div>
 
+<!-- FULLSCREEN START DIALOG -->
+<div class="pomo-overlay" id="fsDialog">
+  <div class="pomo-overlay-box" style="max-width:320px;">
+    <div class="pomo-emoji">🚀</div>
+    <div class="pomo-overlay-title">Bắt đầu thôi!</div>
+    <div class="pomo-overlay-sub" id="fsDialogSub">Bạn muốn bật chế độ toàn màn hình không?</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="startWithFullscreen(false)">🪟 Thường</button>
+      <button class="btn btn-primary" onclick="startWithFullscreen(true)">⛶ Toàn màn hình</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN OVERLAY (shown when in fullscreen mode) -->
+<div id="fsTimerOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+  <div style="position:absolute;top:20px;right:20px;">
+    <button onclick="exitFullscreenMode()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-weight:700;cursor:pointer;font-size:13px;">✕ Thoát</button>
+  </div>
+  <div style="text-align:center;">
+    <div id="fsModeLabel" style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:12px;">FOCUS</div>
+    <div id="fsTime" style="font-size:clamp(5rem,15vw,10rem);font-weight:900;font-family:var(--mono);color:var(--text);line-height:1;letter-spacing:-4px;">25:00</div>
+    <div id="fsSubject" style="font-size:1rem;color:var(--muted);margin-top:10px;"></div>
+  </div>
+  <div style="display:flex;gap:16px;align-items:center;">
+    <button onclick="pomReset();syncFS()" style="width:52px;height:52px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">↺</button>
+    <button id="fsPlayBtn" onclick="pomToggle();syncFS()" style="width:80px;height:80px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:28px;cursor:pointer;box-shadow:0 4px 24px rgba(79,110,247,0.4);display:flex;align-items:center;justify-content:center;transition:all .15s;">▶</button>
+    <button onclick="pomSkip()" style="width:52px;height:52px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">⏭</button>
+  </div>
+  <div id="fsDots" style="display:flex;gap:8px;"></div>
+</div>
+
 <!-- COMPLETION OVERLAY -->
 <div class="pomo-overlay" id="pomOverlay">
   <div class="pomo-overlay-box">
@@ -532,6 +578,8 @@ let soundOn    = true;
 let ambientOn  = true;
 let ambientCtx = null;
 let ambientSource = null;
+let currentUnit = 'min'; // 'min' or 'hour'
+let fsMode = false; // fullscreen mode active
 
 const MODES = {
   focus: { label: 'FOCUS',      color: '#4f6ef7', mins: 25 },
@@ -553,12 +601,35 @@ function setMode(m, mins) {
   render();
 }
 
+function setUnit(unit) {
+  currentUnit = unit;
+  document.getElementById('unitMin').style.background  = unit === 'min'  ? 'var(--accent)' : 'transparent';
+  document.getElementById('unitMin').style.color       = unit === 'min'  ? '#fff' : 'var(--muted)';
+  document.getElementById('unitHour').style.background = unit === 'hour' ? 'var(--accent)' : 'transparent';
+  document.getElementById('unitHour').style.color      = unit === 'hour' ? '#fff' : 'var(--muted)';
+  updateCustomPreview();
+}
+
+function updateCustomPreview() {
+  const v = parseFloat(document.getElementById('customMin').value) || 1;
+  const mins = currentUnit === 'hour' ? Math.round(v * 60) : Math.round(v);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  let label = '';
+  if (h > 0 && m > 0) label = `${h} giờ ${m} phút`;
+  else if (h > 0) label = `${h} giờ`;
+  else label = `${mins} phút`;
+  const previewEl = document.getElementById('customPreview');
+  if (previewEl) previewEl.textContent = label;
+}
+
 function setCustom() {
-  const v = parseInt(document.getElementById('customMin').value) || 25;
-  const clamped = Math.max(1, Math.min(120, v));
-  totalSecs = clamped * 60;
+  const v = parseFloat(document.getElementById('customMin').value) || 1;
+  const mins = currentUnit === 'hour' ? Math.round(v * 60) : Math.round(Math.max(1, v));
+  totalSecs = mins * 60;
   remaining = totalSecs;
   if (running) { clearInterval(intervalId); running = false; playBtn.textContent = '▶'; playBtn.classList.remove('running'); }
+  updateCustomPreview();
   render();
 }
 
@@ -566,19 +637,90 @@ function pomToggle() {
   if (running) {
     clearInterval(intervalId); running = false;
     playBtn.textContent = '▶'; playBtn.classList.remove('running');
+    if (fsMode) { document.getElementById('fsPlayBtn').textContent = '▶'; document.getElementById('fsPlayBtn').style.background = 'var(--accent)'; }
     if (ambientOn) stopAmbient();
   } else {
-    running = true;
-    playBtn.textContent = '⏸'; playBtn.classList.add('running');
-    if (ambientOn) startAmbient();
-    intervalId = setInterval(tick, 1000);
+    // First press when not running → show fullscreen dialog
+    if (!fsMode) {
+      const sub = document.getElementById('pomSubject').value.trim();
+      const minsLabel = formatSecsLabel(totalSecs);
+      document.getElementById('fsDialogSub').textContent = `Chế độ: ${MODES[mode].label} · ${minsLabel}`;
+      document.getElementById('fsDialog').classList.add('show');
+      return;
+    }
+    _startTimer();
   }
+}
+
+function _startTimer() {
+  running = true;
+  playBtn.textContent = '⏸'; playBtn.classList.add('running');
+  if (fsMode) { document.getElementById('fsPlayBtn').textContent = '⏸'; document.getElementById('fsPlayBtn').style.background = '#e53e3e'; }
+  if (ambientOn) startAmbient();
+  intervalId = setInterval(tick, 1000);
+}
+
+function startWithFullscreen(goFS) {
+  document.getElementById('fsDialog').classList.remove('show');
+  if (goFS) {
+    enterFullscreenMode();
+  }
+  _startTimer();
+}
+
+function enterFullscreenMode() {
+  fsMode = true;
+  const overlay = document.getElementById('fsTimerOverlay');
+  overlay.style.display = 'flex';
+  // Try browser fullscreen
+  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch(e) {}
+  syncFS();
+}
+
+function exitFullscreenMode() {
+  fsMode = false;
+  document.getElementById('fsTimerOverlay').style.display = 'none';
+  try { document.exitFullscreen && document.exitFullscreen(); } catch(e) {}
+}
+
+function syncFS() {
+  if (!fsMode) return;
+  const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+  const s = String(remaining % 60).padStart(2, '0');
+  document.getElementById('fsTime').textContent = `${m}:${s}`;
+  document.getElementById('fsModeLabel').textContent = MODES[mode].label;
+  document.getElementById('fsModeLabel').style.color = MODES[mode].color;
+  const sub = document.getElementById('pomSubject').value.trim();
+  document.getElementById('fsSubject').textContent = sub ? `📚 ${sub}` : '';
+  // dots
+  const dotsHtml = [0,1,2,3].map(i =>
+    `<div style="width:12px;height:12px;border-radius:50%;background:${i < sessionCount % 4 ? MODES[mode].color : 'var(--border2)'};"></div>`
+  ).join('');
+  document.getElementById('fsDots').innerHTML = dotsHtml;
+  // play btn color
+  if (running) {
+    document.getElementById('fsPlayBtn').textContent = '⏸';
+    document.getElementById('fsPlayBtn').style.background = '#e53e3e';
+  } else {
+    document.getElementById('fsPlayBtn').textContent = '▶';
+    document.getElementById('fsPlayBtn').style.background = MODES[mode].color;
+  }
+}
+
+function formatSecsLabel(secs) {
+  const totalMins = Math.round(secs / 60);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  if (h > 0 && m > 0) return `${h} giờ ${m} phút`;
+  if (h > 0) return `${h} giờ`;
+  return `${totalMins} phút`;
 }
 
 function pomReset() {
   clearInterval(intervalId); running = false;
   playBtn.textContent = '▶'; playBtn.classList.remove('running');
   remaining = totalSecs;
+  if (fsMode) exitFullscreenMode();
   stopAmbient();
   render();
 }
@@ -587,25 +729,32 @@ function pomSkip() {
   clearInterval(intervalId); running = false;
   remaining = 0;
   stopAmbient();
+  if (fsMode) exitFullscreenMode();
   onComplete(false);
 }
 
 function tick() {
   remaining--;
   render();
+  if (fsMode) syncFS();
   if (remaining <= 0) {
     clearInterval(intervalId); running = false;
     playBtn.textContent = '▶'; playBtn.classList.remove('running');
     stopAmbient();
+    if (fsMode) exitFullscreenMode();
     onComplete(true);
   }
 }
 
 function render() {
-  const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+  const h = Math.floor(remaining / 3600);
+  const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
   const s = String(remaining % 60).padStart(2, '0');
-  timeEl.textContent = `${m}:${s}`;
-  document.title = running ? `${m}:${s} — MindSpark 🍅` : 'Pomodoro — MindSpark';
+  const display = h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+  timeEl.textContent = display;
+  // Scale font for long timers
+  timeEl.style.fontSize = h > 0 ? '2.2rem' : '';
+  document.title = running ? `${display} — MindSpark 🍅` : 'Pomodoro — MindSpark';
 
   const pct = remaining / totalSecs;
   ring.setAttribute('stroke-dashoffset', CIRCUMFERENCE * (1 - pct));
@@ -655,7 +804,7 @@ function startNext() {
   } else {
     setMode('focus', parseInt(document.getElementById('customMin').value) || 25);
   }
-  pomToggle();
+  _startTimer(); // bypass fullscreen dialog for auto-next
 }
 
 // ── Save session to server ──
@@ -747,6 +896,8 @@ function toggleAmbient() {
 ring.setAttribute('stroke-dasharray', CIRCUMFERENCE);
 ring.setAttribute('stroke-dashoffset', 0);
 render();
+updateCustomPreview();
+document.getElementById('customMin').addEventListener('input', updateCustomPreview);
 
 // ══════════════════════════════════════
 //  🎵 MUSIC PLAYER
