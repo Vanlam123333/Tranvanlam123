@@ -502,7 +502,7 @@ function renderPost($p, $REACTIONS) {
     foreach($REACTIONS as $k=>$em) {
         $img = $REACTION_IMGS[$k] ?? '';
         $lbl = $REACTION_LABELS[$k] ?? ucfirst($k);
-        $rpickHtml .= '<button class="rpick" onclick="doReact('.$pid.',\''.$k.'')" data-label="'.$lbl.'"><img src="'.$img.'" alt="'.$lbl.'" onerror="this.parentNode.innerHTML=''.$em.''"></button>';
+        $rpickHtml .= '<button class="rpick" onclick="doReact('.$pid.',\''.$k.'\')" data-label="'.$lbl.'"><img src="'.$img.'" alt="'.$lbl.'" onerror="this.parentNode.textContent=\''.addslashes($em).'\'"></button>';
     }
 
     echo <<<HTML
