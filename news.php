@@ -2,307 +2,6 @@
 require_once __DIR__ . "/db.php";
 requireLogin();
 $user = getCurrentUser();
-
-// ─── RSS SOURCES ───────────────────────────────────────────────────────────
-$SOURCES = [
-    'all'       => ['label' => 'Tất cả',       'icon' => '🗞️',  'color' => '#3b5bdb'],
-    'vnexpress' => ['label' => 'VnExpress',    'icon' => '🔵',  'color' => '#0066cc', 'feeds' => [
-        'Trang chủ'    => 'https://vnexpress.net/rss/tin-moi-nhat.rss',
-        'Thời sự'      => 'https://vnexpress.net/rss/thoi-su.rss',
-        'Thế giới'     => 'https://vnexpress.net/rss/the-gioi.rss',
-        'Kinh doanh'   => 'https://vnexpress.net/rss/kinh-doanh.rss',
-        'Giáo dục'     => 'https://vnexpress.net/rss/giao-duc.rss',
-        'Khoa học'     => 'https://vnexpress.net/rss/khoa-hoc.rss',
-        'Công nghệ'    => 'https://vnexpress.net/rss/so-hoa.rss',
-    ]],
-    'tuoitre'   => ['label' => 'Tuổi Trẻ',     'icon' => '🟠',  'color' => '#e65c00', 'feeds' => [
-        'Trang chủ'    => 'https://tuoitre.vn/rss/tin-moi-nhat.rss',
-        'Thời sự'      => 'https://tuoitre.vn/rss/thoi-su.rss',
-        'Thế giới'     => 'https://tuoitre.vn/rss/the-gioi.rss',
-        'Kinh tế'      => 'https://tuoitre.vn/rss/kinh-te.rss',
-        'Giáo dục'     => 'https://tuoitre.vn/rss/giao-duc.rss',
-        'Nhịp sống trẻ'=> 'https://tuoitre.vn/rss/nhip-song-tre.rss',
-        'Công nghệ'    => 'https://tuoitre.vn/rss/cong-nghe.rss',
-    ]],
-    'thanhnien' => ['label' => 'Thanh Niên',   'icon' => '🟢',  'color' => '#007a3d', 'feeds' => [
-        'Trang chủ'    => 'https://thanhnien.vn/rss/home.rss',
-        'Thời sự'      => 'https://thanhnien.vn/rss/thoi-su.rss',
-        'Thế giới'     => 'https://thanhnien.vn/rss/the-gioi.rss',
-        'Kinh tế'      => 'https://thanhnien.vn/rss/kinh-te.rss',
-        'Giáo dục'     => 'https://thanhnien.vn/rss/giao-duc.rss',
-        'Công nghệ'    => 'https://thanhnien.vn/rss/cong-nghe.rss',
-        'Giải trí'     => 'https://thanhnien.vn/rss/giai-tri.rss',
-    ]],
-    'zingnews'  => ['label' => 'Zing News',    'icon' => '🔴',  'color' => '#cc0000', 'feeds' => [
-        'Trang chủ'    => 'https://zingnews.vn/timeline-tin-moi-nhat.atom',
-        'Thời sự'      => 'https://zingnews.vn/xa-hoi.atom',
-        'Thế giới'     => 'https://zingnews.vn/the-gioi.atom',
-        'Kinh tế'      => 'https://zingnews.vn/kinh-doanh.atom',
-        'Giải trí'     => 'https://zingnews.vn/giai-tri.atom',
-        'Công nghệ'    => 'https://zingnews.vn/cong-nghe.atom',
-    ]],
-    'dantri'    => ['label' => 'Dân Trí',      'icon' => '🟣',  'color' => '#7b2d8b', 'feeds' => [
-        'Trang chủ'    => 'https://dantri.com.vn/rss/home.rss',
-        'Xã hội'       => 'https://dantri.com.vn/rss/xa-hoi.rss',
-        'Thế giới'     => 'https://dantri.com.vn/rss/the-gioi.rss',
-        'Kinh doanh'   => 'https://dantri.com.vn/rss/kinh-doanh.rss',
-        'Giáo dục'     => 'https://dantri.com.vn/rss/giao-duc-khuyen-hoc.rss',
-        'Giải trí'     => 'https://dantri.com.vn/rss/giai-tri.rss',
-    ]],
-    'vietnamnet'=> ['label' => 'VietnamNet',   'icon' => '⚫',  'color' => '#1a1a2e', 'feeds' => [
-        'Trang chủ'    => 'https://vietnamnet.vn/rss/home.rss',
-        'Thời sự'      => 'https://vietnamnet.vn/rss/thoi-su.rss',
-        'Thế giới'     => 'https://vietnamnet.vn/rss/the-gioi.rss',
-        'Kinh doanh'   => 'https://vietnamnet.vn/rss/kinh-doanh.rss',
-        'Giáo dục'     => 'https://vietnamnet.vn/rss/giao-duc.rss',
-    ]],
-    'nhandan'   => ['label' => 'Nhân Dân',     'icon' => '🔶',  'color' => '#c0392b', 'feeds' => [
-        'Trang chủ'    => 'https://nhandan.vn/rss/home.rss',
-        'Chính trị'    => 'https://nhandan.vn/rss/chinhtri.rss',
-        'Kinh tế'      => 'https://nhandan.vn/rss/kinhte.rss',
-        'Thế giới'     => 'https://nhandan.vn/rss/thegioi.rss',
-        'Xã hội'       => 'https://nhandan.vn/rss/xahoi.rss',
-    ]],
-];
-
-// ─── AJAX: Fetch RSS ───────────────────────────────────────────────────────
-// ─── AJAX: Debug / ping ───────────────────────────────────────────────────
-if (isset($_GET['debug'])) {
-    header('Content-Type: application/json; charset=utf-8');
-    $testUrl = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
-    $info = [
-        'curl_available'     => function_exists('curl_init'),
-        'allow_url_fopen'    => ini_get('allow_url_fopen'),
-        'php_version'        => PHP_VERSION,
-    ];
-    $raw = curlFetch($testUrl);
-    $info['fetch_success'] = !empty($raw);
-    $info['fetch_length']  = $raw ? strlen($raw) : 0;
-    if ($raw) {
-        libxml_use_internal_errors(true);
-        $xml = @simplexml_load_string($raw);
-        $info['xml_parse_ok'] = ($xml !== false);
-        $items = fetchRSS($testUrl, 3, 'vnexpress', ['label'=>'VnExpress','icon'=>'🔵','color'=>'#0066cc']);
-        $info['items_found'] = count($items);
-        $info['first_title'] = $items[0]['title'] ?? '(none)';
-    }
-    echo json_encode($info, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    exit;
-}
-
-if (isset($_GET['fetch'])) {
-    header('Content-Type: application/json; charset=utf-8');
-    $src    = $_GET['src']  ?? 'vnexpress';
-    $cat    = $_GET['cat']  ?? null;
-    $page   = max(1, (int)($_GET['page'] ?? 1));
-    $perPage = 20;
-
-    $items = [];
-
-    if ($src === 'all') {
-        // Lấy feed đầu tiên của mỗi nguồn
-        foreach ($SOURCES as $key => $info) {
-            if ($key === 'all') continue;
-            if (!isset($info['feeds'])) continue;
-            $feedUrl = reset($info['feeds']);
-            $fetched = fetchRSS($feedUrl, 8, $key, $info);
-            $items = array_merge($items, $fetched);
-        }
-        // Sắp xếp theo thời gian
-        usort($items, fn($a, $b) => ($b['ts'] ?? 0) - ($a['ts'] ?? 0));
-    } else {
-        $info = $SOURCES[$src] ?? null;
-        if ($info && isset($info['feeds'])) {
-            if ($cat && isset($info['feeds'][$cat])) {
-                $feedUrl = $info['feeds'][$cat];
-                $items = fetchRSS($feedUrl, 50, $src, $info);
-            } else {
-                // Default: feed đầu tiên
-                $feedUrl = reset($info['feeds']);
-                $items = fetchRSS($feedUrl, 50, $src, $info);
-            }
-        }
-    }
-
-    $total  = count($items);
-    $offset = ($page - 1) * $perPage;
-    $paged  = array_slice($items, $offset, $perPage);
-
-    echo json_encode([
-        'items'    => $paged,
-        'total'    => $total,
-        'page'     => $page,
-        'perPage'  => $perPage,
-        'hasMore'  => ($offset + $perPage) < $total,
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-// ─── Helper: Fetch & Parse RSS/Atom ───────────────────────────────────────
-// cURL fetch with fallback to file_get_contents
-function curlFetch($url) {
-    if (function_exists('curl_init')) {
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL            => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 12,
-            CURLOPT_CONNECTTIMEOUT => 7,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS      => 3,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_ENCODING       => '',
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            CURLOPT_HTTPHEADER     => [
-                'Accept: application/rss+xml, application/xml, text/xml, application/atom+xml, */*',
-                'Accept-Language: vi-VN,vi;q=0.9,en;q=0.8',
-            ],
-        ]);
-        $raw  = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($raw && $code < 400) return $raw;
-    }
-    // Fallback
-    $ctx = stream_context_create([
-        'http' => ['timeout'=>10,'user_agent'=>'Mozilla/5.0','ignore_errors'=>true],
-        'ssl'  => ['verify_peer'=>false,'verify_peer_name'=>false],
-    ]);
-    return @file_get_contents($url, false, $ctx);
-}
-
-// Simple 5-minute file cache
-function cachedFetch($url) {
-    $dir  = sys_get_temp_dir() . '/ms_rss/';
-    if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $file = $dir . md5($url) . '.xml';
-    if (file_exists($file) && (time() - filemtime($file)) < 300) {
-        $cached = @file_get_contents($file);
-        if ($cached) return $cached;
-    }
-    $raw = curlFetch($url);
-    if ($raw) @file_put_contents($file, $raw);
-    return $raw;
-}
-
-function fetchRSS($url, $limit = 30, $srcKey = '', $srcInfo = []) {
-    $raw = cachedFetch($url);
-    if (!$raw) return [];
-
-    $raw = mb_convert_encoding($raw, 'UTF-8', 'auto');
-    libxml_use_internal_errors(true);
-    $xml = @simplexml_load_string($raw);
-    if (!$xml) return [];
-
-    $items   = [];
-    $ns      = $xml->getNamespaces(true);
-    $isAtom  = isset($ns['']) && strpos($ns[''], 'Atom') !== false
-                || $xml->getName() === 'feed';
-
-    if ($isAtom) {
-        // Atom format (Zing)
-        $entries = $xml->entry ?? [];
-        foreach ($entries as $e) {
-            if (count($items) >= $limit) break;
-            $link = '';
-            foreach ($e->link as $l) {
-                $attrs = $l->attributes();
-                if ((string)($attrs['rel'] ?? '') !== 'self') {
-                    $link = (string)($attrs['href'] ?? '');
-                    break;
-                }
-            }
-            $desc = '';
-            if (isset($e->summary))  $desc = (string)$e->summary;
-            if (isset($e->content))  $desc = (string)$e->content;
-            $desc = strip_tags($desc);
-            $desc = html_entity_decode($desc, ENT_QUOTES, 'UTF-8');
-            $desc = trim(preg_replace('/\s+/', ' ', $desc));
-
-            $pub   = (string)($e->published ?? $e->updated ?? '');
-            $ts    = $pub ? strtotime($pub) : 0;
-            $thumb = extractThumb((string)$e->content . (string)$e->summary);
-
-            $items[] = buildItem(
-                html_entity_decode((string)$e->title, ENT_QUOTES, 'UTF-8'),
-                $link, $desc, $ts, $thumb, $srcKey, $srcInfo
-            );
-        }
-    } else {
-        // RSS format
-        $channel = $xml->channel ?? $xml;
-        $entries = $channel->item ?? [];
-        foreach ($entries as $e) {
-            if (count($items) >= $limit) break;
-            $link  = (string)($e->link ?? '');
-            $desc  = (string)($e->description ?? '');
-            // Try media:content for thumbnail
-            $thumb = '';
-            foreach ($ns as $prefix => $nsUri) {
-                try {
-                    $media = $e->children($nsUri);
-                    if (isset($media->content)) {
-                        $ma = $media->content->attributes();
-                        if (!empty((string)$ma['url'])) { $thumb = (string)$ma['url']; break; }
-                    }
-                    if (isset($media->thumbnail)) {
-                        $ma = $media->thumbnail->attributes();
-                        if (!empty((string)$ma['url'])) { $thumb = (string)$ma['url']; break; }
-                    }
-                } catch (\Exception $ex) {}
-            }
-            if (!$thumb) $thumb = extractThumb($desc);
-            $desc  = strip_tags($desc);
-            $desc  = html_entity_decode($desc, ENT_QUOTES, 'UTF-8');
-            $desc  = trim(preg_replace('/\s+/', ' ', $desc));
-
-            $pubDate = (string)($e->pubDate ?? $e->published ?? '');
-            $ts      = $pubDate ? strtotime($pubDate) : 0;
-
-            $items[] = buildItem(
-                html_entity_decode((string)$e->title, ENT_QUOTES, 'UTF-8'),
-                $link, $desc, $ts, $thumb, $srcKey, $srcInfo
-            );
-        }
-    }
-    return $items;
-}
-
-function extractThumb($html) {
-    if (preg_match('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
-        $src = $m[1];
-        if (strpos($src, 'http') === 0 && !strpos($src, 'pixel') && !strpos($src, '1x1')) {
-            return $src;
-        }
-    }
-    return '';
-}
-
-function buildItem($title, $link, $desc, $ts, $thumb, $srcKey, $srcInfo) {
-    return [
-        'title'   => $title,
-        'link'    => $link,
-        'desc'    => mb_substr($desc, 0, 200, 'UTF-8'),
-        'ts'      => $ts ?: time(),
-        'time'    => $ts ? timeAgoNews($ts) : 'Vừa xong',
-        'thumb'   => $thumb,
-        'source'  => $srcInfo['label'] ?? $srcKey,
-        'srcKey'  => $srcKey,
-        'color'   => $srcInfo['color'] ?? '#3b5bdb',
-        'icon'    => $srcInfo['icon']  ?? '📰',
-    ];
-}
-
-function timeAgoNews($ts) {
-    $diff = time() - $ts;
-    if ($diff < 0)     return 'Vừa đăng';
-    if ($diff < 60)    return $diff . 'g trước';
-    if ($diff < 3600)  return floor($diff/60)  . ' phút trước';
-    if ($diff < 86400) return floor($diff/3600) . ' giờ trước';
-    if ($diff < 604800)return floor($diff/86400).' ngày trước';
-    return date('d/m/Y', $ts);
-}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -312,722 +11,446 @@ function timeAgoNews($ts) {
 <title>Đọc Tin Tức — MindSpark</title>
 <link rel="stylesheet" href="style.css">
 <style>
-/* ─── NEWS PAGE STYLES ──────────────────────────────── */
-.news-layout {
+/* ═══════════════════════════════════════════════
+   NEWS PAGE
+═══════════════════════════════════════════════ */
+.news-wrap {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 20px;
-  align-items: start;
-  max-width: 1280px;
+  grid-template-columns: 230px 1fr;
+  gap: 18px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 20px 20px 80px;
+  padding: 18px 18px 90px;
+  align-items: start;
 }
 
-/* Sidebar */
+/* ── Sidebar ── */
 .news-sidebar {
   position: sticky;
-  top: 76px;
+  top: 74px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
-.news-sidebar-header {
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: 10px;
+.news-sidebar::-webkit-scrollbar { width: 3px; }
+.news-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+.sidebar-hdr {
+  padding: 12px 14px 8px;
+  font-size: 9.5px;
   font-weight: 800;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  letter-spacing: 1px;
   color: var(--muted);
+  border-bottom: 1px solid var(--border);
 }
-.src-item {
+.src-row {
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 9px 14px;
   cursor: pointer;
-  transition: background .13s;
   border-left: 3px solid transparent;
+  transition: background .12s;
   user-select: none;
 }
-.src-item:hover { background: var(--surface2); }
-.src-item.active {
-  background: var(--accent-soft);
-  border-left-color: var(--accent);
+.src-row:hover { background: var(--surface2); }
+.src-row.active { background: var(--accent-soft); border-left-color: var(--accent); }
+.src-row.active .src-name { color: var(--accent); font-weight: 700; }
+.src-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.src-name { font-size: 13px; font-weight: 500; color: var(--text2); }
+.src-arrow {
+  margin-left: auto;
+  width: 12px; height: 12px;
+  stroke: var(--muted); fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .2s;
+  flex-shrink: 0;
 }
-.src-item.active .src-label { color: var(--accent); font-weight: 700; }
-.src-icon { font-size: 15px; flex-shrink: 0; }
-.src-label { font-size: 12.5px; font-weight: 600; color: var(--text2); }
-.src-item.active .src-label { color: var(--accent); }
+.src-arrow.open { transform: rotate(180deg); }
+.src-divider { height: 1px; background: var(--border); margin: 3px 0; }
 
-.src-cats {
+.cat-list {
   overflow: hidden;
   max-height: 0;
   transition: max-height .25s ease;
 }
-.src-cats.open { max-height: 300px; }
-.src-cat-item {
+.cat-list.open { max-height: 400px; }
+.cat-row {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 7px 14px 7px 36px;
+  padding: 7px 14px 7px 32px;
   font-size: 12px;
   color: var(--muted);
   cursor: pointer;
   transition: background .12s, color .12s;
 }
-.src-cat-item:hover { background: var(--surface2); color: var(--text2); }
-.src-cat-item.active { color: var(--accent); font-weight: 600; background: var(--accent-soft); }
-.src-cat-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: currentColor; flex-shrink: 0;
-}
-.src-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.cat-row:hover { background: var(--surface2); color: var(--text2); }
+.cat-row.active { color: var(--accent); font-weight: 600; background: var(--accent-soft); }
+.cat-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-/* Main content */
-.news-main {}
-
-/* Toolbar */
-.news-toolbar {
+/* ── Trending ── */
+.trending-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.news-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.5px;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.news-title-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 20px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  letter-spacing: .3px;
-}
-.news-search-wrap {
-  position: relative;
-  flex: 0 0 220px;
-}
-.news-search {
-  width: 100%;
-  padding: 8px 12px 8px 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  font-size: 13px;
-  font-family: var(--font);
-  outline: none;
-  transition: border .15s;
-}
-.news-search:focus { border-color: var(--accent); background: var(--surface); }
-.news-search-icon {
-  position: absolute;
-  left: 10px; top: 50%;
-  transform: translateY(-50%);
-  width: 14px; height: 14px;
-  stroke: var(--muted); fill: none; stroke-width: 2;
-}
-.view-toggle {
-  display: flex;
-  gap: 2px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 3px;
-}
-.view-btn {
-  width: 28px; height: 28px;
-  border-radius: 6px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--muted);
-  transition: background .13s, color .13s;
-}
-.view-btn.active { background: var(--accent); color: #fff; }
-.view-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-/* Cards Grid */
-.news-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-.news-grid.list-view {
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-/* News Card */
-.news-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  transition: transform .15s, box-shadow .15s, border-color .15s;
-  cursor: pointer;
-  text-decoration: none;
-  display: flex;
-  flex-direction: column;
-}
-.news-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--border2);
-}
-.news-card-thumb {
-  width: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  background: var(--surface2);
-  display: block;
-  flex-shrink: 0;
-}
-.news-card-thumb-placeholder {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: var(--surface2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  flex-shrink: 0;
-}
-.news-card-body {
-  padding: 12px 14px 14px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-.news-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 7px;
-}
-.news-card-source {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  padding: 2px 7px;
-  border-radius: 20px;
-  color: #fff;
-  flex-shrink: 0;
-}
-.news-card-time {
-  font-size: 11px;
-  color: var(--muted);
-  flex: 1;
-}
-.news-card-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.45;
-  margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.news-card-desc {
-  font-size: 11.5px;
-  color: var(--muted);
-  line-height: 1.55;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
-}
-.news-card-footer {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.news-card-read {
-  margin-left: auto;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: .3px;
-  white-space: nowrap;
-}
-
-/* List View Card */
-.news-grid.list-view .news-card {
-  flex-direction: row;
-  min-height: 90px;
-  align-items: stretch;
-}
-.news-grid.list-view .news-card-thumb {
-  width: 130px;
-  height: 90px;
-  aspect-ratio: unset;
-  flex-shrink: 0;
-}
-.news-grid.list-view .news-card-thumb-placeholder {
-  width: 130px;
-  height: 90px;
-  aspect-ratio: unset;
-  font-size: 24px;
-  flex-shrink: 0;
-}
-.news-grid.list-view .news-card-body {
-  padding: 10px 14px;
-}
-.news-grid.list-view .news-card-title {
-  -webkit-line-clamp: 2;
-  font-size: 13px;
-}
-.news-grid.list-view .news-card-desc {
-  -webkit-line-clamp: 1;
-}
-
-/* States */
-.news-loading {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px 0;
-  color: var(--muted);
-  font-size: 14px;
-}
-.news-empty {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 60px 20px;
-}
-.news-empty-icon { font-size: 48px; margin-bottom: 12px; }
-.news-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.news-empty-sub   { font-size: 13px; color: var(--muted); }
-
-/* Skeleton */
-.skel {
-  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
-  background-size: 200% 100%;
-  animation: skel-anim 1.4s infinite;
-  border-radius: 8px;
-}
-@keyframes skel-anim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-.skel-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-}
-.skel-img  { height: 140px; }
-.skel-line { height: 12px; margin: 10px 14px 0; }
-.skel-line.short { width: 60%; }
-
-/* Load More */
-.load-more-wrap {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 16px 0 4px;
-}
-.btn-load-more {
-  padding: 10px 28px;
-  border-radius: 10px;
-  border: 1.5px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-  font-family: var(--font);
-}
-.btn-load-more:hover { background: var(--accent); color: #fff; }
-.btn-load-more:disabled { opacity: .5; cursor: default; }
-
-/* Refresh & Trend */
-.news-toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.btn-refresh {
-  padding: 7px 12px;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 5px;
-  transition: all .15s;
-  font-family: var(--font);
-}
-.btn-refresh:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.btn-refresh svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform .4s; }
-.btn-refresh.spinning svg { animation: spin .6s linear; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Featured - first card large */
-.news-featured { grid-column: 1 / -1; }
-.news-grid .news-featured .news-card-thumb,
-.news-grid .news-featured .news-card-thumb-placeholder {
-  aspect-ratio: 3/1;
-  max-height: 280px;
-}
-.news-grid .news-featured .news-card-title {
-  font-size: 16px;
-  -webkit-line-clamp: 2;
-}
-.news-grid .news-featured .news-card-desc {
-  -webkit-line-clamp: 3;
-}
-
-/* Trending Strip */
-.trending-strip {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  overflow: hidden;
-}
-.trending-label {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.trending-items {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex: 1;
-}
-.trending-items::-webkit-scrollbar { display: none; }
-.trending-tag {
-  white-space: nowrap;
-  padding: 4px 11px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all .13s;
-  flex-shrink: 0;
-  background: var(--surface2);
-}
-.trending-tag:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-
-/* Modal overlay */
-.news-modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 999;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-}
-.news-modal-overlay.open { display: flex; }
-.news-modal {
-  background: var(--surface);
-  border-radius: 20px;
-  width: 90%;
-  max-width: 620px;
-  max-height: 85vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0,0,0,.35);
-  animation: modal-in .2s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes modal-in { from { transform: scale(.9) translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
-.news-modal-header {
-  padding: 18px 20px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-.news-modal-title {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.4;
-}
-.news-modal-close {
-  width: 30px; height: 30px;
-  border: none; background: var(--surface2);
-  border-radius: 8px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; color: var(--muted);
-  transition: background .13s;
-}
-.news-modal-close:hover { background: var(--border2); }
-.news-modal-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; }
-.news-modal-body {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-.news-modal-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.news-modal-source-badge {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  color: #fff;
-}
-.news-modal-time {
-  font-size: 12px;
-  color: var(--muted);
-}
-.news-modal-thumb {
-  width: 100%;
   border-radius: 12px;
-  margin-bottom: 16px;
-  display: block;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  overflow: hidden;
 }
-.news-modal-desc {
-  font-size: 14px;
-  color: var(--text2);
-  line-height: 1.7;
-  margin-bottom: 20px;
+.trending-lbl {
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .8px;
+  color: var(--muted); white-space: nowrap; flex-shrink: 0;
 }
-.news-modal-actions {
-  display: flex;
-  gap: 8px;
+.trending-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.trending-scroll::-webkit-scrollbar { display: none; }
+.t-tag {
+  white-space: nowrap; padding: 4px 11px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface2);
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  cursor: pointer; flex-shrink: 0; transition: all .13s;
 }
-.btn-open-news {
-  flex: 1;
-  padding: 11px 20px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  text-align: center;
-  transition: background .15s;
-  font-family: var(--font);
-}
-.btn-open-news:hover { background: var(--accent-hover); }
-.btn-share-news {
-  padding: 11px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .15s;
-  display: flex; align-items: center; gap: 6px;
-  font-family: var(--font);
-}
-.btn-share-news:hover { border-color: var(--accent); color: var(--accent); }
-.btn-share-news svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+.t-tag:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 
-/* Mobile responsive */
-@media (max-width: 900px) {
-  .news-layout {
-    grid-template-columns: 1fr;
-    padding: 12px 12px 90px;
-  }
-  .news-sidebar {
-    position: static;
-    display: flex;
-    flex-direction: column;
-  }
-  .news-sidebar-source-list {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    flex-direction: row;
-    padding: 6px 10px;
-    gap: 4px;
-  }
-  .news-sidebar-source-list::-webkit-scrollbar { display: none; }
-  .src-item {
-    flex-shrink: 0;
-    border-radius: 8px;
-    padding: 7px 12px;
-    border-left: none;
-    border-bottom: 2.5px solid transparent;
-    white-space: nowrap;
-  }
-  .src-item.active {
-    border-left: none;
-    border-bottom-color: var(--accent);
-  }
-  .src-cats { display: none; }
-  .news-sidebar-header { display: none; }
-  .news-grid { grid-template-columns: 1fr 1fr; }
-  .news-featured { grid-column: 1 / -1; }
+/* ── Toolbar ── */
+.news-toolbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; flex-wrap: wrap;
 }
-@media (max-width: 600px) {
-  .news-grid { grid-template-columns: 1fr; }
-  .news-modal { width: 95%; max-height: 90vh; }
+.news-head {
+  flex: 1; font-size: 17px; font-weight: 800;
+  color: var(--text); letter-spacing: -.4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.count-pill {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; background: var(--accent-soft); color: var(--accent);
+}
+.search-wrap { position: relative; }
+.search-inp {
+  width: 210px; padding: 7px 12px 7px 32px;
+  border-radius: 9px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text);
+  font-size: 13px; font-family: var(--font); outline: none; transition: border .15s;
+}
+.search-inp:focus { border-color: var(--accent); background: var(--surface); }
+.search-ico {
+  position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; stroke: var(--muted); fill: none;
+  stroke-width: 2; stroke-linecap: round; pointer-events: none;
+}
+.refresh-btn {
+  display: flex; align-items: center; gap: 5px; padding: 7px 13px;
+  border-radius: 9px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all .14s; font-family: var(--font);
+}
+.refresh-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.refresh-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.refresh-btn.spin svg { animation: spin .6s linear; }
+
+.view-tog { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
+.vbtn { width: 28px; height: 28px; border-radius: 6px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all .13s; }
+.vbtn.on { background: var(--accent); color: #fff; }
+.vbtn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Cards ── */
+.news-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
+.news-grid.lv { grid-template-columns: 1fr; gap: 8px; }
+
+.ncard {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 13px; overflow: hidden; cursor: pointer;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+  display: flex; flex-direction: column; text-decoration: none;
+}
+.ncard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--border2); }
+.ncard-img { width:100%; aspect-ratio:16/9; object-fit:cover; background:var(--surface2); display:block; flex-shrink:0; }
+.ncard-noimg { width:100%; aspect-ratio:16/9; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:32px; flex-shrink:0; }
+.ncard-body { padding: 11px 13px 13px; display:flex; flex-direction:column; flex:1; }
+.ncard-meta { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.ncard-badge { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:2px 7px; border-radius:20px; color:#fff; flex-shrink:0; }
+.ncard-time { font-size:11px; color:var(--muted); }
+.ncard-title { font-size:13px; font-weight:700; color:var(--text); line-height:1.45; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.ncard-desc { font-size:11.5px; color:var(--muted); line-height:1.55; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ncard-foot { margin-top:9px; display:flex; }
+.ncard-read { margin-left:auto; font-size:10.5px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.3px; }
+
+.news-grid.lv .ncard { flex-direction:row; min-height:88px; }
+.news-grid.lv .ncard-img, .news-grid.lv .ncard-noimg { width:120px; height:88px; aspect-ratio:unset; flex-shrink:0; }
+.news-grid.lv .ncard-noimg { font-size:22px; }
+.news-grid.lv .ncard-body { padding:9px 13px; }
+.news-grid.lv .ncard-title { -webkit-line-clamp:2; }
+.news-grid.lv .ncard-desc { -webkit-line-clamp:1; }
+
+/* ── States ── */
+.state-box { grid-column:1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; gap:10px; }
+.state-icon { font-size:44px; }
+.state-title { font-size:15px; font-weight:700; color:var(--text); }
+.state-sub { font-size:13px; color:var(--muted); max-width:320px; line-height:1.5; }
+.state-retry { margin-top:6px; padding:9px 22px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:var(--font); transition:background .14s; }
+.state-retry:hover { background:var(--accent-hover); }
+
+/* ── Skeleton ── */
+.skel-card { background:var(--surface); border:1px solid var(--border); border-radius:13px; overflow:hidden; }
+.skel { background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%); background-size:200% 100%; animation:sk 1.4s infinite; border-radius:6px; }
+@keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.sk-img { height:130px; border-radius:0; }
+.sk-l { height:11px; margin:10px 13px 0; }
+
+/* ── Load more ── */
+.loadmore-wrap { grid-column:1/-1; text-align:center; padding:14px 0; }
+.loadmore-btn { padding:9px 26px; border-radius:9px; border:1.5px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:700; cursor:pointer; transition:all .14s; font-family:var(--font); }
+.loadmore-btn:hover { background:var(--accent); color:#fff; }
+
+/* ── Modal ── */
+.modal-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:999; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-ov.open { display:flex; }
+.modal-box { background:var(--surface); border-radius:18px; width:90%; max-width:600px; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,.4); animation:mIn .2s cubic-bezier(.34,1.56,.64,1); }
+@keyframes mIn { from { transform:scale(.9) translateY(16px); opacity:0; } }
+.modal-hdr { padding:16px 18px 14px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:10px; }
+.modal-title { flex:1; font-size:15px; font-weight:700; color:var(--text); line-height:1.4; }
+.modal-close { width:28px; height:28px; flex-shrink:0; border:none; background:var(--surface2); border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--muted); transition:background .13s; }
+.modal-close:hover { background:var(--border2); }
+.modal-close svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2.5; }
+.modal-body { padding:18px; overflow-y:auto; flex:1; }
+.modal-meta { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.modal-badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:3px 9px; border-radius:20px; color:#fff; }
+.modal-time { font-size:12px; color:var(--muted); }
+.modal-thumb { width:100%; border-radius:11px; margin-bottom:14px; display:block; }
+.modal-desc { font-size:14px; color:var(--text2); line-height:1.7; margin-bottom:18px; }
+.modal-acts { display:flex; gap:8px; }
+.modal-open { flex:1; padding:10px 18px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; text-align:center; transition:background .14s; font-family:var(--font); display:block; }
+.modal-open:hover { background:var(--accent-hover); }
+.modal-share { padding:10px 14px; border-radius:9px; border:1px solid var(--border); background:var(--surface2); color:var(--text2); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px; transition:all .14s; font-family:var(--font); }
+.modal-share:hover { border-color:var(--accent); color:var(--accent); }
+.modal-share svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; }
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .news-wrap { grid-template-columns:1fr; padding:10px 10px 90px; }
+  .news-sidebar { position:static; max-height:none; }
+  .sidebar-hdr { display:none; }
+  .src-list-inner { display:flex; overflow-x:auto; scrollbar-width:none; padding:6px 8px; gap:4px; }
+  .src-list-inner::-webkit-scrollbar { display:none; }
+  .src-row { flex-shrink:0; border-radius:8px; padding:6px 12px; border-left:none; border-bottom:2.5px solid transparent; white-space:nowrap; }
+  .src-row.active { border-left:none; border-bottom-color:var(--accent); }
+  .src-arrow, .src-divider, .cat-list { display:none; }
+  .news-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width: 540px) {
+  .news-grid { grid-template-columns:1fr; }
+  .search-inp { width:150px; }
 }
 </style>
 </head>
 <body>
 <?php include 'navbar.php'; ?>
 
-<div class="news-layout">
+<div class="news-wrap">
 
-  <!-- ─── SIDEBAR ─────────────────────────────────── -->
+  <!-- ── SIDEBAR ── -->
   <aside class="news-sidebar">
-    <div class="news-sidebar-header">Nguồn tin</div>
-    <div class="news-sidebar-source-list" id="sourceList">
+    <div class="sidebar-hdr">Nguồn tin</div>
+    <div class="src-list-inner" id="srcList">
 
-      <!-- All -->
-      <div class="src-item active" data-src="all" onclick="selectSource(this)">
-        <span class="src-icon">🗞️</span>
-        <span class="src-label">Tất cả</span>
+      <div class="src-row active" data-src="all" onclick="pickSrc(this)">
+        <span style="font-size:15px">🗞️</span>
+        <span class="src-name">Tất cả</span>
       </div>
       <div class="src-divider"></div>
 
-      <?php foreach ($SOURCES as $key => $info):
-        if ($key === 'all') continue; ?>
       <div>
-        <div class="src-item" data-src="<?= $key ?>" onclick="selectSource(this)">
-          <span class="src-icon"><?= $info['icon'] ?></span>
-          <span class="src-label"><?= $info['label'] ?></span>
+        <div class="src-row" data-src="vnexpress" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#0066cc"></span>
+          <span class="src-name">VnExpress</span>
+          <svg class="src-arrow" id="arr-vnexpress" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
         </div>
-        <div class="src-cats" id="cats-<?= $key ?>">
-          <?php foreach ($info['feeds'] as $catName => $catUrl): ?>
-          <div class="src-cat-item" data-src="<?= $key ?>" data-cat="<?= htmlspecialchars($catName) ?>"
-               onclick="selectCat(this)">
-            <span class="src-cat-dot"></span>
-            <?= htmlspecialchars($catName) ?>
-          </div>
-          <?php endforeach; ?>
+        <div class="cat-list" id="cats-vnexpress">
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/tin-moi-nhat.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/thoi-su.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thời sự</div>
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/the-gioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/kinh-doanh.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh doanh</div>
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/giao-duc.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giáo dục</div>
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/khoa-hoc.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Khoa học</div>
+          <div class="cat-row" data-src="vnexpress" data-url="https://vnexpress.net/rss/so-hoa.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Công nghệ</div>
         </div>
       </div>
-      <?php endforeach; ?>
+
+      <div>
+        <div class="src-row" data-src="tuoitre" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#e65c00"></span>
+          <span class="src-name">Tuổi Trẻ</span>
+          <svg class="src-arrow" id="arr-tuoitre" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <div class="cat-list" id="cats-tuoitre">
+          <div class="cat-row" data-src="tuoitre" data-url="https://tuoitre.vn/rss/tin-moi-nhat.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="tuoitre" data-url="https://tuoitre.vn/rss/thoi-su.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thời sự</div>
+          <div class="cat-row" data-src="tuoitre" data-url="https://tuoitre.vn/rss/the-gioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="tuoitre" data-url="https://tuoitre.vn/rss/kinh-te.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh tế</div>
+          <div class="cat-row" data-src="tuoitre" data-url="https://tuoitre.vn/rss/giao-duc.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giáo dục</div>
+          <div class="cat-row" data-src="tuoitre" data-url="https://tuoitre.vn/rss/cong-nghe.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Công nghệ</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="src-row" data-src="thanhnien" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#007a3d"></span>
+          <span class="src-name">Thanh Niên</span>
+          <svg class="src-arrow" id="arr-thanhnien" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <div class="cat-list" id="cats-thanhnien">
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/home.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/thoi-su.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thời sự</div>
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/the-gioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/kinh-te.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh tế</div>
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/giao-duc.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giáo dục</div>
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/cong-nghe.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Công nghệ</div>
+          <div class="cat-row" data-src="thanhnien" data-url="https://thanhnien.vn/rss/giai-tri.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giải trí</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="src-row" data-src="zingnews" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#cc0000"></span>
+          <span class="src-name">Zing News</span>
+          <svg class="src-arrow" id="arr-zingnews" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <div class="cat-list" id="cats-zingnews">
+          <div class="cat-row" data-src="zingnews" data-url="https://znews.vn/rss/tin-moi-nhat.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="zingnews" data-url="https://znews.vn/rss/xa-hoi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Xã hội</div>
+          <div class="cat-row" data-src="zingnews" data-url="https://znews.vn/rss/the-gioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="zingnews" data-url="https://znews.vn/rss/kinh-doanh.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh tế</div>
+          <div class="cat-row" data-src="zingnews" data-url="https://znews.vn/rss/giai-tri.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giải trí</div>
+          <div class="cat-row" data-src="zingnews" data-url="https://znews.vn/rss/cong-nghe.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Công nghệ</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="src-row" data-src="dantri" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#7b2d8b"></span>
+          <span class="src-name">Dân Trí</span>
+          <svg class="src-arrow" id="arr-dantri" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <div class="cat-list" id="cats-dantri">
+          <div class="cat-row" data-src="dantri" data-url="https://dantri.com.vn/rss/home.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="dantri" data-url="https://dantri.com.vn/rss/xa-hoi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Xã hội</div>
+          <div class="cat-row" data-src="dantri" data-url="https://dantri.com.vn/rss/the-gioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="dantri" data-url="https://dantri.com.vn/rss/kinh-doanh.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh doanh</div>
+          <div class="cat-row" data-src="dantri" data-url="https://dantri.com.vn/rss/giao-duc-khuyen-hoc.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giáo dục</div>
+          <div class="cat-row" data-src="dantri" data-url="https://dantri.com.vn/rss/giai-tri.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giải trí</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="src-row" data-src="vietnamnet" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#444"></span>
+          <span class="src-name">VietnamNet</span>
+          <svg class="src-arrow" id="arr-vietnamnet" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <div class="cat-list" id="cats-vietnamnet">
+          <div class="cat-row" data-src="vietnamnet" data-url="https://vietnamnet.vn/rss/home.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="vietnamnet" data-url="https://vietnamnet.vn/rss/thoi-su.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thời sự</div>
+          <div class="cat-row" data-src="vietnamnet" data-url="https://vietnamnet.vn/rss/the-gioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="vietnamnet" data-url="https://vietnamnet.vn/rss/kinh-doanh.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh doanh</div>
+          <div class="cat-row" data-src="vietnamnet" data-url="https://vietnamnet.vn/rss/giao-duc.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Giáo dục</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="src-row" data-src="nhandan" onclick="pickSrc(this)">
+          <span class="src-dot" style="background:#c0392b"></span>
+          <span class="src-name">Nhân Dân</span>
+          <svg class="src-arrow" id="arr-nhandan" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <div class="cat-list" id="cats-nhandan">
+          <div class="cat-row" data-src="nhandan" data-url="https://nhandan.vn/rss/home.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Trang chủ</div>
+          <div class="cat-row" data-src="nhandan" data-url="https://nhandan.vn/rss/chinhtri.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Chính trị</div>
+          <div class="cat-row" data-src="nhandan" data-url="https://nhandan.vn/rss/kinhte.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Kinh tế</div>
+          <div class="cat-row" data-src="nhandan" data-url="https://nhandan.vn/rss/thegioi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Thế giới</div>
+          <div class="cat-row" data-src="nhandan" data-url="https://nhandan.vn/rss/xahoi.rss" onclick="pickCat(this)"><span class="cat-dot"></span>Xã hội</div>
+        </div>
+      </div>
 
     </div>
   </aside>
 
-  <!-- ─── MAIN ─────────────────────────────────────── -->
+  <!-- ── MAIN ── -->
   <main class="news-main">
 
-    <!-- Trending -->
-    <div class="trending-strip" id="trendingStrip">
-      <span class="trending-label">🔥 Hot</span>
-      <div class="trending-items" id="trendingItems">
-        <span class="trending-tag" onclick="searchNews('AI')">AI & Công nghệ</span>
-        <span class="trending-tag" onclick="searchNews('kinh tế')">Kinh tế</span>
-        <span class="trending-tag" onclick="searchNews('giáo dục')">Giáo dục</span>
-        <span class="trending-tag" onclick="searchNews('thế giới')">Thế giới</span>
-        <span class="trending-tag" onclick="searchNews('chứng khoán')">Chứng khoán</span>
-        <span class="trending-tag" onclick="searchNews('sức khỏe')">Sức khỏe</span>
-        <span class="trending-tag" onclick="searchNews('bóng đá')">Bóng đá</span>
-        <span class="trending-tag" onclick="searchNews('du học')">Du học</span>
-        <span class="trending-tag" onclick="searchNews('tuyển sinh')">Tuyển sinh</span>
+    <div class="trending-bar">
+      <span class="trending-lbl">🔥 Hot</span>
+      <div class="trending-scroll">
+        <span class="t-tag" onclick="doSearch('AI')">AI & Công nghệ</span>
+        <span class="t-tag" onclick="doSearch('kinh tế')">Kinh tế</span>
+        <span class="t-tag" onclick="doSearch('giáo dục')">Giáo dục</span>
+        <span class="t-tag" onclick="doSearch('thế giới')">Thế giới</span>
+        <span class="t-tag" onclick="doSearch('chứng khoán')">Chứng khoán</span>
+        <span class="t-tag" onclick="doSearch('sức khỏe')">Sức khỏe</span>
+        <span class="t-tag" onclick="doSearch('bóng đá')">Bóng đá</span>
+        <span class="t-tag" onclick="doSearch('tuyển sinh')">Tuyển sinh</span>
+        <span class="t-tag" onclick="doSearch('du học')">Du học</span>
       </div>
     </div>
 
-    <!-- Toolbar -->
     <div class="news-toolbar">
-      <div class="news-title">
-        <span id="currentTitle">🗞️ Tất cả báo</span>
-        <span class="news-title-badge" id="countBadge">…</span>
+      <div class="news-head">
+        <span id="pageTitle">🗞️ Tất cả báo</span>
+        <span class="count-pill" id="countPill">…</span>
       </div>
-      <div class="news-toolbar-right">
-        <div class="news-search-wrap">
-          <svg class="news-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input class="news-search" type="text" placeholder="Tìm kiếm tin tức…" id="searchInput"
-                 oninput="handleSearch(this.value)" autocomplete="off">
-        </div>
-        <button class="btn-refresh" id="refreshBtn" onclick="refresh()">
-          <svg viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          Làm mới
+      <div class="search-wrap">
+        <svg class="search-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-inp" id="searchBox" type="text" placeholder="Tìm kiếm…" oninput="onSearch(this.value)" autocomplete="off">
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="reload()">
+        <svg viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Làm mới
+      </button>
+      <div class="view-tog">
+        <button class="vbtn on" id="vGrid" onclick="setView('grid')" title="Lưới">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         </button>
-        <div class="view-toggle">
-          <button class="view-btn active" id="gridBtn" onclick="setView('grid')" title="Dạng lưới">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          </button>
-          <button class="view-btn" id="listBtn" onclick="setView('list')" title="Dạng danh sách">
-            <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-        </div>
+        <button class="vbtn" id="vList" onclick="setView('list')" title="Danh sách">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </div>
     </div>
 
-    <!-- News Grid -->
-    <div class="news-grid" id="newsGrid">
-      <!-- skeleton on load -->
-      <?php for ($i = 0; $i < 6; $i++): ?>
-      <div class="skel-card">
-        <div class="skel skel-img"></div>
-        <div class="skel skel-line" style="width:90%"></div>
-        <div class="skel skel-line" style="width:75%"></div>
-        <div class="skel skel-line short" style="margin-bottom:14px"></div>
-      </div>
-      <?php endfor; ?>
-    </div>
+    <div class="news-grid" id="newsGrid"></div>
 
   </main>
 </div>
 
-<!-- ─── MODAL ──────────────────────────────────────── -->
-<div class="news-modal-overlay" id="newsModal" onclick="closeModal(event)">
-  <div class="news-modal">
-    <div class="news-modal-header">
-      <div class="news-modal-title" id="modalTitle">…</div>
-      <button class="news-modal-close" onclick="closeModalBtn()">
+<!-- ── MODAL ── -->
+<div class="modal-ov" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title" id="mTitle"></div>
+      <button class="modal-close" onclick="closeModalBtn()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="news-modal-body">
-      <div class="news-modal-meta">
-        <span class="news-modal-source-badge" id="modalBadge">…</span>
-        <span class="news-modal-time" id="modalTime">…</span>
+    <div class="modal-body">
+      <div class="modal-meta">
+        <span class="modal-badge" id="mBadge"></span>
+        <span class="modal-time" id="mTime"></span>
       </div>
-      <img id="modalThumb" class="news-modal-thumb" src="" alt="" style="display:none;" onerror="this.style.display='none'">
-      <p class="news-modal-desc" id="modalDesc">…</p>
-      <div class="news-modal-actions">
-        <a href="#" class="btn-open-news" id="modalLink" target="_blank" rel="noopener">
-          Đọc bài đầy đủ →
-        </a>
-        <button class="btn-share-news" onclick="shareNews()">
+      <img id="mThumb" class="modal-thumb" src="" alt="" style="display:none" onerror="this.style.display='none'">
+      <p class="modal-desc" id="mDesc"></p>
+      <div class="modal-acts">
+        <a class="modal-open" id="mLink" href="#" target="_blank" rel="noopener">Đọc bài đầy đủ →</a>
+        <button class="modal-share" onclick="shareItem()">
           <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           Chia sẻ
         </button>
@@ -1037,299 +460,249 @@ function timeAgoNews($ts) {
 </div>
 
 <script>
-// ─── STATE ─────────────────────────────────────────
-let state = {
-  src: 'all',
-  cat: null,
-  page: 1,
-  loading: false,
-  allItems: [],
-  filteredItems: [],
-  view: 'grid',
-  searchQ: '',
+// ═══ CONFIG ═══════════════════════════════════════
+const SOURCES = {
+  vnexpress:  { label:'VnExpress',  color:'#0066cc', default:'https://vnexpress.net/rss/tin-moi-nhat.rss' },
+  tuoitre:    { label:'Tuổi Trẻ',   color:'#e65c00', default:'https://tuoitre.vn/rss/tin-moi-nhat.rss' },
+  thanhnien:  { label:'Thanh Niên', color:'#007a3d', default:'https://thanhnien.vn/rss/home.rss' },
+  zingnews:   { label:'Zing News',  color:'#cc0000', default:'https://znews.vn/rss/tin-moi-nhat.rss' },
+  dantri:     { label:'Dân Trí',    color:'#7b2d8b', default:'https://dantri.com.vn/rss/home.rss' },
+  vietnamnet: { label:'VietnamNet', color:'#444444', default:'https://vietnamnet.vn/rss/home.rss' },
+  nhandan:    { label:'Nhân Dân',   color:'#c0392b', default:'https://nhandan.vn/rss/home.rss' },
 };
-let searchTimer = null;
-let currentModal = null;
 
-// ─── SOURCES CONFIG ──────────────────────────────
-const SOURCES = <?php
-  $out = [];
-  foreach ($SOURCES as $k => $v) {
-    if ($k === 'all') { $out[$k] = ['label'=>'Tất cả báo','icon'=>'🗞️','color'=>'#3b5bdb']; continue; }
-    $out[$k] = ['label'=>$v['label'],'icon'=>$v['icon'],'color'=>$v['color'],'cats'=>array_keys($v['feeds'])];
-  }
-  echo json_encode($out, JSON_UNESCAPED_UNICODE);
-?>;
+// rss2json.com – free CORS-safe RSS API
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=50&rss_url=';
+const PER_PAGE = 21;
 
-// ─── INIT ────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadNews();
-});
+// ═══ STATE ════════════════════════════════════════
+let st = { src:'all', url:'', items:[], filtered:[], page:1, view:'grid', q:'' };
+let modalItem = null, searchTimer = null;
 
-// ─── LOAD NEWS ───────────────────────────────────
-async function loadNews(reset = true) {
-  if (state.loading) return;
-  state.loading = true;
+// ═══ INIT ════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', load);
 
-  if (reset) {
-    state.page = 1;
-    state.allItems = [];
-    showSkeletons();
-  }
-
-  const params = new URLSearchParams({
-    fetch: 1,
-    src: state.src,
-    page: state.page,
-  });
-  if (state.cat) params.set('cat', state.cat);
-
+// ═══ FETCH ════════════════════════════════════════
+async function fetchFeed(url, srcKey) {
+  const s = SOURCES[srcKey] || {};
   try {
-    const res  = await fetch('news.php?' + params);
-    const data = await res.json();
-
-    if (reset) {
-      state.allItems = data.items;
-    } else {
-      state.allItems = [...state.allItems, ...data.items];
-    }
-
-    state.hasMore = data.hasMore;
-    state.page    = data.page + 1;
-
-    applySearch();
-    updateBadge(data.total);
-  } catch (e) {
-    showError();
-  } finally {
-    state.loading = false;
-    document.getElementById('refreshBtn').classList.remove('spinning');
-  }
+    const r = await fetch(RSS2JSON + encodeURIComponent(url));
+    const d = await r.json();
+    if (d.status !== 'ok' || !Array.isArray(d.items)) return [];
+    return d.items.map(it => ({
+      title  : (it.title  || '').trim(),
+      link   : it.link    || '',
+      desc   : stripHtml(it.description || it.content || '').slice(0, 220),
+      thumb  : it.thumbnail || (it.enclosure && it.enclosure.link) || extractImg(it.description || ''),
+      ts     : it.pubDate ? new Date(it.pubDate).getTime() : Date.now(),
+      time   : ago(it.pubDate ? new Date(it.pubDate) : new Date()),
+      source : s.label || srcKey,
+      color  : s.color || '#3b5bdb',
+      srcKey,
+    }));
+  } catch(e) { return []; }
 }
 
-// ─── RENDER ──────────────────────────────────────
-function renderItems(items, append = false) {
-  const grid = document.getElementById('newsGrid');
-  if (!append) grid.innerHTML = '';
+async function load() {
+  showSkel();
+  let all = [];
 
-  if (items.length === 0 && !append) {
-    grid.innerHTML = `
-      <div class="news-empty">
-        <div class="news-empty-icon">📭</div>
-        <div class="news-empty-title">Không tìm thấy tin tức</div>
-        <div class="news-empty-sub">Thử tìm từ khóa khác hoặc chọn nguồn khác.</div>
-      </div>`;
+  if (st.src === 'all') {
+    const jobs = Object.entries(SOURCES).map(([k,v]) => fetchFeed(v.default, k));
+    const res  = await Promise.allSettled(jobs);
+    res.forEach(r => { if (r.status === 'fulfilled') all.push(...r.value); });
+    all.sort((a,b) => b.ts - a.ts);
+  } else {
+    const url = st.url || SOURCES[st.src]?.default || '';
+    if (url) all = await fetchFeed(url, st.src);
+  }
+
+  st.items = all;
+  applyFilter();
+  stopSpin();
+}
+
+// ═══ RENDER ═══════════════════════════════════════
+function applyFilter() {
+  const q = st.q.toLowerCase();
+  st.filtered = q
+    ? st.items.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q))
+    : st.items;
+  document.getElementById('countPill').textContent = st.filtered.length + ' tin';
+  renderPage(1);
+}
+
+function renderPage(page) {
+  st.page = page;
+  const grid = document.getElementById('newsGrid');
+  grid.className = 'news-grid' + (st.view === 'list' ? ' lv' : '');
+  grid.innerHTML = '';
+
+  const slice = st.filtered.slice(0, page * PER_PAGE);
+
+  if (!slice.length) {
+    grid.innerHTML = `<div class="state-box">
+      <div class="state-icon">📭</div>
+      <div class="state-title">Không có tin tức</div>
+      <div class="state-sub">Thử chọn nguồn khác hoặc xóa từ khóa tìm kiếm.</div>
+      <button class="state-retry" onclick="reload()">Thử lại</button>
+    </div>`;
     return;
   }
 
-  items.forEach((item, idx) => {
-    const el = createCard(item, idx === 0 && !append && state.view === 'grid' && !state.searchQ);
-    grid.appendChild(el);
-  });
+  slice.forEach(item => grid.appendChild(makeCard(item)));
 
-  // Load more button
-  const existing = document.getElementById('loadMoreWrap');
-  if (existing) existing.remove();
-
-  if (state.hasMore) {
-    const wrap = document.createElement('div');
-    wrap.className = 'load-more-wrap';
-    wrap.id = 'loadMoreWrap';
-    wrap.innerHTML = `<button class="btn-load-more" onclick="loadMore()">Tải thêm tin tức…</button>`;
-    grid.appendChild(wrap);
+  if (slice.length < st.filtered.length) {
+    const w = document.createElement('div');
+    w.className = 'loadmore-wrap';
+    const rem = Math.min(PER_PAGE, st.filtered.length - slice.length);
+    w.innerHTML = `<button class="loadmore-btn" onclick="renderPage(${page+1})">Tải thêm ${rem} tin…</button>`;
+    grid.appendChild(w);
   }
 }
 
-function createCard(item, featured = false) {
+function makeCard(item) {
   const a = document.createElement('a');
   a.href = 'javascript:void(0)';
-  a.className = 'news-card' + (featured ? ' news-featured' : '');
+  a.className = 'ncard';
   a.addEventListener('click', () => openModal(item));
 
-  const srcInfo  = SOURCES[item.srcKey] || {};
-  const color    = item.color || srcInfo.color || '#3b5bdb';
-  const thumbHtml = item.thumb
-    ? `<img class="news-card-thumb" src="${escHtml(item.thumb)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      + `<div class="news-card-thumb-placeholder" style="display:none">${item.icon || '📰'}</div>`
-    : `<div class="news-card-thumb-placeholder">${item.icon || '📰'}</div>`;
+  const imgHtml = item.thumb
+    ? `<img class="ncard-img" src="${esc(item.thumb)}" alt="" loading="lazy"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      + `<div class="ncard-noimg" style="display:none">📰</div>`
+    : `<div class="ncard-noimg">📰</div>`;
 
   a.innerHTML = `
-    ${thumbHtml}
-    <div class="news-card-body">
-      <div class="news-card-meta">
-        <span class="news-card-source" style="background:${color}">${escHtml(item.source)}</span>
-        <span class="news-card-time">${escHtml(item.time)}</span>
+    ${imgHtml}
+    <div class="ncard-body">
+      <div class="ncard-meta">
+        <span class="ncard-badge" style="background:${esc(item.color)}">${esc(item.source)}</span>
+        <span class="ncard-time">${esc(item.time)}</span>
       </div>
-      <div class="news-card-title">${escHtml(item.title)}</div>
-      ${item.desc ? `<div class="news-card-desc">${escHtml(item.desc)}</div>` : ''}
-      <div class="news-card-footer">
-        <span class="news-card-read">Đọc →</span>
-      </div>
+      <div class="ncard-title">${esc(item.title)}</div>
+      ${item.desc ? `<div class="ncard-desc">${esc(item.desc)}</div>` : ''}
+      <div class="ncard-foot"><span class="ncard-read">Đọc →</span></div>
     </div>`;
   return a;
 }
 
-// ─── SEARCH ──────────────────────────────────────
-function handleSearch(val) {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    state.searchQ = val.trim().toLowerCase();
-    applySearch();
-  }, 300);
-}
-
-function applySearch() {
-  const grid = document.getElementById('newsGrid');
-  grid.className = 'news-grid' + (state.view === 'list' ? ' list-view' : '');
-
-  let items = state.allItems;
-  if (state.searchQ) {
-    items = items.filter(it =>
-      it.title.toLowerCase().includes(state.searchQ) ||
-      (it.desc||'').toLowerCase().includes(state.searchQ)
-    );
-  }
-  state.filteredItems = items;
-  renderItems(items);
-}
-
-function searchNews(q) {
-  document.getElementById('searchInput').value = q;
-  state.searchQ = q.toLowerCase();
-  applySearch();
-}
-
-// ─── SELECT SOURCE ───────────────────────────────
-function selectSource(el) {
-  // Deactivate all
-  document.querySelectorAll('.src-item').forEach(e => e.classList.remove('active'));
-  document.querySelectorAll('.src-cats').forEach(e => e.classList.remove('open'));
-  document.querySelectorAll('.src-cat-item').forEach(e => e.classList.remove('active'));
-
+// ═══ UI ACTIONS ═══════════════════════════════════
+function pickSrc(el) {
+  document.querySelectorAll('.src-row').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.cat-list').forEach(e => e.classList.remove('open'));
+  document.querySelectorAll('.src-arrow').forEach(e => e.classList.remove('open'));
+  document.querySelectorAll('.cat-row').forEach(e => e.classList.remove('active'));
   el.classList.add('active');
-  state.src = el.dataset.src;
-  state.cat = null;
-  document.getElementById('searchInput').value = '';
-  state.searchQ = '';
-
-  // Open cats
-  const catsEl = document.getElementById('cats-' + state.src);
-  if (catsEl) catsEl.classList.add('open');
-
-  // Title
-  const info = SOURCES[state.src] || {};
-  document.getElementById('currentTitle').textContent = (info.icon||'🗞️') + ' ' + (info.label || state.src);
-
-  loadNews();
+  st.src = el.dataset.src;
+  st.url = '';
+  clearSearch();
+  const cats = document.getElementById('cats-' + st.src);
+  const arr  = document.getElementById('arr-' + st.src);
+  if (cats) { cats.classList.add('open'); if (arr) arr.classList.add('open'); }
+  const info = SOURCES[st.src];
+  document.getElementById('pageTitle').textContent =
+    st.src === 'all' ? '🗞️ Tất cả báo' : (info ? info.label : st.src);
+  load();
 }
 
-function selectCat(el) {
-  document.querySelectorAll('.src-cat-item').forEach(e => e.classList.remove('active'));
+function pickCat(el) {
+  document.querySelectorAll('.cat-row').forEach(e => e.classList.remove('active'));
   el.classList.add('active');
-  state.src = el.dataset.src;
-  state.cat = el.dataset.cat;
-  document.getElementById('searchInput').value = '';
-  state.searchQ = '';
-
-  const info = SOURCES[state.src] || {};
-  document.getElementById('currentTitle').textContent = (info.icon||'📰') + ' ' + (info.label||state.src) + ' › ' + el.dataset.cat;
-
-  loadNews();
+  st.src = el.dataset.src;
+  st.url = el.dataset.url;
+  clearSearch();
+  const info = SOURCES[st.src];
+  document.getElementById('pageTitle').textContent =
+    (info ? info.label : st.src) + ' › ' + el.textContent.trim();
+  load();
 }
 
-// ─── LOAD MORE ───────────────────────────────────
-async function loadMore() {
-  const btn = document.querySelector('.btn-load-more');
-  if (btn) { btn.disabled = true; btn.textContent = 'Đang tải…'; }
-  await loadNews(false);
+function reload() {
+  document.getElementById('refreshBtn').classList.add('spin');
+  load();
 }
+function stopSpin() { document.getElementById('refreshBtn').classList.remove('spin'); }
 
-// ─── REFRESH ─────────────────────────────────────
-function refresh() {
-  document.getElementById('refreshBtn').classList.add('spinning');
-  loadNews();
-}
-
-// ─── VIEW TOGGLE ─────────────────────────────────
 function setView(v) {
-  state.view = v;
-  document.getElementById('gridBtn').classList.toggle('active', v === 'grid');
-  document.getElementById('listBtn').classList.toggle('active', v === 'list');
-  applySearch();
+  st.view = v;
+  document.getElementById('vGrid').classList.toggle('on', v === 'grid');
+  document.getElementById('vList').classList.toggle('on', v === 'list');
+  renderPage(st.page);
 }
 
-// ─── MODAL ───────────────────────────────────────
-function openModal(item) {
-  currentModal = item;
-  document.getElementById('modalTitle').textContent = item.title;
-  document.getElementById('modalBadge').textContent = item.source;
-  document.getElementById('modalBadge').style.background = item.color || '#3b5bdb';
-  document.getElementById('modalTime').textContent = item.time;
-  document.getElementById('modalDesc').textContent = item.desc || 'Nhấn "Đọc bài đầy đủ" để xem chi tiết.';
-  document.getElementById('modalLink').href = item.link;
+function onSearch(val) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { st.q = val.trim(); applyFilter(); }, 280);
+}
+function doSearch(q) {
+  document.getElementById('searchBox').value = q;
+  st.q = q;
+  applyFilter();
+}
+function clearSearch() {
+  document.getElementById('searchBox').value = '';
+  st.q = '';
+}
 
-  const img = document.getElementById('modalThumb');
-  if (item.thumb) {
-    img.src = item.thumb;
-    img.style.display = 'block';
-  } else {
-    img.style.display = 'none';
-  }
-  document.getElementById('newsModal').classList.add('open');
+// ═══ MODAL ════════════════════════════════════════
+function openModal(item) {
+  modalItem = item;
+  document.getElementById('mTitle').textContent = item.title;
+  document.getElementById('mBadge').textContent = item.source;
+  document.getElementById('mBadge').style.background = item.color;
+  document.getElementById('mTime').textContent = item.time;
+  document.getElementById('mDesc').textContent = item.desc || 'Nhấn "Đọc bài đầy đủ" để xem chi tiết.';
+  document.getElementById('mLink').href = item.link;
+  const img = document.getElementById('mThumb');
+  if (item.thumb) { img.src = item.thumb; img.style.display = 'block'; }
+  else img.style.display = 'none';
+  document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-function closeModal(e) {
-  if (e.target === document.getElementById('newsModal')) closeModalBtn();
-}
+function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalBtn(); }
 function closeModalBtn() {
-  document.getElementById('newsModal').classList.remove('open');
+  document.getElementById('modal').classList.remove('open');
   document.body.style.overflow = '';
 }
-function shareNews() {
-  if (!currentModal) return;
-  if (navigator.share) {
-    navigator.share({ title: currentModal.title, url: currentModal.link });
-  } else {
-    navigator.clipboard.writeText(currentModal.link).then(() => alert('Đã copy link!'));
-  }
+function shareItem() {
+  if (!modalItem) return;
+  if (navigator.share) navigator.share({ title: modalItem.title, url: modalItem.link });
+  else navigator.clipboard.writeText(modalItem.link).then(() => alert('Đã copy link!'));
 }
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModalBtn();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
 
-// ─── HELPERS ─────────────────────────────────────
-function showSkeletons() {
-  const grid = document.getElementById('newsGrid');
-  grid.className = 'news-grid' + (state.view === 'list' ? ' list-view' : '');
-  grid.innerHTML = Array(6).fill('').map(() => `
+// ═══ HELPERS ══════════════════════════════════════
+function showSkel() {
+  const g = document.getElementById('newsGrid');
+  g.className = 'news-grid' + (st.view === 'list' ? ' lv' : '');
+  g.innerHTML = Array(6).fill('').map(() => `
     <div class="skel-card">
-      <div class="skel skel-img"></div>
-      <div class="skel skel-line" style="width:90%"></div>
-      <div class="skel skel-line" style="width:75%"></div>
-      <div class="skel skel-line short" style="margin-bottom:14px"></div>
+      <div class="skel sk-img"></div>
+      <div class="skel sk-l" style="width:92%"></div>
+      <div class="skel sk-l" style="width:78%"></div>
+      <div class="skel sk-l" style="width:55%;margin-bottom:14px"></div>
     </div>`).join('');
 }
-
-function showError() {
-  document.getElementById('newsGrid').innerHTML = `
-    <div class="news-empty" style="grid-column:1/-1">
-      <div class="news-empty-icon">⚠️</div>
-      <div class="news-empty-title">Không thể tải tin tức</div>
-      <div class="news-empty-sub">Kiểm tra kết nối mạng và thử lại.</div>
-    </div>`;
+function stripHtml(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
 }
-
-function updateBadge(total) {
-  document.getElementById('countBadge').textContent = total + ' tin';
+function extractImg(html) {
+  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return (m && m[1].startsWith('http')) ? m[1] : '';
 }
-
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function ago(date) {
+  const d = Date.now() - date.getTime();
+  if (d < 60000)     return 'Vừa đăng';
+  if (d < 3600000)   return Math.floor(d/60000) + ' phút trước';
+  if (d < 86400000)  return Math.floor(d/3600000) + ' giờ trước';
+  if (d < 604800000) return Math.floor(d/86400000) + ' ngày trước';
+  return date.toLocaleDateString('vi-VN');
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
