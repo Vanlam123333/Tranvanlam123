@@ -11,247 +11,120 @@ $user = getCurrentUser();
 <title>Đọc Tin Tức — MindSpark</title>
 <link rel="stylesheet" href="style.css">
 <style>
-/* ═══════════════════════════════════════════════
-   NEWS PAGE
-═══════════════════════════════════════════════ */
-.news-wrap {
-  display: grid;
-  grid-template-columns: 230px 1fr;
-  gap: 18px;
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 18px 18px 90px;
-  align-items: start;
+.news-wrap{display:grid;grid-template-columns:230px 1fr;gap:18px;max-width:1300px;margin:0 auto;padding:18px 18px 90px;align-items:start}
+.news-sidebar{position:sticky;top:74px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-height:calc(100vh - 90px);overflow-y:auto;scrollbar-width:thin}
+.news-sidebar::-webkit-scrollbar{width:3px}
+.news-sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+.sidebar-hdr{padding:12px 14px 8px;font-size:9.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.src-row{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;transition:background .12s;user-select:none}
+.src-row:hover{background:var(--surface2)}
+.src-row.active{background:var(--accent-soft);border-left-color:var(--accent)}
+.src-row.active .src-name{color:var(--accent);font-weight:700}
+.src-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.src-name{font-size:13px;font-weight:500;color:var(--text2)}
+.src-arrow{margin-left:auto;width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;flex-shrink:0}
+.src-arrow.open{transform:rotate(180deg)}
+.src-divider{height:1px;background:var(--border);margin:3px 0}
+.cat-list{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.cat-list.open{max-height:400px}
+.cat-row{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 32px;font-size:12px;color:var(--muted);cursor:pointer;transition:background .12s,color .12s}
+.cat-row:hover{background:var(--surface2);color:var(--text2)}
+.cat-row.active{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+.cat-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}
+.trending-bar{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:14px;overflow:hidden}
+.trending-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.trending-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1}
+.trending-scroll::-webkit-scrollbar{display:none}
+.t-tag{white-space:nowrap;padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;flex-shrink:0;transition:all .13s}
+.t-tag:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.news-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.news-head{flex:1;font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.4px;display:flex;align-items:center;gap:8px}
+.count-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}
+.search-wrap{position:relative}
+.search-inp{width:210px;padding:7px 12px 7px 32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:border .15s}
+.search-inp:focus{border-color:var(--accent);background:var(--surface)}
+.search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}
+.refresh-btn{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .14s;font-family:var(--font)}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.refresh-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+@keyframes spin{to{transform:rotate(360deg)}}
+.refresh-btn.spin svg{animation:spin .6s linear}
+.view-tog{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:3px}
+.vbtn{width:28px;height:28px;border-radius:6px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .13s}
+.vbtn.on{background:var(--accent);color:#fff}
+.vbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.news-grid.lv{grid-template-columns:1fr;gap:8px}
+.ncard{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;display:flex;flex-direction:column;text-decoration:none}
+.ncard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--border2)}
+.ncard-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--surface2);display:block;flex-shrink:0}
+.ncard-noimg{width:100%;aspect-ratio:16/9;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+.ncard-body{padding:11px 13px 13px;display:flex;flex-direction:column;flex:1}
+.ncard-meta{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ncard-badge{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:20px;color:#fff;flex-shrink:0}
+.ncard-time{font-size:11px;color:var(--muted)}
+.ncard-title{font-size:13px;font-weight:700;color:var(--text);line-height:1.45;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ncard-desc{font-size:11.5px;color:var(--muted);line-height:1.55;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ncard-foot{margin-top:9px;display:flex}
+.ncard-read{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.3px}
+.news-grid.lv .ncard{flex-direction:row;min-height:88px}
+.news-grid.lv .ncard-img,.news-grid.lv .ncard-noimg{width:120px;height:88px;aspect-ratio:unset;flex-shrink:0}
+.news-grid.lv .ncard-noimg{font-size:22px}
+.news-grid.lv .ncard-body{padding:9px 13px}
+.news-grid.lv .ncard-title{-webkit-line-clamp:2}
+.news-grid.lv .ncard-desc{-webkit-line-clamp:1}
+.state-box{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;gap:10px}
+.state-icon{font-size:44px}
+.state-title{font-size:15px;font-weight:700;color:var(--text)}
+.state-sub{font-size:13px;color:var(--muted);max-width:340px;line-height:1.6}
+.state-retry{margin-top:6px;padding:9px 22px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .14s}
+.state-retry:hover{background:var(--accent-hover)}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden}
+.skel{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:6px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-img{height:130px;border-radius:0}
+.sk-l{height:11px;margin:10px 13px 0}
+.loadmore-wrap{grid-column:1/-1;text-align:center;padding:14px 0}
+.loadmore-btn{padding:9px 26px;border-radius:9px;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;transition:all .14s;font-family:var(--font)}
+.loadmore-btn:hover{background:var(--accent);color:#fff}
+/* status bar */
+.fetch-status{font-size:11px;color:var(--muted);margin-bottom:10px;min-height:16px;transition:opacity .3s}
+/* modal */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--surface);border-radius:18px;width:90%;max-width:600px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.4);animation:mIn .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes mIn{from{transform:scale(.9) translateY(16px);opacity:0}}
+.modal-hdr{padding:16px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+.modal-title{flex:1;font-size:15px;font-weight:700;color:var(--text);line-height:1.4}
+.modal-close{width:28px;height:28px;flex-shrink:0;border:none;background:var(--surface2);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:background .13s}
+.modal-close:hover{background:var(--border2)}
+.modal-close svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+.modal-meta{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.modal-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 9px;border-radius:20px;color:#fff}
+.modal-time{font-size:12px;color:var(--muted)}
+.modal-thumb{width:100%;border-radius:11px;margin-bottom:14px;display:block}
+.modal-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:18px}
+.modal-acts{display:flex;gap:8px}
+.modal-open{flex:1;padding:10px 18px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;transition:background .14s;font-family:var(--font);display:block}
+.modal-open:hover{background:var(--accent-hover)}
+.modal-share{padding:10px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .14s;font-family:var(--font)}
+.modal-share:hover{border-color:var(--accent);color:var(--accent)}
+.modal-share svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+@media(max-width:860px){
+  .news-wrap{grid-template-columns:1fr;padding:10px 10px 90px}
+  .news-sidebar{position:static;max-height:none}
+  .sidebar-hdr{display:none}
+  .src-list-inner{display:flex;overflow-x:auto;scrollbar-width:none;padding:6px 8px;gap:4px}
+  .src-list-inner::-webkit-scrollbar{display:none}
+  .src-row{flex-shrink:0;border-radius:8px;padding:6px 12px;border-left:none;border-bottom:2.5px solid transparent;white-space:nowrap}
+  .src-row.active{border-left:none;border-bottom-color:var(--accent)}
+  .src-arrow,.src-divider,.cat-list{display:none}
+  .news-grid{grid-template-columns:1fr 1fr}
 }
-
-/* ── Sidebar ── */
-.news-sidebar {
-  position: sticky;
-  top: 74px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  max-height: calc(100vh - 90px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-.news-sidebar::-webkit-scrollbar { width: 3px; }
-.news-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-
-.sidebar-hdr {
-  padding: 12px 14px 8px;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-}
-.src-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 14px;
-  cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: background .12s;
-  user-select: none;
-}
-.src-row:hover { background: var(--surface2); }
-.src-row.active { background: var(--accent-soft); border-left-color: var(--accent); }
-.src-row.active .src-name { color: var(--accent); font-weight: 700; }
-.src-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.src-name { font-size: 13px; font-weight: 500; color: var(--text2); }
-.src-arrow {
-  margin-left: auto;
-  width: 12px; height: 12px;
-  stroke: var(--muted); fill: none; stroke-width: 2;
-  stroke-linecap: round; stroke-linejoin: round;
-  transition: transform .2s;
-  flex-shrink: 0;
-}
-.src-arrow.open { transform: rotate(180deg); }
-.src-divider { height: 1px; background: var(--border); margin: 3px 0; }
-
-.cat-list {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height .25s ease;
-}
-.cat-list.open { max-height: 400px; }
-.cat-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 14px 7px 32px;
-  font-size: 12px;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background .12s, color .12s;
-}
-.cat-row:hover { background: var(--surface2); color: var(--text2); }
-.cat-row.active { color: var(--accent); font-weight: 600; background: var(--accent-soft); }
-.cat-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-
-/* ── Trending ── */
-.trending-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin-bottom: 14px;
-  overflow: hidden;
-}
-.trending-lbl {
-  font-size: 10px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: .8px;
-  color: var(--muted); white-space: nowrap; flex-shrink: 0;
-}
-.trending-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; }
-.trending-scroll::-webkit-scrollbar { display: none; }
-.t-tag {
-  white-space: nowrap; padding: 4px 11px; border-radius: 20px;
-  border: 1px solid var(--border); background: var(--surface2);
-  font-size: 12px; font-weight: 600; color: var(--text2);
-  cursor: pointer; flex-shrink: 0; transition: all .13s;
-}
-.t-tag:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-
-/* ── Toolbar ── */
-.news-toolbar {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 14px; flex-wrap: wrap;
-}
-.news-head {
-  flex: 1; font-size: 17px; font-weight: 800;
-  color: var(--text); letter-spacing: -.4px;
-  display: flex; align-items: center; gap: 8px;
-}
-.count-pill {
-  font-size: 10px; font-weight: 700; padding: 2px 8px;
-  border-radius: 20px; background: var(--accent-soft); color: var(--accent);
-}
-.search-wrap { position: relative; }
-.search-inp {
-  width: 210px; padding: 7px 12px 7px 32px;
-  border-radius: 9px; border: 1px solid var(--border);
-  background: var(--surface2); color: var(--text);
-  font-size: 13px; font-family: var(--font); outline: none; transition: border .15s;
-}
-.search-inp:focus { border-color: var(--accent); background: var(--surface); }
-.search-ico {
-  position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-  width: 14px; height: 14px; stroke: var(--muted); fill: none;
-  stroke-width: 2; stroke-linecap: round; pointer-events: none;
-}
-.refresh-btn {
-  display: flex; align-items: center; gap: 5px; padding: 7px 13px;
-  border-radius: 9px; border: 1px solid var(--border);
-  background: var(--surface2); color: var(--muted);
-  font-size: 12px; font-weight: 600; cursor: pointer;
-  transition: all .14s; font-family: var(--font);
-}
-.refresh-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.refresh-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.refresh-btn.spin svg { animation: spin .6s linear; }
-
-.view-tog { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
-.vbtn { width: 28px; height: 28px; border-radius: 6px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all .13s; }
-.vbtn.on { background: var(--accent); color: #fff; }
-.vbtn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-/* ── Cards ── */
-.news-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
-.news-grid.lv { grid-template-columns: 1fr; gap: 8px; }
-
-.ncard {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 13px; overflow: hidden; cursor: pointer;
-  transition: transform .15s, box-shadow .15s, border-color .15s;
-  display: flex; flex-direction: column; text-decoration: none;
-}
-.ncard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--border2); }
-.ncard-img { width:100%; aspect-ratio:16/9; object-fit:cover; background:var(--surface2); display:block; flex-shrink:0; }
-.ncard-noimg { width:100%; aspect-ratio:16/9; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:32px; flex-shrink:0; }
-.ncard-body { padding: 11px 13px 13px; display:flex; flex-direction:column; flex:1; }
-.ncard-meta { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-.ncard-badge { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:2px 7px; border-radius:20px; color:#fff; flex-shrink:0; }
-.ncard-time { font-size:11px; color:var(--muted); }
-.ncard-title { font-size:13px; font-weight:700; color:var(--text); line-height:1.45; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.ncard-desc { font-size:11.5px; color:var(--muted); line-height:1.55; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.ncard-foot { margin-top:9px; display:flex; }
-.ncard-read { margin-left:auto; font-size:10.5px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.3px; }
-
-.news-grid.lv .ncard { flex-direction:row; min-height:88px; }
-.news-grid.lv .ncard-img, .news-grid.lv .ncard-noimg { width:120px; height:88px; aspect-ratio:unset; flex-shrink:0; }
-.news-grid.lv .ncard-noimg { font-size:22px; }
-.news-grid.lv .ncard-body { padding:9px 13px; }
-.news-grid.lv .ncard-title { -webkit-line-clamp:2; }
-.news-grid.lv .ncard-desc { -webkit-line-clamp:1; }
-
-/* ── States ── */
-.state-box { grid-column:1/-1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; gap:10px; }
-.state-icon { font-size:44px; }
-.state-title { font-size:15px; font-weight:700; color:var(--text); }
-.state-sub { font-size:13px; color:var(--muted); max-width:320px; line-height:1.5; }
-.state-retry { margin-top:6px; padding:9px 22px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:var(--font); transition:background .14s; }
-.state-retry:hover { background:var(--accent-hover); }
-
-/* ── Skeleton ── */
-.skel-card { background:var(--surface); border:1px solid var(--border); border-radius:13px; overflow:hidden; }
-.skel { background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%); background-size:200% 100%; animation:sk 1.4s infinite; border-radius:6px; }
-@keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-.sk-img { height:130px; border-radius:0; }
-.sk-l { height:11px; margin:10px 13px 0; }
-
-/* ── Load more ── */
-.loadmore-wrap { grid-column:1/-1; text-align:center; padding:14px 0; }
-.loadmore-btn { padding:9px 26px; border-radius:9px; border:1.5px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:700; cursor:pointer; transition:all .14s; font-family:var(--font); }
-.loadmore-btn:hover { background:var(--accent); color:#fff; }
-
-/* ── Modal ── */
-.modal-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:999; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
-.modal-ov.open { display:flex; }
-.modal-box { background:var(--surface); border-radius:18px; width:90%; max-width:600px; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,.4); animation:mIn .2s cubic-bezier(.34,1.56,.64,1); }
-@keyframes mIn { from { transform:scale(.9) translateY(16px); opacity:0; } }
-.modal-hdr { padding:16px 18px 14px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:10px; }
-.modal-title { flex:1; font-size:15px; font-weight:700; color:var(--text); line-height:1.4; }
-.modal-close { width:28px; height:28px; flex-shrink:0; border:none; background:var(--surface2); border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--muted); transition:background .13s; }
-.modal-close:hover { background:var(--border2); }
-.modal-close svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2.5; }
-.modal-body { padding:18px; overflow-y:auto; flex:1; }
-.modal-meta { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-.modal-badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:3px 9px; border-radius:20px; color:#fff; }
-.modal-time { font-size:12px; color:var(--muted); }
-.modal-thumb { width:100%; border-radius:11px; margin-bottom:14px; display:block; }
-.modal-desc { font-size:14px; color:var(--text2); line-height:1.7; margin-bottom:18px; }
-.modal-acts { display:flex; gap:8px; }
-.modal-open { flex:1; padding:10px 18px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; text-align:center; transition:background .14s; font-family:var(--font); display:block; }
-.modal-open:hover { background:var(--accent-hover); }
-.modal-share { padding:10px 14px; border-radius:9px; border:1px solid var(--border); background:var(--surface2); color:var(--text2); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px; transition:all .14s; font-family:var(--font); }
-.modal-share:hover { border-color:var(--accent); color:var(--accent); }
-.modal-share svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; }
-
-/* ── Responsive ── */
-@media (max-width: 860px) {
-  .news-wrap { grid-template-columns:1fr; padding:10px 10px 90px; }
-  .news-sidebar { position:static; max-height:none; }
-  .sidebar-hdr { display:none; }
-  .src-list-inner { display:flex; overflow-x:auto; scrollbar-width:none; padding:6px 8px; gap:4px; }
-  .src-list-inner::-webkit-scrollbar { display:none; }
-  .src-row { flex-shrink:0; border-radius:8px; padding:6px 12px; border-left:none; border-bottom:2.5px solid transparent; white-space:nowrap; }
-  .src-row.active { border-left:none; border-bottom-color:var(--accent); }
-  .src-arrow, .src-divider, .cat-list { display:none; }
-  .news-grid { grid-template-columns:1fr 1fr; }
-}
-@media (max-width: 540px) {
-  .news-grid { grid-template-columns:1fr; }
-  .search-inp { width:150px; }
+@media(max-width:540px){
+  .news-grid{grid-template-columns:1fr}
+  .search-inp{width:140px}
 }
 </style>
 </head>
@@ -259,8 +132,7 @@ $user = getCurrentUser();
 <?php include 'navbar.php'; ?>
 
 <div class="news-wrap">
-
-  <!-- ── SIDEBAR ── -->
+  <!-- SIDEBAR -->
   <aside class="news-sidebar">
     <div class="sidebar-hdr">Nguồn tin</div>
     <div class="src-list-inner" id="srcList">
@@ -271,6 +143,7 @@ $user = getCurrentUser();
       </div>
       <div class="src-divider"></div>
 
+      <!-- VnExpress -->
       <div>
         <div class="src-row" data-src="vnexpress" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#0066cc"></span>
@@ -288,6 +161,7 @@ $user = getCurrentUser();
         </div>
       </div>
 
+      <!-- Tuổi Trẻ -->
       <div>
         <div class="src-row" data-src="tuoitre" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#e65c00"></span>
@@ -304,6 +178,7 @@ $user = getCurrentUser();
         </div>
       </div>
 
+      <!-- Thanh Niên -->
       <div>
         <div class="src-row" data-src="thanhnien" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#007a3d"></span>
@@ -321,6 +196,7 @@ $user = getCurrentUser();
         </div>
       </div>
 
+      <!-- Zing -->
       <div>
         <div class="src-row" data-src="zingnews" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#cc0000"></span>
@@ -337,6 +213,7 @@ $user = getCurrentUser();
         </div>
       </div>
 
+      <!-- Dân Trí -->
       <div>
         <div class="src-row" data-src="dantri" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#7b2d8b"></span>
@@ -353,6 +230,7 @@ $user = getCurrentUser();
         </div>
       </div>
 
+      <!-- VietnamNet -->
       <div>
         <div class="src-row" data-src="vietnamnet" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#444"></span>
@@ -368,6 +246,7 @@ $user = getCurrentUser();
         </div>
       </div>
 
+      <!-- Nhân Dân -->
       <div>
         <div class="src-row" data-src="nhandan" onclick="pickSrc(this)">
           <span class="src-dot" style="background:#c0392b"></span>
@@ -386,9 +265,8 @@ $user = getCurrentUser();
     </div>
   </aside>
 
-  <!-- ── MAIN ── -->
+  <!-- MAIN -->
   <main class="news-main">
-
     <div class="trending-bar">
       <span class="trending-lbl">🔥 Hot</span>
       <div class="trending-scroll">
@@ -427,12 +305,12 @@ $user = getCurrentUser();
       </div>
     </div>
 
+    <div class="fetch-status" id="fetchStatus"></div>
     <div class="news-grid" id="newsGrid"></div>
-
   </main>
 </div>
 
-<!-- ── MODAL ── -->
+<!-- MODAL -->
 <div class="modal-ov" id="modal" onclick="closeModal(event)">
   <div class="modal-box">
     <div class="modal-hdr">
@@ -460,73 +338,173 @@ $user = getCurrentUser();
 </div>
 
 <script>
-// ═══ CONFIG ═══════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   SOURCES
+════════════════════════════════════════════════════ */
 const SOURCES = {
-  vnexpress:  { label:'VnExpress',  color:'#0066cc', default:'https://vnexpress.net/rss/tin-moi-nhat.rss' },
-  tuoitre:    { label:'Tuổi Trẻ',   color:'#e65c00', default:'https://tuoitre.vn/rss/tin-moi-nhat.rss' },
-  thanhnien:  { label:'Thanh Niên', color:'#007a3d', default:'https://thanhnien.vn/rss/home.rss' },
-  zingnews:   { label:'Zing News',  color:'#cc0000', default:'https://znews.vn/rss/tin-moi-nhat.rss' },
-  dantri:     { label:'Dân Trí',    color:'#7b2d8b', default:'https://dantri.com.vn/rss/home.rss' },
-  vietnamnet: { label:'VietnamNet', color:'#444444', default:'https://vietnamnet.vn/rss/home.rss' },
-  nhandan:    { label:'Nhân Dân',   color:'#c0392b', default:'https://nhandan.vn/rss/home.rss' },
+  vnexpress : {label:'VnExpress', color:'#0066cc', default:'https://vnexpress.net/rss/tin-moi-nhat.rss'},
+  tuoitre   : {label:'Tuổi Trẻ',  color:'#e65c00', default:'https://tuoitre.vn/rss/tin-moi-nhat.rss'},
+  thanhnien : {label:'Thanh Niên',color:'#007a3d', default:'https://thanhnien.vn/rss/home.rss'},
+  zingnews  : {label:'Zing News', color:'#cc0000', default:'https://znews.vn/rss/tin-moi-nhat.rss'},
+  dantri    : {label:'Dân Trí',   color:'#7b2d8b', default:'https://dantri.com.vn/rss/home.rss'},
+  vietnamnet: {label:'VietnamNet',color:'#444444', default:'https://vietnamnet.vn/rss/home.rss'},
+  nhandan   : {label:'Nhân Dân',  color:'#c0392b', default:'https://nhandan.vn/rss/home.rss'},
 };
 
-// rss2json.com – free CORS-safe RSS API
-const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=50&rss_url=';
+/* CORS proxies – tried in order until one works */
+const PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,
+];
+
 const PER_PAGE = 21;
+let st = {src:'all', url:'', items:[], filtered:[], page:1, view:'grid', q:''};
+let modalItem = null, searchTimer = null, loadKey = 0;
 
-// ═══ STATE ════════════════════════════════════════
-let st = { src:'all', url:'', items:[], filtered:[], page:1, view:'grid', q:'' };
-let modalItem = null, searchTimer = null;
-
-// ═══ INIT ════════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', load);
 
-// ═══ FETCH ════════════════════════════════════════
-async function fetchFeed(url, srcKey) {
-  const s = SOURCES[srcKey] || {};
+/* ════════════════════════════════════════════════════
+   FETCH WITH PROXY FALLBACK
+════════════════════════════════════════════════════ */
+async function fetchWithProxy(url) {
+  for (const mkProxy of PROXIES) {
+    try {
+      const proxyUrl = mkProxy(url);
+      const res = await fetch(proxyUrl, {signal: AbortSignal.timeout(8000)});
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text && text.trim().startsWith('<')) return text; // valid XML
+      if (text && text.length > 100) return text;
+    } catch(e) { /* try next */ }
+  }
+  return null;
+}
+
+/* ════════════════════════════════════════════════════
+   PARSE RSS / ATOM XML
+════════════════════════════════════════════════════ */
+function parseXML(xmlText, srcKey) {
+  const src = SOURCES[srcKey] || {};
   try {
-    const r = await fetch(RSS2JSON + encodeURIComponent(url));
-    const d = await r.json();
-    if (d.status !== 'ok' || !Array.isArray(d.items)) return [];
-    return d.items.map(it => ({
-      title  : (it.title  || '').trim(),
-      link   : it.link    || '',
-      desc   : stripHtml(it.description || it.content || '').slice(0, 220),
-      thumb  : it.thumbnail || (it.enclosure && it.enclosure.link) || extractImg(it.description || ''),
-      ts     : it.pubDate ? new Date(it.pubDate).getTime() : Date.now(),
-      time   : ago(it.pubDate ? new Date(it.pubDate) : new Date()),
-      source : s.label || srcKey,
-      color  : s.color || '#3b5bdb',
-      srcKey,
-    }));
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'text/xml');
+    if (doc.querySelector('parsererror')) return [];
+
+    // Atom feed?
+    const isAtom = !!doc.querySelector('feed');
+    const entries = isAtom
+      ? Array.from(doc.querySelectorAll('entry'))
+      : Array.from(doc.querySelectorAll('item'));
+
+    return entries.slice(0, 50).map(e => {
+      let title, link, desc, thumb, pubDate;
+
+      if (isAtom) {
+        title = e.querySelector('title')?.textContent || '';
+        const linkEl = e.querySelector('link[href]:not([rel="self"])') || e.querySelector('link');
+        link = linkEl?.getAttribute('href') || linkEl?.textContent || '';
+        desc = e.querySelector('summary')?.textContent || e.querySelector('content')?.textContent || '';
+        pubDate = e.querySelector('published')?.textContent || e.querySelector('updated')?.textContent || '';
+        thumb = extractImg(desc);
+      } else {
+        title = e.querySelector('title')?.textContent || '';
+        link = e.querySelector('link')?.textContent
+             || e.querySelector('link')?.nextSibling?.textContent
+             || '';
+        // Fix: some RSS has <link> as empty + text node sibling
+        if (!link) {
+          const linkNode = e.getElementsByTagName('link')[0];
+          link = linkNode ? (linkNode.textContent || linkNode.getAttribute('href') || '') : '';
+        }
+        desc = e.querySelector('description')?.textContent || '';
+        pubDate = e.querySelector('pubDate')?.textContent || '';
+        // Try media:thumbnail / media:content
+        const mediaNS = 'http://search.yahoo.com/mrss/';
+        const mt = e.getElementsByTagNameNS(mediaNS,'thumbnail')[0]
+                || e.getElementsByTagNameNS(mediaNS,'content')[0];
+        thumb = mt?.getAttribute('url') || extractImg(desc) || '';
+      }
+
+      // Clean
+      title = decodeEntities(title.trim());
+      desc  = decodeEntities(stripTags(desc).trim()).slice(0,220);
+      link  = link.trim();
+
+      const ts = pubDate ? new Date(pubDate).getTime() : Date.now();
+
+      return {title, link, desc, thumb, ts,
+              time: ago(ts), source: src.label||srcKey,
+              color: src.color||'#3b5bdb', srcKey};
+    }).filter(i => i.title && i.link);
   } catch(e) { return []; }
 }
 
+/* ════════════════════════════════════════════════════
+   LOAD
+════════════════════════════════════════════════════ */
 async function load() {
+  const key = ++loadKey;
   showSkel();
+  setStatus('⏳ Đang tải tin tức…');
+
   let all = [];
 
   if (st.src === 'all') {
-    const jobs = Object.entries(SOURCES).map(([k,v]) => fetchFeed(v.default, k));
-    const res  = await Promise.allSettled(jobs);
-    res.forEach(r => { if (r.status === 'fulfilled') all.push(...r.value); });
-    all.sort((a,b) => b.ts - a.ts);
+    let done = 0;
+    const total = Object.keys(SOURCES).length;
+    const jobs = Object.entries(SOURCES).map(async ([k,v]) => {
+      const xml = await fetchWithProxy(v.default);
+      if (key !== loadKey) return; // stale
+      if (xml) {
+        const items = parseXML(xml, k);
+        all.push(...items);
+        done++;
+        setStatus(`⏳ Đã tải ${done}/${total} nguồn…`);
+        // render progressively
+        if (done === 1) {
+          all.sort((a,b)=>b.ts-a.ts);
+          st.items = [...all];
+          applyFilter();
+        }
+      } else {
+        done++;
+      }
+    });
+    await Promise.allSettled(jobs);
+    if (key !== loadKey) return;
+    all.sort((a,b)=>b.ts-a.ts);
   } else {
     const url = st.url || SOURCES[st.src]?.default || '';
-    if (url) all = await fetchFeed(url, st.src);
+    const xml = url ? await fetchWithProxy(url) : null;
+    if (key !== loadKey) return;
+    if (xml) all = parseXML(xml, st.src);
   }
 
+  if (key !== loadKey) return;
   st.items = all;
   applyFilter();
   stopSpin();
+
+  if (!all.length) {
+    setStatus('');
+    showEmpty();
+  } else {
+    setStatus('');
+  }
 }
 
-// ═══ RENDER ═══════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   RENDER
+════════════════════════════════════════════════════ */
 function applyFilter() {
   const q = st.q.toLowerCase();
   st.filtered = q
-    ? st.items.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q))
+    ? st.items.filter(i=>i.title.toLowerCase().includes(q)||i.desc.toLowerCase().includes(q))
     : st.items;
   document.getElementById('countPill').textContent = st.filtered.length + ' tin';
   renderPage(1);
@@ -535,23 +513,11 @@ function applyFilter() {
 function renderPage(page) {
   st.page = page;
   const grid = document.getElementById('newsGrid');
-  grid.className = 'news-grid' + (st.view === 'list' ? ' lv' : '');
+  grid.className = 'news-grid' + (st.view==='list' ? ' lv' : '');
   grid.innerHTML = '';
-
   const slice = st.filtered.slice(0, page * PER_PAGE);
-
-  if (!slice.length) {
-    grid.innerHTML = `<div class="state-box">
-      <div class="state-icon">📭</div>
-      <div class="state-title">Không có tin tức</div>
-      <div class="state-sub">Thử chọn nguồn khác hoặc xóa từ khóa tìm kiếm.</div>
-      <button class="state-retry" onclick="reload()">Thử lại</button>
-    </div>`;
-    return;
-  }
-
+  if (!slice.length) { showEmpty(); return; }
   slice.forEach(item => grid.appendChild(makeCard(item)));
-
   if (slice.length < st.filtered.length) {
     const w = document.createElement('div');
     w.className = 'loadmore-wrap';
@@ -566,117 +532,125 @@ function makeCard(item) {
   a.href = 'javascript:void(0)';
   a.className = 'ncard';
   a.addEventListener('click', () => openModal(item));
-
   const imgHtml = item.thumb
     ? `<img class="ncard-img" src="${esc(item.thumb)}" alt="" loading="lazy"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
       + `<div class="ncard-noimg" style="display:none">📰</div>`
     : `<div class="ncard-noimg">📰</div>`;
-
-  a.innerHTML = `
-    ${imgHtml}
+  a.innerHTML = `${imgHtml}
     <div class="ncard-body">
       <div class="ncard-meta">
         <span class="ncard-badge" style="background:${esc(item.color)}">${esc(item.source)}</span>
         <span class="ncard-time">${esc(item.time)}</span>
       </div>
       <div class="ncard-title">${esc(item.title)}</div>
-      ${item.desc ? `<div class="ncard-desc">${esc(item.desc)}</div>` : ''}
+      ${item.desc?`<div class="ncard-desc">${esc(item.desc)}</div>`:''}
       <div class="ncard-foot"><span class="ncard-read">Đọc →</span></div>
     </div>`;
   return a;
 }
 
-// ═══ UI ACTIONS ═══════════════════════════════════
+function showEmpty() {
+  document.getElementById('newsGrid').innerHTML = `
+    <div class="state-box">
+      <div class="state-icon">📭</div>
+      <div class="state-title">Không tải được tin tức</div>
+      <div class="state-sub">Server của bạn không thể kết nối tới các trang báo. Hãy thử lại hoặc kiểm tra kết nối.</div>
+      <button class="state-retry" onclick="reload()">🔄 Thử lại</button>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════
+   UI CONTROLS
+════════════════════════════════════════════════════ */
 function pickSrc(el) {
-  document.querySelectorAll('.src-row').forEach(e => e.classList.remove('active'));
-  document.querySelectorAll('.cat-list').forEach(e => e.classList.remove('open'));
-  document.querySelectorAll('.src-arrow').forEach(e => e.classList.remove('open'));
-  document.querySelectorAll('.cat-row').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.src-row').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.cat-list').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.src-arrow').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.cat-row').forEach(e=>e.classList.remove('active'));
   el.classList.add('active');
-  st.src = el.dataset.src;
-  st.url = '';
+  st.src = el.dataset.src; st.url = '';
   clearSearch();
-  const cats = document.getElementById('cats-' + st.src);
-  const arr  = document.getElementById('arr-' + st.src);
-  if (cats) { cats.classList.add('open'); if (arr) arr.classList.add('open'); }
+  const cats = document.getElementById('cats-'+st.src);
+  const arr  = document.getElementById('arr-'+st.src);
+  if(cats){cats.classList.add('open'); if(arr) arr.classList.add('open');}
   const info = SOURCES[st.src];
   document.getElementById('pageTitle').textContent =
-    st.src === 'all' ? '🗞️ Tất cả báo' : (info ? info.label : st.src);
+    st.src==='all' ? '🗞️ Tất cả báo' : (info?info.label:st.src);
   load();
 }
-
 function pickCat(el) {
-  document.querySelectorAll('.cat-row').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.cat-row').forEach(e=>e.classList.remove('active'));
   el.classList.add('active');
-  st.src = el.dataset.src;
-  st.url = el.dataset.url;
+  st.src = el.dataset.src; st.url = el.dataset.url;
   clearSearch();
   const info = SOURCES[st.src];
   document.getElementById('pageTitle').textContent =
-    (info ? info.label : st.src) + ' › ' + el.textContent.trim();
+    (info?info.label:st.src)+' › '+el.textContent.trim();
   load();
 }
-
 function reload() {
   document.getElementById('refreshBtn').classList.add('spin');
   load();
 }
 function stopSpin() { document.getElementById('refreshBtn').classList.remove('spin'); }
-
 function setView(v) {
-  st.view = v;
-  document.getElementById('vGrid').classList.toggle('on', v === 'grid');
-  document.getElementById('vList').classList.toggle('on', v === 'list');
+  st.view=v;
+  document.getElementById('vGrid').classList.toggle('on',v==='grid');
+  document.getElementById('vList').classList.toggle('on',v==='list');
   renderPage(st.page);
 }
-
 function onSearch(val) {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { st.q = val.trim(); applyFilter(); }, 280);
+  searchTimer = setTimeout(()=>{st.q=val.trim();applyFilter();},280);
 }
 function doSearch(q) {
-  document.getElementById('searchBox').value = q;
-  st.q = q;
-  applyFilter();
+  document.getElementById('searchBox').value=q; st.q=q; applyFilter();
 }
 function clearSearch() {
-  document.getElementById('searchBox').value = '';
-  st.q = '';
+  document.getElementById('searchBox').value=''; st.q='';
+}
+function setStatus(msg) {
+  const el = document.getElementById('fetchStatus');
+  if(el) el.textContent = msg;
 }
 
-// ═══ MODAL ════════════════════════════════════════
+/* ════════════════════════════════════════════════════
+   MODAL
+════════════════════════════════════════════════════ */
 function openModal(item) {
   modalItem = item;
   document.getElementById('mTitle').textContent = item.title;
   document.getElementById('mBadge').textContent = item.source;
   document.getElementById('mBadge').style.background = item.color;
   document.getElementById('mTime').textContent = item.time;
-  document.getElementById('mDesc').textContent = item.desc || 'Nhấn "Đọc bài đầy đủ" để xem chi tiết.';
+  document.getElementById('mDesc').textContent = item.desc||'Nhấn "Đọc bài đầy đủ" để xem chi tiết.';
   document.getElementById('mLink').href = item.link;
   const img = document.getElementById('mThumb');
-  if (item.thumb) { img.src = item.thumb; img.style.display = 'block'; }
-  else img.style.display = 'none';
+  if(item.thumb){img.src=item.thumb;img.style.display='block';}
+  else img.style.display='none';
   document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
-function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalBtn(); }
-function closeModalBtn() {
+function closeModal(e){if(e.target===document.getElementById('modal'))closeModalBtn();}
+function closeModalBtn(){
   document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
+  document.body.style.overflow='';
 }
-function shareItem() {
-  if (!modalItem) return;
-  if (navigator.share) navigator.share({ title: modalItem.title, url: modalItem.link });
-  else navigator.clipboard.writeText(modalItem.link).then(() => alert('Đã copy link!'));
+function shareItem(){
+  if(!modalItem)return;
+  if(navigator.share) navigator.share({title:modalItem.title,url:modalItem.link});
+  else navigator.clipboard.writeText(modalItem.link).then(()=>alert('Đã copy link!'));
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModalBtn();});
 
-// ═══ HELPERS ══════════════════════════════════════
-function showSkel() {
-  const g = document.getElementById('newsGrid');
-  g.className = 'news-grid' + (st.view === 'list' ? ' lv' : '');
-  g.innerHTML = Array(6).fill('').map(() => `
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
+function showSkel(){
+  const g=document.getElementById('newsGrid');
+  g.className='news-grid'+(st.view==='list'?' lv':'');
+  g.innerHTML=Array(6).fill('').map(()=>`
     <div class="skel-card">
       <div class="skel sk-img"></div>
       <div class="skel sk-l" style="width:92%"></div>
@@ -684,24 +658,27 @@ function showSkel() {
       <div class="skel sk-l" style="width:55%;margin-bottom:14px"></div>
     </div>`).join('');
 }
-function stripHtml(html) {
-  const d = document.createElement('div');
-  d.innerHTML = html;
-  return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
+function stripTags(html){
+  const d=document.createElement('div'); d.innerHTML=html;
+  return (d.textContent||d.innerText||'').replace(/\s+/g,' ').trim();
 }
-function extractImg(html) {
-  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return (m && m[1].startsWith('http')) ? m[1] : '';
+function extractImg(html){
+  const m=(html||'').match(/<img[^>]+src=["']([^"']+)["']/i);
+  return (m&&m[1].startsWith('http'))?m[1]:'';
 }
-function ago(date) {
-  const d = Date.now() - date.getTime();
-  if (d < 60000)     return 'Vừa đăng';
-  if (d < 3600000)   return Math.floor(d/60000) + ' phút trước';
-  if (d < 86400000)  return Math.floor(d/3600000) + ' giờ trước';
-  if (d < 604800000) return Math.floor(d/86400000) + ' ngày trước';
-  return date.toLocaleDateString('vi-VN');
+function decodeEntities(s){
+  const d=document.createElement('div'); d.innerHTML=s;
+  return d.textContent||d.innerText||s;
 }
-function esc(s) {
+function ago(ts){
+  const d=Date.now()-ts;
+  if(d<60000)    return 'Vừa đăng';
+  if(d<3600000)  return Math.floor(d/60000)+' phút trước';
+  if(d<86400000) return Math.floor(d/3600000)+' giờ trước';
+  if(d<604800000)return Math.floor(d/86400000)+' ngày trước';
+  return new Date(ts).toLocaleDateString('vi-VN');
+}
+function esc(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
