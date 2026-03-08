@@ -49,6 +49,7 @@ function navIcon($name) {
     'sun'       => '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
     'moon'      => '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
     'menu'      => '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>',
+    'news'      => '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/>',
     'logo'      => '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>',
   ];
   $path = $icons[$name] ?? '';
@@ -85,6 +86,7 @@ function navIcon($name) {
     <a href="pomodoro.php"  class="nav-link <?=$current=='pomodoro.php'?'active':''?>">Pomodoro</a>
     <a href="community.php" class="nav-link <?=$current=='community.php'?'active':''?>">Cộng đồng</a>
     <a href="rooms.php"     class="nav-link <?=$current=='rooms.php'?'active':''?>">Chat</a>
+    <a href="news.php"      class="nav-link <?=$current=='news.php'?'active':''?>" style="font-weight:700;color:var(--accent)">📰 Tin tức</a>
     <a href="mindmap.php"   class="nav-link <?=$current=='mindmap.php'?'active':''?>" style="font-weight:700;color:var(--accent)">Mind Map</a>
     <a href="math.php"      class="nav-link <?=$current=='math.php'?'active':''?>" style="font-weight:700;color:var(--accent)">Toán học</a>
   </div>
@@ -123,6 +125,7 @@ function navIcon($name) {
         <a href="community.php" class="nav-dd-item"><?=navIcon('community')?> Cộng đồng</a>
         <a href="rooms.php"     class="nav-dd-item"><?=navIcon('chat')?> Phòng chat</a>
         <div class="nav-dd-sep"></div>
+        <a href="news.php"      class="nav-dd-item"><?=navIcon('news')?>  Đọc tin tức</a>
         <a href="mindmap.php"   class="nav-dd-item"><?=navIcon('mindmap')?> Mind Map</a>
         <a href="math.php"      class="nav-dd-item"><?=navIcon('math')?> Toán học</a>
         <a href="quiz.php"      class="nav-dd-item"><?=navIcon('quiz')?> Quiz</a>
@@ -194,6 +197,7 @@ function navIcon($name) {
 
 <!-- MORE DROPDOWN (mobile) -->
 <div class="more-dropdown" id="moreDropdown">
+  <a href="news.php"      ><?=navIcon('news')?>     Đọc tin tức</a>
   <a href="profile.php"   ><?=navIcon('profile')?>  Hồ sơ</a>
   <a href="flashcard.php" ><?=navIcon('flashcard')?> Flashcard</a>
   <a href="notes.php"     ><?=navIcon('notes')?>     Ghi chú</a>
