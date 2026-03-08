@@ -66,6 +66,30 @@ $SOURCES = [
 ];
 
 // ─── AJAX: Fetch RSS ───────────────────────────────────────────────────────
+// ─── AJAX: Debug / ping ───────────────────────────────────────────────────
+if (isset($_GET['debug'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    $testUrl = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
+    $info = [
+        'curl_available'     => function_exists('curl_init'),
+        'allow_url_fopen'    => ini_get('allow_url_fopen'),
+        'php_version'        => PHP_VERSION,
+    ];
+    $raw = curlFetch($testUrl);
+    $info['fetch_success'] = !empty($raw);
+    $info['fetch_length']  = $raw ? strlen($raw) : 0;
+    if ($raw) {
+        libxml_use_internal_errors(true);
+        $xml = @simplexml_load_string($raw);
+        $info['xml_parse_ok'] = ($xml !== false);
+        $items = fetchRSS($testUrl, 3, 'vnexpress', ['label'=>'VnExpress','icon'=>'🔵','color'=>'#0066cc']);
+        $info['items_found'] = count($items);
+        $info['first_title'] = $items[0]['title'] ?? '(none)';
+    }
+    echo json_encode($info, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    exit;
+}
+
 if (isset($_GET['fetch'])) {
     header('Content-Type: application/json; charset=utf-8');
     $src    = $_GET['src']  ?? 'vnexpress';
@@ -115,20 +139,55 @@ if (isset($_GET['fetch'])) {
 }
 
 // ─── Helper: Fetch & Parse RSS/Atom ───────────────────────────────────────
-function fetchRSS($url, $limit = 30, $srcKey = '', $srcInfo = []) {
+// cURL fetch with fallback to file_get_contents
+function curlFetch($url) {
+    if (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 12,
+            CURLOPT_CONNECTTIMEOUT => 7,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 3,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_ENCODING       => '',
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            CURLOPT_HTTPHEADER     => [
+                'Accept: application/rss+xml, application/xml, text/xml, application/atom+xml, */*',
+                'Accept-Language: vi-VN,vi;q=0.9,en;q=0.8',
+            ],
+        ]);
+        $raw  = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($raw && $code < 400) return $raw;
+    }
+    // Fallback
     $ctx = stream_context_create([
-        'http' => [
-            'timeout'       => 8,
-            'user_agent'    => 'Mozilla/5.0 (compatible; MindSpark/1.0)',
-            'ignore_errors' => true,
-        ],
-        'ssl'  => [
-            'verify_peer'      => false,
-            'verify_peer_name' => false,
-        ],
+        'http' => ['timeout'=>10,'user_agent'=>'Mozilla/5.0','ignore_errors'=>true],
+        'ssl'  => ['verify_peer'=>false,'verify_peer_name'=>false],
     ]);
+    return @file_get_contents($url, false, $ctx);
+}
 
-    $raw = @file_get_contents($url, false, $ctx);
+// Simple 5-minute file cache
+function cachedFetch($url) {
+    $dir  = sys_get_temp_dir() . '/ms_rss/';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $file = $dir . md5($url) . '.xml';
+    if (file_exists($file) && (time() - filemtime($file)) < 300) {
+        $cached = @file_get_contents($file);
+        if ($cached) return $cached;
+    }
+    $raw = curlFetch($url);
+    if ($raw) @file_put_contents($file, $raw);
+    return $raw;
+}
+
+function fetchRSS($url, $limit = 30, $srcKey = '', $srcInfo = []) {
+    $raw = cachedFetch($url);
     if (!$raw) return [];
 
     $raw = mb_convert_encoding($raw, 'UTF-8', 'auto');
