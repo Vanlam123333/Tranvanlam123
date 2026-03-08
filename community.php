@@ -444,8 +444,12 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
     </div>
     <div class="compose-modal-footer">
       <div class="compose-modal-tools">
-        <button class="cmtool" title="Thêm ảnh" onclick="document.getElementById('imgInput').click()">🖼️</button>
-        <button class="cmtool" title="Emoji" onclick="toggleComposeEmoji()">😊</button>
+        <button class="cmtool" title="Thêm ảnh" onclick="document.getElementById('imgInput').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#45bd62" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="#45bd62" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <button class="cmtool" title="Emoji" onclick="toggleComposeEmoji()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f7b928" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><circle cx="12" cy="12" r="9"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/></svg>
+        </button>
       </div>
       <span class="char-hint" id="charCount">0/3000</span>
       <button class="compose-submit" id="postBtn" onclick="submitPost()" disabled>Đăng bài</button>
@@ -533,7 +537,7 @@ function renderPost($p, $REACTIONS) {
       <button class="post-menu-btn" onclick="toggleMenu({$pid},event)">···</button>
       <div class="post-menu-drop" id="pmenu-{$pid}">
 HTML;
-    if ($mine) echo '<button class="post-menu-item danger" onclick="deletePost('.$pid.')"><span>🗑️</span> Xoá bài viết</button>';
+    if ($mine) echo '<button class="post-menu-item danger" onclick="deletePost('.$pid.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6M9,6V4h6v2"/></svg> Xoá bài viết</button>';
     echo <<<HTML
         <button class="post-menu-item" onclick="copyPostLink({$pid})"><span>🔗</span> Sao chép liên kết</button>
       </div>
@@ -964,7 +968,7 @@ async function submitReply(pid, cid){
   // Submit as normal comment for now (replies stored as comments)
   const fd = new FormData();
   fd.append('action','comment'); fd.append('post_id',pid);
-  fd.append('content', '@reply: ' + content);
+  fd.append('content', content);
   const res = await fetch('community.php',{method:'POST',body:fd});
   const d = await res.json();
   if(d.ok){
