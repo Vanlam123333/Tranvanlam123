@@ -133,38 +133,38 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
 <style>
 :root { --fb-blue:#1877f2; }
 
-.feed-wrap{max-width:600px;margin:0 auto;padding-bottom:40px;}
+.feed-wrap{max-width:590px;margin:0 auto;padding-bottom:40px;}
 
 /* ── Compose ── */
-.compose-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.compose-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:12px 16px 0;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
 .compose-top{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
 .compose-fake-input{flex:1;padding:10px 16px;background:var(--surface2);border:1.5px solid var(--border);
-  border-radius:30px;font-size:14px;color:var(--muted);cursor:pointer;transition:all .15s;font-family:var(--font);}
-.compose-fake-input:hover{background:var(--surface);border-color:var(--accent);}
-.compose-divider{height:1px;background:var(--border);margin:10px 0;}
-.compose-tools{display:flex;gap:4px;}
-.compose-tool{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;
-  border:none;background:none;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;
-  color:var(--muted);transition:all .15s;flex:1;justify-content:center;}
-.compose-tool:hover{background:var(--surface2);color:var(--text);}
+  border-radius:30px;font-size:15px;color:var(--muted);cursor:pointer;transition:all .15s;font-family:var(--font);}
+.compose-fake-input:hover{background:var(--surface);border-color:var(--border2);}
+.compose-divider{height:1px;background:var(--border);margin:0 -16px;}
+.compose-tools{display:flex;}
+.compose-tool{display:flex;align-items:center;gap:6px;padding:10px 8px;border:none;background:none;
+  cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;color:var(--muted);
+  transition:background .12s;flex:1;justify-content:center;}
+.compose-tool:hover{background:var(--surface2);}
 .compose-tool .ti{font-size:18px;}
 
 /* Compose modal */
 .compose-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;
   display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:16px;}
 .compose-modal.show{display:flex;}
-.compose-modal-box{background:var(--surface);border-radius:16px;width:520px;max-width:100%;
+.compose-modal-box{background:var(--surface);border-radius:10px;width:520px;max-width:100%;
   max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);}
-.compose-modal-header{display:flex;align-items:center;justify-content:center;padding:16px;
+.compose-modal-header{display:flex;align-items:center;justify-content:center;padding:14px 16px;
   border-bottom:1px solid var(--border);position:relative;}
-.compose-modal-title{font-size:16px;font-weight:800;color:var(--text);}
-.compose-modal-close{position:absolute;right:16px;width:32px;height:32px;border-radius:50%;
+.compose-modal-title{font-size:17px;font-weight:800;color:var(--text);}
+.compose-modal-close{position:absolute;right:14px;width:36px;height:36px;border-radius:50%;
   background:var(--surface2);border:none;cursor:pointer;font-size:18px;color:var(--muted);
   display:flex;align-items:center;justify-content:center;transition:background .15s;}
 .compose-modal-close:hover{background:var(--border);}
 .compose-modal-user{display:flex;align-items:center;gap:10px;padding:14px 16px;}
-.compose-modal-name{font-size:14px;font-weight:800;color:var(--text);}
+.compose-modal-name{font-size:15px;font-weight:700;color:var(--text);}
 .compose-textarea{width:100%;border:none;outline:none;background:transparent;font-family:var(--font);
   font-size:16px;color:var(--text);resize:none;padding:0 16px 12px;min-height:80px;line-height:1.6;}
 .compose-img-preview{margin:0 16px 12px;position:relative;}
@@ -173,89 +173,126 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
   background:rgba(0,0,0,.7);border:none;color:#fff;font-size:14px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;}
 .compose-modal-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-.compose-modal-tools{display:flex;gap:6px;}
+.compose-modal-tools{display:flex;gap:4px;}
 .cmtool{background:none;border:none;cursor:pointer;font-size:20px;padding:6px;border-radius:8px;
   color:var(--muted);transition:all .15s;}
 .cmtool:hover{background:var(--surface2);color:var(--text);}
-.compose-submit{margin-left:auto;padding:9px 24px;border-radius:22px;background:var(--accent);
-  border:none;color:#fff;font-family:var(--font);font-size:14px;font-weight:800;
+.compose-submit{margin-left:auto;padding:8px 20px;border-radius:8px;background:var(--accent);
+  border:none;color:#fff;font-family:var(--font);font-size:15px;font-weight:700;
   cursor:pointer;transition:all .15s;}
 .compose-submit:hover{opacity:.9;}
 .compose-submit:disabled{opacity:.4;cursor:not-allowed;}
-.char-hint{font-size:10px;color:var(--muted);}
+.char-hint{font-size:11px;color:var(--muted);}
 
 /* ── Post card ── */
-.post-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .15s;}
-.post-header{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;}
+.post-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  margin-bottom:12px;overflow:visible;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.post-header{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;}
 .post-user-info{flex:1;}
-.post-user-name{font-size:14px;font-weight:800;color:var(--text);}
-.post-time{font-size:11px;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:4px;}
-.post-content{padding:4px 16px 12px;font-size:14px;line-height:1.65;color:var(--text);
+.post-user-name{font-size:15px;font-weight:700;color:var(--text);line-height:1.2;}
+.post-time{font-size:12px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:3px;}
+.post-content{padding:0 16px 10px;font-size:15px;line-height:1.6;color:var(--text);
   white-space:pre-wrap;word-break:break-word;}
 .post-image-wrap{margin-bottom:0;}
-.post-image{width:100%;max-height:450px;object-fit:cover;display:block;cursor:pointer;}
+.post-image{width:100%;max-height:500px;object-fit:cover;display:block;cursor:pointer;}
 
 .post-menu{position:relative;}
-.post-menu-btn{width:34px;height:34px;border-radius:50%;background:none;border:none;cursor:pointer;
-  font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;
-  transition:background .15s;letter-spacing:1px;}
+.post-menu-btn{width:36px;height:36px;border-radius:50%;background:none;border:none;cursor:pointer;
+  color:var(--muted);display:flex;align-items:center;justify-content:center;
+  transition:background .15s;font-size:20px;line-height:1;}
 .post-menu-btn:hover{background:var(--surface2);}
-.post-menu-drop{position:absolute;right:0;top:38px;background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:20;min-width:160px;overflow:hidden;display:none;}
+.post-menu-drop{position:absolute;right:0;top:40px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:20;min-width:200px;overflow:hidden;display:none;}
 .post-menu-drop.show{display:block;}
 .post-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:none;
-  background:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:600;
+  background:none;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:600;
   color:var(--text2);transition:background .12s;text-align:left;}
 .post-menu-item:hover{background:var(--surface2);}
 .post-menu-item.danger{color:#ef4444;}
 
-/* ── Reactions ── */
-.reaction-summary{padding:6px 16px;display:flex;align-items:center;justify-content:space-between;
-  font-size:12px;color:var(--muted);}
-.reaction-emojis{display:flex;gap:2px;align-items:center;}
-.reaction-emoji-badge{font-size:14px;display:inline-flex;align-items:center;justify-content:center;
-  width:22px;height:22px;border-radius:50%;background:var(--surface2);border:2px solid var(--surface);}
-.reaction-count{font-size:12px;color:var(--muted);margin-left:4px;}
+/* ── Reaction summary ── */
+.reaction-summary{padding:6px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);}
+.reaction-emojis{display:flex;align-items:center;}
+.reaction-emoji-badge{width:20px;height:20px;border-radius:50%;background:var(--surface2);
+  border:2px solid var(--surface);font-size:12px;display:inline-flex;align-items:center;
+  justify-content:center;margin-right:-4px;}
+.reaction-count{font-size:13px;color:var(--muted);margin-left:8px;}
 
-.post-actions{display:flex;border-top:1px solid var(--border);}
+/* ── Action bar ── */
+.post-actions{display:flex;border-top:1px solid var(--border);padding:4px 8px;gap:2px;}
+.react-like-wrap{position:relative;flex:1;display:flex;}
 .post-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
-  padding:8px 6px;border:none;background:none;cursor:pointer;font-family:var(--font);font-size:13px;
-  font-weight:700;color:var(--muted);transition:background .15s;position:relative;}
+  padding:7px 4px;border:none;background:none;cursor:pointer;font-family:var(--font);
+  font-size:14px;font-weight:700;color:var(--muted);transition:background .12s;
+  position:relative;border-radius:8px;}
 .post-action-btn:hover{background:var(--surface2);}
-.post-action-btn.reacted{color:var(--accent);}
-.post-action-btn .ba{font-size:16px;}
+.post-action-btn.reacted{color:#1877f2;}
+.post-action-btn.reacted.love{color:#f1416c;}
+.post-action-btn.reacted.haha,.post-action-btn.reacted.wow{color:#f7b731;}
+.post-action-btn.reacted.sad{color:#74b9ff;}
+.post-action-btn.reacted.angry{color:#e17055;}
 
-/* Reaction picker */
-.reaction-picker{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
-  background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:6px 10px;
-  display:flex;gap:4px;box-shadow:0 8px 30px rgba(0,0,0,.18);z-index:30;
-  opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;transform:translateX(-50%) translateY(8px) scale(.9);}
-.reaction-picker.show{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0) scale(1);}
-.rpick{font-size:26px;cursor:pointer;padding:4px;border-radius:50%;transition:transform .12s;border:none;background:none;line-height:1;}
-.rpick:hover{transform:scale(1.4) translateY(-4px);}
+/* Reaction picker — OUTSIDE button flow, fixed above */
+/* ── Reaction picker — hover like FB ── */
+.react-like-wrap{position:relative;flex:1;display:flex;}
+.reaction-picker{
+  position:absolute;bottom:calc(100% + 8px);left:-4px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:50px;padding:6px 10px;
+  display:flex;gap:2px;
+  box-shadow:0 4px 24px rgba(0,0,0,.2);z-index:100;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+  transform:translateY(10px) scale(.88);
+  white-space:nowrap;
+}
+.reaction-picker.show{
+  opacity:1;pointer-events:all;
+  transform:translateY(0) scale(1);
+}
+.rpick{
+  position:relative;
+  width:44px;height:44px;
+  border-radius:50%;border:none;background:transparent;
+  cursor:pointer;padding:0;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0;line-height:0;
+}
+.rpick:hover{transform:scale(1.5) translateY(-6px);}
+.rpick img{width:36px;height:36px;display:block;pointer-events:none;}
+.rpick::after{
+  content:attr(data-label);
+  position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.78);color:#fff;
+  font-size:11px;font-weight:700;
+  padding:3px 8px;border-radius:20px;
+  white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .12s;font-family:var(--font);
+}
+.rpick:hover::after{opacity:1;}
 
 /* ── Comments ── */
 .comments-section{padding:0 16px 12px;display:none;}
 .comments-section.open{display:block;}
-.comments-divider{height:1px;background:var(--border);margin-bottom:12px;}
+.comments-divider{height:1px;background:var(--border);margin-bottom:10px;}
 .comment-item{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;}
 .comment-body{flex:1;}
-.comment-bubble{background:var(--surface2);border-radius:18px;padding:9px 14px;display:inline-block;max-width:100%;}
-.comment-user{font-size:12px;font-weight:800;color:var(--text);}
-.comment-text{font-size:13px;color:var(--text2);margin-top:1px;word-break:break-word;line-height:1.5;}
+.comment-bubble{background:var(--surface2);border-radius:18px;padding:8px 14px;display:inline-block;max-width:100%;}
+.comment-user{font-size:13px;font-weight:700;color:var(--text);}
+.comment-text{font-size:14px;color:var(--text2);margin-top:1px;word-break:break-word;line-height:1.5;}
 .comment-img{max-width:200px;border-radius:10px;margin-top:6px;display:block;cursor:pointer;}
-.comment-meta{display:flex;gap:10px;padding:3px 6px;font-size:11px;color:var(--muted);font-weight:600;}
-.comment-meta button{background:none;border:none;cursor:pointer;font-size:11px;color:var(--muted);font-weight:600;padding:0;}
+.comment-meta{display:flex;gap:10px;padding:3px 6px;font-size:12px;color:var(--muted);font-weight:600;}
+.comment-meta button{background:none;border:none;cursor:pointer;font-size:12px;color:var(--muted);font-weight:600;padding:0;}
 .comment-meta button:hover{color:#ef4444;text-decoration:underline;}
 
 /* Comment input */
 .comment-input-area{display:flex;gap:8px;align-items:flex-end;margin-top:8px;}
 .comment-input-wrap{flex:1;background:var(--surface2);border:1.5px solid var(--border);
   border-radius:22px;display:flex;align-items:center;padding:6px 12px;gap:6px;transition:border-color .15s;}
-.comment-input-wrap:focus-within{border-color:var(--accent);background:var(--surface);}
+.comment-input-wrap:focus-within{border-color:var(--accent);}
 .comment-input{flex:1;border:none;background:transparent;outline:none;font-family:var(--font);
-  font-size:13px;color:var(--text);resize:none;min-height:32px;max-height:80px;line-height:1.5;}
+  font-size:14px;color:var(--text);resize:none;min-height:32px;max-height:80px;line-height:1.5;}
 .cmt-attach{background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px;transition:color .15s;}
 .cmt-attach:hover{color:var(--accent);}
 .comment-send-btn{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;
@@ -281,80 +318,33 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
 
 /* Load more */
 .load-more-wrap{text-align:center;padding:10px 0;}
-.load-more-btn{padding:10px 28px;border-radius:22px;background:var(--surface);border:1.5px solid var(--border);
-  color:var(--accent);font-weight:800;font-size:13px;cursor:pointer;transition:all .15s;font-family:var(--font);}
+.load-more-btn{padding:10px 28px;border-radius:8px;background:var(--surface);border:1.5px solid var(--border);
+  color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;font-family:var(--font);}
 .load-more-btn:hover{background:var(--accent-soft);border-color:var(--accent);}
 
 /* Lightbox */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:400;
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;
   display:none;align-items:center;justify-content:center;cursor:pointer;}
 .lightbox.show{display:flex;}
 .lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;}
 
-/* Empty */
 .empty-feed{text-align:center;padding:3rem 1rem;color:var(--muted);}
 
-/* ═══════════════════════════════════
-   MOBILE OVERRIDES
-═══════════════════════════════════ */
 @media(max-width:640px){
   .page{padding:0 !important;}
   .page-header{padding:14px 14px 10px !important;text-align:left !important;margin-bottom:0;}
-  .page-header h1{font-size:1.3rem !important;}
-
-  .feed-wrap{
-    max-width:100%;
-    padding:10px 12px 100px; /* extra bottom for nav */
-  }
-
-  /* Compose card */
-  .compose-card{border-radius:12px;padding:12px;}
-  .compose-top{gap:8px;}
-  .compose-fake-input{font-size:13px;padding:9px 14px;}
-  .compose-tool{font-size:12px;padding:7px 6px;}
-  .compose-tool .ti{font-size:16px;}
-
-  /* Compose modal */
+  .feed-wrap{max-width:100%;padding:10px 0 100px;}
+  .compose-card{border-radius:0;border-left:none;border-right:none;margin-bottom:8px;}
   .compose-modal{align-items:flex-end;padding:0;}
-  .compose-modal-box{
-    width:100%;
-    border-radius:20px 20px 0 0;
-    padding-bottom:max(16px, env(safe-area-inset-bottom));
-  }
+  .compose-modal-box{width:100%;border-radius:20px 20px 0 0;}
   .compose-textarea{font-size:16px;}
-
-  /* Post cards */
-  .post-card{border-radius:12px;margin-bottom:10px;}
-  .post-header{padding:12px 14px 8px;}
-  .post-user-name{font-size:13.5px;}
-  .post-content{padding:4px 14px 10px;font-size:14px;}
-  .post-image{max-height:320px;}
-
-  /* Reaction summary */
-  .reaction-summary{padding:5px 14px;}
-
-  /* Action buttons */
-  .post-actions{overflow:hidden;}
-  .post-action-btn{font-size:12px;padding:10px 4px;}
-  .post-action-btn .ba{font-size:15px;}
-
-  /* Comments */
-  .comments-section{padding:0 12px 12px;}
-  .comment-bubble{border-radius:14px;padding:8px 12px;}
-  .comment-text{font-size:13px;}
-  .comment-input-area{gap:6px;}
-  .comment-input{font-size:15px;} /* prevent zoom */
-  .comment-send-btn{width:38px;height:38px;}
-
-  /* Reaction picker */
-  .reaction-picker{left:0;transform:translateX(0) translateY(8px) scale(.9);}
-  .reaction-picker.show{transform:translateX(0) translateY(0) scale(1);}
-  .rpick{font-size:24px;}
-
-  /* Load more */
-  .load-more-btn{padding:12px 20px;}
+  .post-card{border-radius:0;border-left:none;border-right:none;margin-bottom:8px;}
+  .post-header{padding:12px 12px 8px;}
+  .post-content{padding:0 12px 10px;}
+  .post-actions{margin:0 4px;}
+  .comments-section{padding:0 12px 10px;}
+  .reaction-picker{left:0;}
 }
-
 </style>
 </head>
 <body>
@@ -474,14 +464,45 @@ function renderPost($p, $REACTIONS) {
     }
 
     // Current user's reaction display
-    $myRxEmoji = $myRx ? ($REACTIONS[$myRx] ?? '👍') : '';
-    $reactLabel = $myRx ? htmlspecialchars($myRx) : 'Thích';
+    $REACTION_LABELS_PHP = ['like'=>'Thích','love'=>'Yêu thích','haha'=>'Haha','wow'=>'Wow','sad'=>'Buồn','angry'=>'Phẫn nộ'];
+    $REACTION_IMGS_PHP = [
+      'like'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t4c/2/32/1f44d.png',
+      'love'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tb4/2/32/2764.png',
+      'haha'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t93/2/32/1f606.png',
+      'wow'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tf3/2/32/1f62e.png',
+      'sad'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t13/2/32/1f622.png',
+      'angry' => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t73/2/32/1f620.png',
+    ];
+    $REACTION_COLORS_PHP = ['like'=>'#1877f2','love'=>'#f33e58','haha'=>'#f7b731','wow'=>'#f7b731','sad'=>'#f7b731','angry'=>'#e05900'];
+    if ($myRx && isset($REACTION_IMGS_PHP[$myRx])) {
+      $myRxEmoji = '<img src="' . $REACTION_IMGS_PHP[$myRx] . '" style="width:20px;height:20px;vertical-align:middle" alt="">';
+    } elseif ($myRx) {
+      $myRxEmoji = $REACTIONS[$myRx] ?? '👍';
+    } else {
+      $myRxEmoji = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 13v3h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+    }
+    $reactLabel = $myRx ? ($REACTION_LABELS_PHP[$myRx] ?? ucfirst($myRx)) : 'Thích';
+    $rxColor = $reacted ? ($REACTION_COLORS_PHP[$myRx] ?? '#1877f2') : '';
+    $rxColorStyle = $rxColor ? 'color:'.$rxColor.';font-size:14px;font-weight:700;' : 'font-size:14px;font-weight:700;';
     $reactClass = $reacted ? 'reacted' : '';
 
-    // Reaction picker buttons
+    // Reaction picker buttons — FB emoji CDN style
+    $REACTION_IMGS = [
+      'like'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t4c/2/32/1f44d.png',
+      'love'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tb4/2/32/2764.png',
+      'haha'  => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t93/2/32/1f606.png',
+      'wow'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/tf3/2/32/1f62e.png',
+      'sad'   => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t13/2/32/1f622.png',
+      'angry' => 'https://static.xx.fbcdn.net/images/emoji.php/v9/t73/2/32/1f620.png',
+    ];
+    $REACTION_LABELS = [
+      'like'=>'Thích','love'=>'Yêu thích','haha'=>'Haha','wow'=>'Wow','sad'=>'Buồn','angry'=>'Phẫn nộ'
+    ];
     $rpickHtml = '';
     foreach($REACTIONS as $k=>$em) {
-        $rpickHtml .= '<button class="rpick" onclick="doReact('.$pid.',\''.$k.'\')" title="'.ucfirst($k).'">'.$em.'</button>';
+        $img = $REACTION_IMGS[$k] ?? '';
+        $lbl = $REACTION_LABELS[$k] ?? ucfirst($k);
+        $rpickHtml .= '<button class="rpick" onclick="doReact('.$pid.',\''.$k.'')" data-label="'.$lbl.'"><img src="'.$img.'" alt="'.$lbl.'" onerror="this.parentNode.innerHTML=''.$em.''"></button>';
     }
 
     echo <<<HTML
@@ -518,19 +539,27 @@ HTML;
     <span style="font-size:11px;color:var(--muted);" id="cmtLabel-{$pid}">{$cmtCount} bình luận</span>
   </div>
   <div class="post-actions">
-    <button class="post-action-btn {$reactClass}" id="like-{$pid}"
-      onclick="toggleReactPicker({$pid})"
-      ondblclick="doReact({$pid},'like')"
-      title="Giữ để chọn cảm xúc">
-      <div class="reaction-picker" id="rpicker-{$pid}">{$rpickHtml}</div>
-      <span class="ba" id="react-icon-{$pid}">{$myRxEmoji}</span>
-      <span id="react-label-{$pid}">{$reactLabel}</span>
-    </button>
+    <div class="react-like-wrap" id="like-wrap-{$pid}"
+      onmouseenter="showReactPicker({$pid})"
+      onmouseleave="scheduleHideReactPicker({$pid})">
+      <div class="reaction-picker" id="rpicker-{$pid}"
+        onmouseenter="cancelHideReactPicker({$pid})"
+        onmouseleave="scheduleHideReactPicker({$pid})">{$rpickHtml}</div>
+      <button class="post-action-btn {$reactClass}" id="like-{$pid}"
+        style="{$rxColorStyle}"
+        onclick="doReact({$pid}, document.getElementById('like-{$pid}').dataset.myReaction || 'like')"
+        data-my-reaction="{$myRx}">
+        <span id="react-icon-{$pid}" style="display:inline-flex;align-items:center;line-height:1;">{$myRxEmoji}</span>
+        <span id="react-label-{$pid}">{$reactLabel}</span>
+      </button>
+    </div>
     <button class="post-action-btn" onclick="toggleComments({$pid})">
-      <span class="ba">💬</span> Bình luận
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Bình luận</span>
     </button>
     <button class="post-action-btn" onclick="sharePost({$pid})">
-      <span class="ba">↗️</span> Chia sẻ
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      <span>Chia sẻ</span>
     </button>
   </div>
   <div class="comments-section" id="cmt-{$pid}">
@@ -662,16 +691,22 @@ function sharePost(pid){ copyPostLink(pid); }
 const REACTIONS = <?=json_encode($REACTIONS)?>;
 let pickerTimer = {};
 
-function toggleReactPicker(pid){
-  const picker=document.getElementById('rpicker-'+pid);
-  if(picker.classList.contains('show')){
-    picker.classList.remove('show');
-    clearTimeout(pickerTimer[pid]);
-  } else {
-    picker.classList.add('show');
-    pickerTimer[pid]=setTimeout(()=>picker.classList.remove('show'),3000);
-  }
+function showReactPicker(pid){
+  clearTimeout(pickerTimer[pid]);
+  pickerTimer[pid] = setTimeout(()=>{
+    document.getElementById('rpicker-'+pid)?.classList.add('show');
+  }, 400); // 400ms delay like FB
 }
+function scheduleHideReactPicker(pid){
+  clearTimeout(pickerTimer[pid]);
+  pickerTimer[pid] = setTimeout(()=>{
+    document.getElementById('rpicker-'+pid)?.classList.remove('show');
+  }, 300);
+}
+function cancelHideReactPicker(pid){
+  clearTimeout(pickerTimer[pid]);
+}
+function toggleReactPicker(pid){ /* legacy, kept for compatibility */ }
 
 async function doReact(pid, reaction){
   document.getElementById('rpicker-'+pid)?.classList.remove('show');
@@ -686,14 +721,25 @@ async function doReact(pid, reaction){
     const cnt=document.getElementById('likeCount-'+pid);
     const emojisEl=document.getElementById('react-emojis-'+pid);
     cnt.textContent=d.count;
+    const REACT_IMGS = {"like": "https://static.xx.fbcdn.net/images/emoji.php/v9/t4c/2/32/1f44d.png", "love": "https://static.xx.fbcdn.net/images/emoji.php/v9/tb4/2/32/2764.png", "haha": "https://static.xx.fbcdn.net/images/emoji.php/v9/t93/2/32/1f606.png", "wow": "https://static.xx.fbcdn.net/images/emoji.php/v9/tf3/2/32/1f62e.png", "sad": "https://static.xx.fbcdn.net/images/emoji.php/v9/t13/2/32/1f622.png", "angry": "https://static.xx.fbcdn.net/images/emoji.php/v9/t73/2/32/1f620.png"};
+    const REACT_LABELS = {"like": "Thích", "love": "Yêu thích", "haha": "Haha", "wow": "Wow", "sad": "Buồn", "angry": "Phẫn nộ"};
+    const REACT_COLORS = {"like": "#1877f2", "love": "#f33e58", "haha": "#f7b731", "wow": "#f7b731", "sad": "#f7b731", "angry": "#e05900"};
     if(d.my_reaction){
       btn.classList.add('reacted');
-      icon.textContent=REACTIONS[d.my_reaction]||'👍';
-      label.textContent=d.my_reaction.charAt(0).toUpperCase()+d.my_reaction.slice(1);
+      btn.dataset.myReaction = d.my_reaction;
+      const col = REACT_COLORS[d.my_reaction]||'#1877f2';
+      btn.style.color = col;
+      const img = REACT_IMGS[d.my_reaction];
+      icon.innerHTML = img ? `<img src="${img}" style="width:20px;height:20px;vertical-align:middle">` : REACTIONS[d.my_reaction]||'👍';
+      label.textContent = REACT_LABELS[d.my_reaction]||d.my_reaction;
+      label.style.color = col;
     } else {
       btn.classList.remove('reacted');
-      icon.textContent='';
-      label.textContent='Thích';
+      btn.dataset.myReaction = '';
+      btn.style.color = '';
+      icon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 13v3h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+      label.textContent = 'Thích';
+      label.style.color = '';
     }
     // Update top emojis display
     let newEmojis='';
