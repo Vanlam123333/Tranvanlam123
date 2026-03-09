@@ -3,7 +3,7 @@ session_start();
 if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error'=>'Unauthorized']); exit; }
 
 header('Content-Type: application/json');
-$GROQ_KEY = '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';
+$GROQ_KEY = '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';
 $GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 $MODEL = 'llama-3.3-70b-versatile';
 
