@@ -6,48 +6,32 @@ $uid   = $_SESSION['user_id'];
 $today = date('Y-m-d');
 $dayNames = ['Sunday'=>'Chủ nhật','Monday'=>'Thứ hai','Tuesday'=>'Thứ ba','Wednesday'=>'Thứ tư','Thursday'=>'Thứ năm','Friday'=>'Thứ sáu','Saturday'=>'Thứ bảy'];
 $dayVi = $dayNames[date('l')] ?? date('l');
-
 $notes_count = (int)$db->query("SELECT COUNT(*) as c FROM notes WHERE user_id=$uid")->fetchArray()['c'];
 $pomo_today  = $db->query("SELECT COUNT(*) as c, COALESCE(SUM(duration),0) as m FROM pomodoro_sessions WHERE user_id=$uid AND type='focus' AND DATE(created_at)='$today'")->fetchArray(SQLITE3_ASSOC);
 $done_today  = (int)$db->query("SELECT COUNT(*) as c FROM plans WHERE user_id=$uid AND date='$today' AND done=1")->fetchArray()['c'];
 $total_today = (int)$db->query("SELECT COUNT(*) as c FROM plans WHERE user_id=$uid AND date='$today'")->fetchArray()['c'];
 $today_tasks = $db->query("SELECT * FROM plans WHERE user_id=$uid AND date='$today' ORDER BY done ASC, created_at ASC LIMIT 8");
 $upcoming_q  = $db->query("SELECT * FROM plans WHERE user_id=$uid AND date>='$today' AND date<=DATE('$today','+6 days') AND done=0 ORDER BY date ASC, created_at ASC LIMIT 12");
-
 $week_data = [];
 for ($i = 6; $i >= 0; $i--) {
     $d    = date('Y-m-d', strtotime("-$i days"));
     $dow  = (int)date('w', strtotime("-$i days"));
     $days = ['CN','T2','T3','T4','T5','T6','T7'];
-    $week_data[] = [
-        'date'     => $d,
-        'day'      => $days[$dow],
-        'dd'       => date('d', strtotime("-$i days")),
-        'done'     => (int)$db->query("SELECT COUNT(*) as c FROM plans WHERE user_id=$uid AND date='$d' AND done=1")->fetchArray()['c'],
-        'pomo'     => (int)$db->query("SELECT COUNT(*) as c FROM pomodoro_sessions WHERE user_id=$uid AND type='focus' AND DATE(created_at)='$d'")->fetchArray()['c'],
-        'is_today' => $i === 0,
-    ];
+    $week_data[] = ['date'=>$d,'day'=>$days[$dow],'dd'=>date('d',strtotime("-$i days")),
+        'done'=>(int)$db->query("SELECT COUNT(*) as c FROM plans WHERE user_id=$uid AND date='$d' AND done=1")->fetchArray()['c'],
+        'pomo'=>(int)$db->query("SELECT COUNT(*) as c FROM pomodoro_sessions WHERE user_id=$uid AND type='focus' AND DATE(created_at)='$d'")->fetchArray()['c'],
+        'is_today'=>$i===0];
 }
-
 $upcoming_rows = [];
 while ($r = $upcoming_q->fetchArray(SQLITE3_ASSOC)) $upcoming_rows[] = $r;
 $grouped = [];
 foreach ($upcoming_rows as $r) $grouped[$r['date']][] = $r;
-
-$banners = [
-    ['icon'=>'🔥','title'=>'Đừng phá vỡ chuỗi học!',   'sub'=>'Hôm nay hãy hoàn thành ít nhất 1 nhiệm vụ để duy trì thói quen.'],
-    ['icon'=>'🎯','title'=>'Tập trung 25 phút — nghỉ 5 phút','sub'=>'Kỹ thuật Pomodoro giúp năng suất tăng 40%. Thử ngay hôm nay!'],
-    ['icon'=>'📚','title'=>'Kiến thức là sức mạnh',    'sub'=>'Mỗi ngày học một điều mới, sau 1 năm bạn biết 365 điều mới.'],
-    ['icon'=>'⚡','title'=>'Bắt đầu ngay đi!',          'sub'=>'Điều khó nhất là bắt đầu. Hãy làm nhiệm vụ dễ nhất trước.'],
-    ['icon'=>'🌱','title'=>'Tiến bộ từng ngày',         'sub'=>'Chỉ cần tốt hơn 1% mỗi ngày — sau 1 năm bạn sẽ tốt hơn 37 lần.'],
-    ['icon'=>'💡','title'=>'Ôn lại kiến thức cũ',       'sub'=>'Spaced repetition: ôn sau 1 ngày → 3 ngày → 1 tuần → 1 tháng.'],
-    ['icon'=>'🧠','title'=>'Ngủ đủ giấc để học tốt',   'sub'=>'Não củng cố ký ức khi ngủ. 7-8 tiếng giúp nhớ bài lâu hơn 40%.'],
-];
-$banner = $banners[date('N') % count($banners)];
 $hour = (int)date('H');
-$greeting = $hour < 12 ? '☀️ Buổi sáng tốt lành!' : ($hour < 17 ? '🌤️ Buổi chiều năng suất!' : '🌙 Chúc tối học tốt!');
+$greeting = $hour < 12 ? 'Chào buổi sáng' : ($hour < 17 ? 'Chào buổi chiều' : 'Chào buổi tối');
+$greetingIcon = $hour < 12 ? '☀️' : ($hour < 17 ? '🌤️' : '🌙');
 $nameArr = explode(' ', $user['name']);
 $firstName = end($nameArr);
+$pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -57,119 +41,192 @@ $firstName = end($nameArr);
 <title>Dashboard — MindSpark</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.dash-date{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-.dash-name{font-size:2rem;font-weight:800;letter-spacing:-1px;line-height:1.1}
-.dash-name span{color:var(--accent)}
-.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
-.stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:transform .15s,box-shadow .15s}
-.stat-tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-.stat-tile-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.stat-tile-icon.blue{background:var(--accent-soft)}.stat-tile-icon.green{background:var(--green-soft)}.stat-tile-icon.gold{background:var(--gold-soft)}.stat-tile-icon.red{background:var(--red-soft)}
-.stat-tile-val{font-size:1.4rem;font-weight:800;color:var(--text);line-height:1;font-family:var(--mono)}
-.stat-tile-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
-.moti-banner{border-radius:16px;padding:16px 20px;background:linear-gradient(135deg,var(--accent) 0%,#7c3aed 100%);color:#fff;display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;position:relative;overflow:hidden}
-.moti-banner::before{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
-.week-strip{display:flex;gap:6px}
-.week-day{flex:1;border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1.5px solid var(--border);background:var(--surface2)}
-.week-day.today{border-color:var(--accent);background:var(--accent-soft)}
-.week-day.has-act{border-color:var(--green)}
-.week-day-lbl{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.week-day.today .week-day-lbl{color:var(--accent)}
-.week-day-num{font-size:12px;font-weight:800;color:var(--text)}
-.week-dots{display:flex;gap:3px;min-height:8px}
-.dot{width:6px;height:6px;border-radius:50%}
-.dot-p{background:var(--accent)}.dot-t{background:var(--green)}
-.task-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
-.task-row:last-child{border-bottom:none}
-.task-chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
-.task-chk.done{background:var(--green);border-color:var(--green);color:#fff}
-.task-txt{flex:1;font-size:13px;font-weight:600;color:var(--text)}
-.task-txt.done{color:var(--muted);text-decoration:line-through}
-.task-subj{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--accent-soft);color:var(--accent);flex-shrink:0}
-.up-hdr{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:8px 0 4px;display:flex;align-items:center;gap:6px}
-.up-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
-.up-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.up-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;background:var(--surface2);margin-bottom:4px;border-left:3px solid var(--accent)}
-.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.quick-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);text-decoration:none;color:var(--text2);font-size:11px;font-weight:700;transition:all .15s;text-align:center}
-.quick-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
-.quick-btn-icon{font-size:22px}
-
-/* ── Hero feature cards ── */
-.hero-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.2rem;}
-.hero-card{position:relative;border-radius:16px;padding:22px 22px 20px;text-decoration:none;
-  display:flex;flex-direction:column;gap:10px;overflow:hidden;transition:transform .18s,box-shadow .18s;}
-.hero-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.18);}
-.hero-card-mindmap{background:linear-gradient(135deg,#3b5bdb 0%,#6741d9 100%);}
-.hero-card-math{background:linear-gradient(135deg,#0f766e 0%,#0891b2 100%);}
-.hero-card-icon{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.18);
-  display:flex;align-items:center;justify-content:center;}
-.hero-card-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.hero-card-title{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px;}
-.hero-card-sub{font-size:12px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.4;}
-.hero-card-arrow{margin-top:auto;align-self:flex-start;background:rgba(255,255,255,.2);color:#fff;
-  border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 14px;
-  font-size:12px;font-weight:700;font-family:var(--font);}
-.hero-card:hover .hero-card-arrow{background:rgba(255,255,255,.3);}
-/* decorative circle */
-.hero-card::after{content:'';position:absolute;right:-30px;top:-30px;
-  width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none;}
-@media(max-width:600px){
-  .hero-cards{grid-template-columns:1fr;}
+/* ── DASHBOARD ── */
+.dash-hero {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%, #0891b2 100%);
+  border-radius: var(--radius-xl); padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem; position: relative; overflow: hidden;
+  color: #fff;
 }
-@media(max-width:768px){.stat-strip{grid-template-columns:repeat(2,1fr)}.dash-name{font-size:1.5rem}}
+.dash-hero::before {
+  content: ''; position: absolute; top: -60%; right: -10%;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: rgba(255,255,255,0.06); pointer-events: none;
+}
+.dash-hero::after {
+  content: ''; position: absolute; bottom: -40%; left: 30%;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(255,255,255,0.04); pointer-events: none;
+}
+.dash-greeting { font-size: 12px; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.dash-name { font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 8px; }
+.dash-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; opacity: 0.75; flex-wrap: wrap; }
+.dash-meta-item { display: flex; align-items: center; gap: 5px; }
+.dash-actions { display: flex; gap: 8px; margin-top: 1.2rem; z-index: 1; position: relative; }
+.dash-action-btn {
+  padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; border: none; font-family: var(--font-display); transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
+.dash-action-primary { background: rgba(255,255,255,0.2); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
+.dash-action-primary:hover { background: rgba(255,255,255,0.3); color: #fff; }
+.dash-action-ghost { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); border: 1.5px solid rgba(255,255,255,0.15); }
+.dash-action-ghost:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* STAT GRID */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.25rem; }
+.stat-tile {
+  background: var(--card-gradient); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.2s; box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s both;
+}
+.stat-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--border2); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+.stat-tile:nth-child(1) { animation-delay: 0ms; }
+.stat-tile:nth-child(2) { animation-delay: 60ms; }
+.stat-tile:nth-child(3) { animation-delay: 120ms; }
+.stat-tile:nth-child(4) { animation-delay: 180ms; }
+.stat-tile-icon {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.stat-tile-icon.indigo { background: var(--accent-soft); }
+.stat-tile-icon.green  { background: var(--green-soft); }
+.stat-tile-icon.gold   { background: var(--gold-soft); }
+.stat-tile-icon.teal   { background: var(--teal-soft); }
+.stat-tile-val { font-family: var(--mono); font-size: 1.4rem; font-weight: 500; color: var(--text); line-height: 1; }
+.stat-tile-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 3px; }
+
+/* HERO FEATURE CARDS */
+.hero-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+.hero-card {
+  position: relative; border-radius: var(--radius-lg); padding: 20px 20px 18px;
+  text-decoration: none; display: flex; flex-direction: column; gap: 8px;
+  overflow: hidden; transition: transform .18s, box-shadow .18s;
+}
+.hero-card:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(0,0,0,0.2); }
+.hero-card-mindmap { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+.hero-card-math { background: linear-gradient(135deg, #059669 0%, #0891b2 100%); }
+.hero-card-icon { width: 44px; height: 44px; border-radius: 11px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; }
+.hero-card-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hero-card-title { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: #fff; }
+.hero-card-sub { font-size: 12px; color: rgba(255,255,255,0.72); font-weight: 500; line-height: 1.4; }
+.hero-card-arrow { margin-top: auto; align-self: flex-start; background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 700; font-family: var(--font-display); }
+.hero-card:hover .hero-card-arrow { background: rgba(255,255,255,0.28); }
+.hero-card::after { content: ''; position: absolute; right: -30px; top: -30px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,0.07); pointer-events: none; }
+
+/* AI INSIGHT CARD */
+.ai-insight {
+  background: var(--card-gradient); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1rem 1.1rem;
+  margin-bottom: 1.25rem; position: relative; overflow: hidden;
+}
+.ai-insight::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), #0891b2);
+}
+.ai-insight-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-insight-badge { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; }
+.ai-insight-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.ai-insight-text strong { color: var(--text); }
+
+/* TASK CARD */
+.task-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.task-row:last-child { border-bottom: none; }
+.task-chk { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.task-chk.done { background: var(--green); border-color: var(--green); color: #fff; }
+.task-txt { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+.task-txt.done { color: var(--muted); text-decoration: line-through; }
+.task-subj { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); flex-shrink: 0; }
+
+/* UPCOMING */
+.up-hdr { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); padding: 8px 0 4px; display: flex; align-items: center; gap: 6px; }
+.up-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.up-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.up-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 10px; background: var(--surface2); margin-bottom: 4px; border-left: 3px solid var(--accent); }
+
+/* AI STUDY PLAN */
+.ai-plan-wrap { background: var(--surface2); border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: var(--text2); min-height: 60px; line-height: 1.55; }
+
+@media(max-width:900px) { .stat-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:600px) { .stat-grid { grid-template-columns: repeat(2,1fr); } .hero-cards { grid-template-columns: 1fr; } .dash-name { font-size: 1.6rem; } }
 </style>
 </head>
 <body>
 <?php include 'navbar.php'; ?>
 <div class="page">
 
-  <!-- GREETING -->
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem;">
-    <div>
-      <div class="dash-date"><?= $dayVi ?>, ngày <?= date('d/m/Y') ?></div>
-      <h1 class="dash-name">Chào <span><?= htmlspecialchars($firstName) ?></span>! 👋</h1>
+  <!-- HERO GREETING -->
+  <div class="dash-hero">
+    <div class="dash-greeting"><?= $greetingIcon ?> <?= $dayVi ?>, <?= date('d/m/Y') ?></div>
+    <h1 class="dash-name">Chào, <?= htmlspecialchars($firstName) ?>! 👋</h1>
+    <div class="dash-meta">
+      <div class="dash-meta-item">🕐 <span id="liveClock">--:--</span></div>
+      <?php if($total_today > 0): ?>
+      <div class="dash-meta-item">✅ <?= $done_today ?>/<?= $total_today ?> nhiệm vụ hôm nay</div>
+      <div class="dash-meta-item">📊 <?= $pct ?>% hoàn thành</div>
+      <?php endif; ?>
+      <div class="dash-meta-item">🍅 <?= $pomo_today['c'] ?> pomodoro</div>
     </div>
-    <div style="text-align:right;">
-      <div style="font-size:13px;font-weight:700;color:var(--text2);"><?= $greeting ?></div>
-      <div style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-top:2px;" id="liveClock">--:--:--</div>
+    <div class="dash-actions">
+      <a href="chat.php" class="dash-action-btn dash-action-primary">🧠 Chat với Spark AI</a>
+      <a href="pomodoro.php" class="dash-action-btn dash-action-ghost">🍅 Bắt đầu học</a>
+      <a href="planner.php" class="dash-action-btn dash-action-ghost">📅 Thêm việc</a>
     </div>
-  </div>
-
-  <!-- BANNER -->
-  <div class="moti-banner">
-    <div style="font-size:2rem;flex-shrink:0;z-index:1;"><?= $banner['icon'] ?></div>
-    <div style="z-index:1;">
-      <div style="font-size:14px;font-weight:800;margin-bottom:2px;"><?= $banner['title'] ?></div>
-      <div style="font-size:12px;opacity:.85;"><?= $banner['sub'] ?></div>
-    </div>
-    <a href="pomodoro.php" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-size:12px;margin-left:auto;z-index:1;flex-shrink:0;white-space:nowrap;padding:8px 14px;border-radius:10px;text-decoration:none;font-weight:700;">🍅 Bắt đầu học</a>
   </div>
 
   <!-- STATS -->
-  <div class="stat-strip">
-    <div class="stat-tile"><div class="stat-tile-icon green">✅</div><div><div class="stat-tile-val"><?= $done_today ?>/<?= $total_today ?: '–' ?></div><div class="stat-tile-label">Nhiệm vụ hôm nay</div></div></div>
-    <div class="stat-tile"><div class="stat-tile-icon blue">🍅</div><div><div class="stat-tile-val"><?= $pomo_today['c'] ?></div><div class="stat-tile-label">Pomodoro hôm nay</div></div></div>
-    <div class="stat-tile"><div class="stat-tile-icon gold">⏱️</div><div><div class="stat-tile-val"><?= $pomo_today['m'] ?>p</div><div class="stat-tile-label">Phút học hôm nay</div></div></div>
-    <div class="stat-tile"><div class="stat-tile-icon red">🗒️</div><div><div class="stat-tile-val"><?= $notes_count ?></div><div class="stat-tile-label">Ghi chú đã tạo</div></div></div>
+  <div class="stat-grid">
+    <div class="stat-tile">
+      <div class="stat-tile-icon green">✅</div>
+      <div><div class="stat-tile-val"><?= $done_today ?>/<?= $total_today ?: '0' ?></div><div class="stat-tile-label">Nhiệm vụ hôm nay</div></div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-icon indigo">🍅</div>
+      <div><div class="stat-tile-val"><?= $pomo_today['c'] ?></div><div class="stat-tile-label">Pomodoro hôm nay</div></div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-icon gold">⏱️</div>
+      <div><div class="stat-tile-val"><?= $pomo_today['m'] ?>p</div><div class="stat-tile-label">Phút học hôm nay</div></div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-icon teal">🗒️</div>
+      <div><div class="stat-tile-val"><?= $notes_count ?></div><div class="stat-tile-label">Ghi chú</div></div>
+    </div>
   </div>
 
-  <!-- HERO FEATURE CARDS -->
+  <!-- AI INSIGHT -->
+  <div class="ai-insight">
+    <div class="ai-insight-header">
+      <div class="ai-insight-badge">✨ AI <span>Spark</span></div>
+      <span style="font-size:11px;color:var(--muted);">Lời khuyên hôm nay</span>
+      <button onclick="loadAIInsight()" class="btn btn-ghost btn-sm" style="margin-left:auto;" id="insightRefresh">🔄 Làm mới</button>
+    </div>
+    <div class="ai-insight-text" id="aiInsight">
+      <span style="color:var(--muted);">⌛ Đang tải lời khuyên AI...</span>
+    </div>
+  </div>
+
+  <!-- HERO FEATURES -->
   <div class="hero-cards">
     <a href="mindmap.php" class="hero-card hero-card-mindmap">
       <div class="hero-card-icon">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="15"/><line x1="9" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="15" y2="12"/><circle cx="12" cy="3" r="1.5"/><circle cx="12" cy="21" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="21" cy="12" r="1.5"/></svg>
       </div>
-      <div class="hero-card-title">Mind Map</div>
-      <div class="hero-card-sub">Sơ đồ tư duy trực quan · Kết nối ý tưởng · Ghi nhớ sâu hơn</div>
+      <div class="hero-card-title">Mind Map AI</div>
+      <div class="hero-card-sub">Tự động tạo sơ đồ tư duy từ văn bản · Kết nối ý tưởng · Ghi nhớ sâu hơn</div>
       <div class="hero-card-arrow">Mở Mind Map →</div>
     </a>
     <a href="math.php" class="hero-card hero-card-math">
       <div class="hero-card-icon">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="7" x2="10" y2="7"/><line x1="14" y1="17" x2="19" y2="17"/></svg>
       </div>
-      <div class="hero-card-title">Toán học</div>
-      <div class="hero-card-sub">Giải toán tức thì · Vẽ đồ thị · Luyện tập mỗi ngày</div>
+      <div class="hero-card-title">Giải Toán AI</div>
+      <div class="hero-card-sub">Giải phương trình · Vẽ đồ thị · Từng bước chi tiết với công thức LaTeX</div>
       <div class="hero-card-arrow">Mở Toán học →</div>
     </a>
   </div>
@@ -182,15 +239,17 @@ $firstName = end($nameArr);
       <div class="card-header">
         <div class="card-title">📅 Nhiệm vụ hôm nay</div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <?php if ($total_today > 0): ?><span style="font-size:11px;font-weight:800;color:var(--green);"><?= $done_today ?>/<?= $total_today ?></span><?php endif; ?>
+          <?php if($total_today > 0): ?>
+          <span style="font-size:11px;font-weight:800;color:var(--green);"><?= $done_today ?>/<?= $total_today ?></span>
+          <?php endif; ?>
           <a href="planner.php" class="btn btn-ghost btn-sm">+ Thêm</a>
         </div>
       </div>
       <div class="card-body">
-        <?php if ($total_today > 0): ?>
+        <?php if($total_today > 0): ?>
         <div style="margin-bottom:12px;">
-          <div class="progress-wrap"><div class="progress-fill" style="width:<?= $total_today>0?round($done_today/$total_today*100):0 ?>%;background:var(--green);transition:width .8s;"></div></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;"><?= $total_today>0?round($done_today/$total_today*100):0 ?>% hoàn thành</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:<?= $pct ?>%;"></div></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;font-weight:700;"><?= $pct ?>% hoàn thành</div>
         </div>
         <?php while ($t = $today_tasks->fetchArray(SQLITE3_ASSOC)): ?>
         <div class="task-row">
@@ -211,7 +270,6 @@ $firstName = end($nameArr);
 
     <!-- RIGHT COL -->
     <div style="display:flex;flex-direction:column;gap:1.2rem;">
-
       <!-- Week activity -->
       <div class="card">
         <div class="card-header">
@@ -241,14 +299,14 @@ $firstName = end($nameArr);
           <a href="planner.php" class="btn btn-ghost btn-sm">Xem tất cả</a>
         </div>
         <div class="card-body" style="padding-top:.5rem;">
-          <?php if (count($upcoming_rows) > 0):
+          <?php if(count($upcoming_rows) > 0):
             foreach ($grouped as $gdate => $gtasks):
               $diff = (strtotime($gdate) - strtotime($today)) / 86400;
               $dlabel = $diff==0?'Hôm nay':($diff==1?'Ngày mai':($diff==2?'Ngày kia':date('d/m',strtotime($gdate))));
               $col = $diff==0?'var(--red)':($diff==1?'var(--gold)':'var(--accent)');
           ?>
           <div class="up-hdr"><div class="up-dot" style="background:<?= $col ?>;"></div><?= $dlabel ?></div>
-          <?php foreach (array_slice($gtasks,0,3) as $gt): ?>
+          <?php foreach(array_slice($gtasks,0,3) as $gt): ?>
           <div class="up-item" style="border-left-color:<?= $col ?>;">
             <div style="flex:1;font-size:12px;font-weight:600;color:var(--text);"><?= htmlspecialchars($gt['task']) ?></div>
             <?php if ($gt['subject']): ?><span class="task-subj" style="font-size:9px;"><?= htmlspecialchars($gt['subject']) ?></span><?php endif; ?>
@@ -259,6 +317,19 @@ $firstName = end($nameArr);
           <div style="text-align:center;color:var(--muted);font-size:12px;padding:1rem 0;font-weight:600;">🎉 Không có nhiệm vụ sắp đến hạn!</div>
           <?php endif; ?>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI STUDY PLAN -->
+  <div class="card" style="margin-bottom:1.2rem;">
+    <div class="card-header">
+      <div class="card-title">🤖 AI Lập kế hoạch học</div>
+      <button onclick="generateStudyPlan()" class="btn btn-primary btn-sm" id="planBtn">✨ Tạo kế hoạch</button>
+    </div>
+    <div class="card-body">
+      <div class="ai-plan-wrap" id="aiPlan">
+        <span style="color:var(--muted);">Nhấn "Tạo kế hoạch" để AI đề xuất lịch học thông minh cho bạn hôm nay.</span>
       </div>
     </div>
   </div>
@@ -281,18 +352,64 @@ $firstName = end($nameArr);
   </div>
 
 </div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
 <script>
+// Live clock
 (function tick(){
-  const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0');
-  const el=document.getElementById('liveClock'); if(el) el.textContent=h+':'+m+':'+s;
-  setTimeout(tick,1000);
+  const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0');
+  const el=document.getElementById('liveClock'); if(el) el.textContent=h+':'+m;
+  setTimeout(tick,10000);
 })();
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('.stat-tile').forEach((el,i)=>{
-    el.style.opacity='0'; el.style.transform='translateY(10px)';
-    setTimeout(()=>{ el.style.transition='opacity .4s,transform .4s'; el.style.opacity='1'; el.style.transform='translateY(0)'; }, i*80);
-  });
+
+// AI Insight
+async function loadAIInsight() {
+  const el = document.getElementById('aiInsight');
+  const btn = document.getElementById('insightRefresh');
+  el.innerHTML = '<span style="color:var(--muted);">✨ Đang tải lời khuyên từ AI...</span>';
+  if(btn) btn.disabled = true;
+  const hour = new Date().getHours();
+  const tod = hour < 12 ? 'buổi sáng' : hour < 17 ? 'buổi chiều' : 'buổi tối';
+  const msgs = [{role:'user', content:`Tôi đang học vào ${tod}. Hôm nay tôi có ${<?=$total_today?>} nhiệm vụ, đã hoàn thành ${<?=$done_today?>}. Đã học ${<?=$pomo_today['c']?>} pomodoro (${<?=$pomo_today['m']?>} phút). Hãy đưa ra 1 lời khuyên học tập ngắn gọn, truyền cảm hứng và thực tế cho tôi (2-3 câu, bằng tiếng Việt, thân thiện, kèm emoji phù hợp).`}];
+  try {
+    const res = await fetch('ai_api.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'chat',messages:msgs})});
+    const data = await res.json();
+    el.innerHTML = data.result || 'Hãy giữ vững tinh thần học tập nhé! 💪';
+  } catch(e) {
+    el.innerHTML = '💡 Mỗi ngày học một điều mới, sau một năm bạn sẽ biết 365 điều mới!';
+  }
+  if(btn) btn.disabled = false;
+}
+
+async function generateStudyPlan() {
+  const el = document.getElementById('aiPlan');
+  const btn = document.getElementById('planBtn');
+  btn.disabled = true; btn.textContent = '⌛ Đang tạo...';
+  el.innerHTML = '<span style="color:var(--muted);">🤖 AI đang phân tích và tạo kế hoạch...</span>';
+  const hour = new Date().getHours();
+  const msgs = [{role:'user', content:`Tôi có ${<?=$total_today?>} nhiệm vụ hôm nay, đã làm ${<?=$done_today?>}. Đã học ${<?=$pomo_today['m']?>} phút. Hãy tạo kế hoạch học tập chi tiết cho phần còn lại của ngày hôm nay (từ ${hour}h), chia theo khung giờ pomodoro 25 phút, có nghỉ giải lao. Ngắn gọn, thực tế, bằng tiếng Việt.`}];
+  try {
+    const res = await fetch('ai_api.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'chat',messages:msgs})});
+    const data = await res.json();
+    el.innerHTML = (data.result||'').replace(/\n/g,'<br>');
+  } catch(e) {
+    el.innerHTML = '⚠️ Không thể tải kế hoạch. Thử lại!';
+  }
+  btn.disabled = false; btn.innerHTML = '✨ Tạo lại';
+}
+
+// Load on page ready
+document.addEventListener('DOMContentLoaded', () => {
+  loadAIInsight();
 });
+
+function showToast(msg, type='ok') {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div'); t.className = `toast ${type}`;
+  t.textContent = msg; wrap.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; t.style.transition = '0.3s'; setTimeout(()=>t.remove(),300); }, 2800);
+}
 </script>
 </body>
 </html>

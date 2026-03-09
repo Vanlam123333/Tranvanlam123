@@ -250,5 +250,47 @@ SYS;
     $s = strpos($clean,'{'); $e = strrpos($clean,'}');
     $q = json_decode(substr($clean,$s,$e-$s+1), true) ?? [];
     echo json_encode(['question' => $q]);
+} elseif ($type === 'study_insight') {
+    $done = (int)($input['done'] ?? 0);
+    $total = (int)($input['total'] ?? 0);
+    $pomo = (int)($input['pomo'] ?? 0);
+    $hour = (int)date('H');
+    $tod = $hour < 12 ? 'buổi sáng' : ($hour < 17 ? 'buổi chiều' : 'buổi tối');
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là Spark, trợ lý học tập AI thân thiện. Đưa ra lời khuyên ngắn gọn, truyền cảm hứng, bằng tiếng Việt. 2-3 câu, dùng emoji phù hợp, thực tế không sáo rỗng.'],
+        ['role'=>'user','content'=>"Tôi đang học vào $tod. Đã hoàn thành $done/$total nhiệm vụ. Học $pomo pomodoro hôm nay. Cho tôi 1 lời khuyên ngắn gọn."]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 200)]);
+
+} elseif ($type === 'improve_note') {
+    $note = mb_substr(trim($input['note'] ?? ''), 0, 3000);
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là chuyên gia giáo dục. Cải thiện ghi chú học tập: thêm tiêu đề rõ ràng, bullet points, highlight từ khóa quan trọng. Trả lời bằng tiếng Việt.'],
+        ['role'=>'user','content'=>"Cải thiện ghi chú này:\n\n$note"]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 1500)]);
+
+} elseif ($type === 'quiz_from_note') {
+    $note = mb_substr(trim($input['note'] ?? ''), 0, 3000);
+    $messages = [
+        ['role'=>'system','content'=>'Tạo 5 câu hỏi trắc nghiệm từ nội dung ghi chú. CHỈ JSON array thuần túy.'],
+        ['role'=>'user','content'=>"Tạo quiz từ:\n$note\nJSON: [{\"question\":\"...\",\"options\":[\"A...\",\"B...\",\"C...\",\"D...\"],\"answer\":0,\"explain\":\"...\"}]"]
+    ];
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    $clean = preg_replace('/```json|```/', '', $raw);
+    $s = strpos($clean,'['); $e = strrpos($clean,']');
+    $qs = $s!==false ? json_decode(substr($clean,$s,$e-$s+1), true) : [];
+    echo json_encode(['questions' => $qs ?? []]);
+
+} elseif ($type === 'smart_plan') {
+    $done = (int)($input['done'] ?? 0);
+    $total = (int)($input['total'] ?? 0);
+    $pomo = (int)($input['pomo'] ?? 0);
+    $hour = (int)date('H');
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là chuyên gia quản lý thời gian. Tạo kế hoạch học ngắn gọn, thực tế với emoji. Bằng tiếng Việt.'],
+        ['role'=>'user','content'=>"Bây giờ là $hour giờ. Đã làm $done/$total nhiệm vụ, học $pomo pomodoro. Tạo kế hoạch học từ giờ đến tối với khung giờ pomodoro 25 phút. Ngắn gọn."]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 500)]);
 }
 ?>
