@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đăng ký — MindSpark</title>
 <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 body { background: #07070e; }
 .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.3; pointer-events: none; animation: blobMove 8s ease-in-out infinite; }
@@ -48,16 +49,16 @@ body { background: #07070e; }
 .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; text-decoration: none; }
 .login-logo-mark { width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(79,70,229,0.4); }
 .login-logo-mark svg { width: 26px; height: 26px; }
-.login-logo-text { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.login-logo-text { font-family: 'Be Vietnam Pro', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
 .login-logo-text em { font-style: normal; background: linear-gradient(90deg, #6366f1, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.login-welcome { font-size: 22px; font-family: 'Syne', sans-serif; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
+.login-welcome { font-size: 22px; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
 .login-sub { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 1.8rem; }
 .login-input-wrap { position: relative; margin-bottom: 10px; }
 .login-input-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
-.login-input { width: 100%; padding: 12px 14px 12px 40px; border: 1.5px solid rgba(255,255,255,0.07); border-radius: 12px; background: rgba(255,255,255,0.04); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: all 0.2s; }
+.login-input { width: 100%; padding: 12px 14px 12px 40px; border: 1.5px solid rgba(255,255,255,0.07); border-radius: 12px; background: rgba(255,255,255,0.04); color: #fff; font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; outline: none; transition: all 0.2s; }
 .login-input:focus { border-color: #6366f1; background: rgba(99,102,241,0.06); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
 .login-input::placeholder { color: rgba(255,255,255,0.25); }
-.login-btn { width: 100%; padding: 13px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; box-shadow: 0 4px 20px rgba(79,70,229,0.3); }
+.login-btn { width: 100%; padding: 13px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; font-family: 'Be Vietnam Pro', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; box-shadow: 0 4px 20px rgba(79,70,229,0.3); }
 .login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(79,70,229,0.4); }
 .login-error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); border-radius: 10px; padding: 10px 14px; color: #f87171; font-size: 13px; margin-bottom: 14px; }
 .login-success { display:none; }
@@ -113,7 +114,7 @@ body { background: #07070e; }
 .success-check svg { width:32px; height:32px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
 
 .success-text {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 18px; font-weight: 700;
   color: #fff; letter-spacing: -0.3px;
   text-align: center;
