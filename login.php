@@ -20,204 +20,209 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đăng nhập — MindSpark</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #07070e; overflow-x: hidden; }
+.login-scene {
+  min-height: 100vh; display: flex;
+  position: relative; overflow: hidden;
+}
+/* Animated gradient blobs */
+.blob {
+  position: fixed; border-radius: 50%; filter: blur(80px);
+  opacity: 0.35; pointer-events: none; animation: blobMove 8s ease-in-out infinite;
+}
+.blob1 { width: 500px; height: 500px; top: -150px; left: -150px; background: radial-gradient(circle, #4f46e5, transparent); animation-delay: 0s; }
+.blob2 { width: 400px; height: 400px; bottom: -100px; right: -100px; background: radial-gradient(circle, #7c3aed, transparent); animation-delay: -3s; }
+.blob3 { width: 300px; height: 300px; top: 50%; left: 50%; background: radial-gradient(circle, #0891b2, transparent); animation-delay: -5s; }
+@keyframes blobMove {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
 
-  :root {
-    --bg: #05050f;
-    --card: #0d0d1f;
-    --border: rgba(255,255,255,0.07);
-    --accent: #5b5ef4;
-    --accent2: #a78bfa;
-    --text: #f0f0ff;
-    --muted: rgba(240,240,255,0.38);
-  }
+/* Left panel */
+.login-left {
+  flex: 1; display: none; align-items: center; justify-content: center;
+  padding: 3rem; flex-direction: column; gap: 2rem;
+  position: relative; z-index: 1;
+}
+.login-hero-text { text-align: center; }
+.login-hero-title {
+  font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
+  color: #fff; letter-spacing: -1.5px; line-height: 1.05;
+  margin-bottom: 1rem;
+}
+.login-hero-sub { font-size: 1rem; color: rgba(255,255,255,0.5); line-height: 1.6; max-width: 320px; }
+.feature-pills { display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
+.feature-pill {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50px; padding: 10px 18px;
+  font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500;
+  backdrop-filter: blur(10px); transition: all 0.2s;
+}
+.feature-pill:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.feature-pill span { font-size: 18px; }
 
-  body {
-    background: var(--bg);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    overflow: hidden;
-  }
+/* Right panel */
+.login-right {
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; min-height: 100vh; position: relative; z-index: 1;
+  width: 100%;
+}
+.login-box {
+  background: rgba(17,17,32,0.85); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 28px; padding: 2.5rem 2.2rem;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  animation: authIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes authIn { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
 
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(91,94,244,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(91,94,244,0.05) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none; z-index: 0;
-  }
+.login-logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.5rem; text-decoration: none;
+}
+.login-logo-mark {
+  width: 44px; height: 44px; border-radius: 13px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(79,70,229,0.4);
+}
+.login-logo-mark svg { width: 26px; height: 26px; }
+.login-logo-text { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.login-logo-text em { font-style: normal; background: linear-gradient(90deg, #6366f1, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-  .orb {
-    position: fixed; border-radius: 50%;
-    filter: blur(100px); pointer-events: none; z-index: 0;
-  }
-  .orb1 { width: 600px; height: 600px; top: -200px; left: -150px; background: radial-gradient(circle, rgba(91,94,244,0.22), transparent 70%); }
-  .orb2 { width: 500px; height: 500px; bottom: -150px; right: -100px; background: radial-gradient(circle, rgba(167,139,250,0.18), transparent 70%); }
+.login-welcome { font-size: 22px; font-family: 'Syne', sans-serif; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
+.login-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 1.8rem; }
 
-  /* LEFT */
-  .left {
-    flex: 1; display: none;
-    flex-direction: column; justify-content: center;
-    padding: 5rem 4rem; position: relative; z-index: 1;
-  }
-  @media(min-width:900px){ .left { display: flex; } }
+.login-input-wrap { position: relative; margin-bottom: 12px; }
+.login-input-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; pointer-events: none;
+}
+.login-input {
+  width: 100%; padding: 12px 14px 12px 40px;
+  border: 1.5px solid rgba(255,255,255,0.07);
+  border-radius: 12px; background: rgba(255,255,255,0.04);
+  color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: all 0.2s;
+}
+.login-input:focus { border-color: #6366f1; background: rgba(99,102,241,0.06); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.login-input::placeholder { color: rgba(255,255,255,0.25); }
 
-  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 4rem; text-decoration: none; }
-  .brand-icon {
-    width: 46px; height: 46px; border-radius: 14px;
-    background: linear-gradient(135deg, #5b5ef4, #a78bfa);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; box-shadow: 0 0 30px rgba(91,94,244,0.4);
-  }
-  .brand-name { font-family: 'Syne', sans-serif; font-size: 1.5rem; color: var(--text); }
-  .brand-name em { font-style: normal; color: var(--accent2); }
+.login-btn {
+  width: 100%; padding: 13px; border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff; border: none; font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(79,70,229,0.3);
+  letter-spacing: -0.2px;
+}
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(79,70,229,0.4); }
+.login-btn:active { transform: translateY(0); }
 
-  .tag {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: rgba(91,94,244,0.1); border: 1px solid rgba(91,94,244,0.22);
-    border-radius: 50px; padding: 5px 13px;
-    font-size: 11px; font-weight: 700; color: var(--accent2);
-    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 1.4rem;
-  }
+.login-error {
+  background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2);
+  border-radius: 10px; padding: 10px 14px; color: #f87171;
+  font-size: 13px; font-weight: 500; margin-bottom: 14px;
+}
+.login-footer { text-align: center; font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 1.2rem; }
+.login-footer a { color: #818cf8; text-decoration: none; font-weight: 600; }
+.login-footer a:hover { color: #a5b4fc; }
 
-  .hero-title {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2.8rem, 4vw, 3.8rem);
-    color: var(--text); line-height: 1.0;
-    letter-spacing: -2px; margin-bottom: 1.2rem;
-  }
-  .hero-title span { color: var(--accent2); }
+.login-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+.login-divider span { font-size: 11px; color: rgba(255,255,255,0.25); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
-  .hero-desc { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 340px; margin-bottom: 3rem; }
+.guest-features { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.guest-feat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.guest-feat-ico { font-size: 18px; }
+.guest-feat-lbl { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); line-height: 1.2; }
 
-  .features { display: flex; flex-direction: column; gap: 10px; }
-  .feat {
-    display: flex; align-items: center; gap: 14px;
-    padding: 13px 17px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border); border-radius: 14px;
-    transition: all 0.2s; cursor: default;
-  }
-  .feat:hover { background: rgba(91,94,244,0.07); border-color: rgba(91,94,244,0.18); transform: translateX(5px); }
-  .feat-ico { width: 34px; height: 34px; border-radius: 9px; background: rgba(91,94,244,0.14); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .feat-lbl { font-size: 13.5px; color: rgba(240,240,255,0.55); font-weight: 500; }
-
-  /* RIGHT */
-  .right {
-    display: flex; align-items: center; justify-content: center;
-    padding: 2rem; width: 100%; position: relative; z-index: 1;
-  }
-  @media(min-width:900px){ .right { width: 480px; flex-shrink: 0; } }
-
-  .card {
-    width: 100%; max-width: 400px;
-    background: var(--card);
-    border: 1px solid var(--border); border-radius: 24px;
-    padding: 2.5rem 2.2rem;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
-    animation: up 0.5s cubic-bezier(0.22,1,0.36,1) both;
-  }
-  @keyframes up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
-
-  .card-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; text-decoration: none; }
-  .card-brand-ico { width: 38px; height: 38px; border-radius: 11px; background: linear-gradient(135deg,#5b5ef4,#a78bfa); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .card-brand-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--text); }
-  .card-brand-name em { font-style: normal; color: var(--accent2); }
-
-  .card-title { font-family: 'Syne', sans-serif; font-size: 1.7rem; color: var(--text); letter-spacing: -0.8px; margin-bottom: 5px; }
-  .card-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
-
-  .inp-wrap { position: relative; margin-bottom: 12px; }
-  .inp-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
-  .inp {
-    width: 100%; padding: 13px 14px 13px 42px;
-    background: rgba(255,255,255,0.04);
-    border: 1.5px solid var(--border); border-radius: 12px;
-    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
-    outline: none; transition: all 0.2s;
-  }
-  .inp::placeholder { color: rgba(240,240,255,0.2); }
-  .inp:focus { border-color: var(--accent); background: rgba(91,94,244,0.07); box-shadow: 0 0 0 3px rgba(91,94,244,0.18); }
-
-  .err { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 10px 14px; color: #f87171; font-size: 13px; margin-bottom: 14px; }
-
-  .btn {
-    width: 100%; padding: 14px;
-    background: linear-gradient(135deg, #5b5ef4, #a78bfa);
-    border: none; border-radius: 12px;
-    color: #fff; font-family: 'Syne', sans-serif;
-    font-size: 15px; font-weight: 700;
-    cursor: pointer; margin-top: 8px;
-    box-shadow: 0 4px 24px rgba(91,94,244,0.35);
-    transition: all 0.2s;
-  }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(91,94,244,0.45); }
-  .btn:active { transform: none; }
-
-  .footer { text-align: center; font-size: 13px; color: var(--muted); margin-top: 1.4rem; }
-  .footer a { color: var(--accent2); text-decoration: none; font-weight: 600; }
-  .footer a:hover { color: #c4b5fd; }
+@media(min-width:900px) {
+  .login-left { display: flex; max-width: 480px; }
+  .login-right { width: auto; min-width: 480px; }
+}
 </style>
 </head>
 <body>
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
 
-<div class="left">
-  <a href="#" class="brand">
-    <div class="brand-icon">✦</div>
-    <span class="brand-name">Mind<em>Spark</em></span>
-  </a>
-  <div class="tag">✦ Nền tảng học tập AI</div>
-  <h1 class="hero-title">Học thông<br>minh hơn<br><span>mỗi ngày.</span></h1>
-  <p class="hero-desc">MindSpark kết hợp AI tiên tiến với công cụ học tập hiệu quả để giúp bạn đạt kết quả tốt nhất.</p>
-  <div class="features">
-    <div class="feat"><div class="feat-ico">🧠</div><div class="feat-lbl">Gia sư AI giải thích mọi môn học</div></div>
-    <div class="feat"><div class="feat-ico">⚡</div><div class="feat-lbl">Flashcard thông minh với spaced repetition</div></div>
-    <div class="feat"><div class="feat-ico">🗺️</div><div class="feat-lbl">Mind Map trực quan bằng AI</div></div>
-    <div class="feat"><div class="feat-ico">🍅</div><div class="feat-lbl">Pomodoro + Deep Focus cho năng suất cao</div></div>
-    <div class="feat"><div class="feat-ico">📐</div><div class="feat-lbl">Giải toán từng bước với LaTeX</div></div>
+<div class="login-scene">
+  <!-- Left Panel -->
+  <div class="login-left">
+    <div class="login-hero-text">
+      <div class="login-hero-title">Học thông minh<br>hơn mỗi ngày.</div>
+      <div class="login-hero-sub">MindSpark kết hợp AI tiên tiến với công cụ học tập hiệu quả để giúp bạn đạt kết quả tốt nhất.</div>
+    </div>
+    <div class="feature-pills">
+      <div class="feature-pill"><span>🧠</span> Gia sư AI giải thích mọi môn học</div>
+      <div class="feature-pill"><span>⚡</span> Flashcard thông minh với spaced repetition</div>
+      <div class="feature-pill"><span>🗺️</span> Mind Map trực quan bằng AI</div>
+      <div class="feature-pill"><span>🍅</span> Pomodoro + Deep Focus cho năng suất cao</div>
+      <div class="feature-pill"><span>📐</span> Giải toán từng bước với LaTeX</div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="login-right">
+    <div class="login-box">
+      <a href="#" class="login-logo">
+        <div class="login-logo-mark">
+          <svg viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="3.5" fill="#fff" opacity=".95"/>
+            <line x1="14" y1="3" x2="14" y2="9.5" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <line x1="14" y1="18.5" x2="14" y2="25" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <line x1="3" y1="14" x2="9.5" y2="14" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <line x1="18.5" y1="14" x2="25" y2="14" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+            <line x1="6.5" y1="6.5" x2="10.8" y2="10.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>
+            <line x1="17.2" y1="17.2" x2="21.5" y2="21.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>
+            <line x1="21.5" y1="6.5" x2="17.2" y2="10.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>
+            <line x1="10.8" y1="17.2" x2="6.5" y2="21.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>
+          </svg>
+        </div>
+        <span class="login-logo-text">Mind<em>Spark</em></span>
+      </a>
+
+      <div class="login-welcome">Chào mừng trở lại!</div>
+      <div class="login-sub">Đăng nhập để tiếp tục hành trình học tập của bạn.</div>
+
+      <?php if ($error): ?>
+      <div class="login-error">⚠️ <?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
+
+      <form method="POST">
+        <div class="login-input-wrap">
+          <span class="login-input-icon">✉️</span>
+          <input type="email" name="email" class="login-input" placeholder="Email của bạn" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+        </div>
+        <div class="login-input-wrap">
+          <span class="login-input-icon">🔑</span>
+          <input type="password" name="password" class="login-input" placeholder="Mật khẩu" required>
+        </div>
+        <button type="submit" class="login-btn">Đăng nhập →</button>
+      </form>
+
+      <div class="login-footer">Chưa có tài khoản? <a href="register.php">Đăng ký miễn phí</a></div>
+    </div>
   </div>
 </div>
 
-<div class="right">
-  <div class="card">
-    <a href="#" class="card-brand">
-      <div class="card-brand-ico">✦</div>
-      <span class="card-brand-name">Mind<em>Spark</em></span>
-    </a>
-    <div class="card-title">Chào mừng trở lại!</div>
-    <div class="card-sub">Đăng nhập để tiếp tục hành trình học tập của bạn.</div>
-
-    <?php if ($error): ?>
-    <div class="err">⚠️ <?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-
-    <form method="POST">
-      <div class="inp-wrap">
-        <span class="inp-ico">✉️</span>
-        <input type="email" name="email" class="inp" placeholder="Email của bạn" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
-      </div>
-      <div class="inp-wrap">
-        <span class="inp-ico">🔑</span>
-        <input type="password" name="password" class="inp" placeholder="Mật khẩu" required>
-      </div>
-      <button type="submit" class="btn">Đăng nhập →</button>
-    </form>
-
-    <div class="footer">Chưa có tài khoản? <a href="register.php">Đăng ký miễn phí</a></div>
-  </div>
-</div>
-
+<script>
+(function(){
+  const t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 </body>
 </html>
