@@ -406,7 +406,6 @@ SYS;
         ['role'=>'user','content'=>"Bây giờ là $hour giờ. Đã làm $done/$total nhiệm vụ, học $pomo pomodoro. Tạo kế hoạch học từ giờ đến tối với khung giờ pomodoro 25 phút. Ngắn gọn."]
     ];
     echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 500)]);
-}
 
 } elseif ($type === 'doc_summarize') {
     $content = mb_substr(trim($input['content'] ?? ''), 0, 8000);
