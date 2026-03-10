@@ -185,8 +185,6 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
 .fc-done-stat { background: var(--surface2); border-radius: 10px; padding: 12px 8px; text-align: center; }
 .fc-done-stat-num { font-size: 1.4rem; font-weight: 800; }
 .fc-done-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
-em, i { font-style: normal !important; }
-* { font-style: normal; }
 </style>
 </head>
 <body>
@@ -223,16 +221,7 @@ em, i { font-style: normal !important; }
             <div id="aiMode">
               <div class="fc-section">
                 <div class="fc-section-title">Chủ đề</div>
-                <div class="chip-group" id="topicChips">
-                  <span class="chip active" onclick="selectChip('topic',this,'Giao tiếp hàng ngày')">💬 Giao tiếp</span>
-                  <span class="chip" onclick="selectChip('topic',this,'IELTS Academic')">📚 IELTS</span>
-                  <span class="chip" onclick="selectChip('topic',this,'TOEIC Business')">💼 TOEIC</span>
-                  <span class="chip" onclick="selectChip('topic',this,'Du lịch')">✈️ Du lịch</span>
-                  <span class="chip" onclick="selectChip('topic',this,'Công nghệ')">💻 Tech</span>
-                  <span class="chip" onclick="selectChip('topic',this,'Idioms thông dụng')">🎯 Idioms</span>
-                  <span class="chip" onclick="selectChip('topic',this,'Phrasal verbs')">⚡ Phrasal</span>
-                  <span class="chip" onclick="selectChip('topic',this,'Sức khỏe')">🏥 Y tế</span>
-                </div>
+                <input type="text" id="topicInput" class="form-input" placeholder="VD: Kinh doanh, Du lịch, IELTS..." style="width:100%">
               </div>
 
               <div class="fc-section" style="margin-top:10px;">
@@ -256,12 +245,7 @@ em, i { font-style: normal !important; }
 
               <div class="fc-section" style="margin-top:10px;">
                 <div class="fc-section-title">Số từ muốn học</div>
-                <div class="count-chips" id="countChips">
-                  <div class="count-chip" onclick="selectCount(this,5)">5</div>
-                  <div class="count-chip active" onclick="selectCount(this,10)">10</div>
-                  <div class="count-chip" onclick="selectCount(this,15)">15</div>
-                  <div class="count-chip" onclick="selectCount(this,20)">20</div>
-                </div>
+                <input type="number" id="countInput" class="form-input" value="10" min="1" max="100" placeholder="Nhập số từ..." style="width:100%">
               </div>
             </div>
 
@@ -447,7 +431,7 @@ em, i { font-style: normal !important; }
 <script>
 let cards = [], idx = 0, flipped = false, viewMode = 'study';
 let ratings = {};
-let selected = { topic: 'Giao tiếp hàng ngày', level: 'B1-B2', type: 'tất cả' };
+let selected = { topic: '', level: 'B1-B2', type: 'tất cả' };
 let selectedCount = 10;
 let inputMode = 'ai';
 let testAnswered = false;
@@ -488,8 +472,10 @@ async function generate() {
   try {
     let body;
     if (inputMode === 'ai') {
-      currentTopic = selected.topic;
-      body = { type: 'flashcard_en', topic: selected.topic, level: selected.level, wordType: selected.type, count: selectedCount };
+      const topicVal = document.getElementById('topicInput').value.trim() || 'Giao tiếp hàng ngày';
+      const countVal = parseInt(document.getElementById('countInput').value) || 10;
+      currentTopic = topicVal;
+      body = { type: 'flashcard_en', topic: topicVal, level: selected.level, wordType: selected.type, count: countVal };
     } else {
       const raw = document.getElementById('wordList').value.trim();
       if (!raw) { alert('Nhập từ vựng đi!'); btn.disabled = false; btn.textContent = '✨ Tạo flashcard'; return; }
