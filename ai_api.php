@@ -83,7 +83,7 @@ if ($type === 'chat') {
     $topic = $input['topic'] ?? '';
     $level = $input['level'] ?? 'B1-B2';
     $wordType = $input['wordType'] ?? 'tất cả';
-    $count = max(5, min(30, (int)($input['count'] ?? 10)));
+    $count = max(1, (int)($input['count'] ?? 10));
     $typeNote = $wordType !== 'tất cả' ? ", chỉ lấy $wordType" : '';
     $messages = [
         ['role'=>'system','content'=>'Bạn là giáo viên tiếng Anh. CHỈ trả về JSON array thuần túy, không giải thích thêm.'],
