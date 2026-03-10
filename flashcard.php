@@ -110,7 +110,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
 /* CARD */
 .fc-scene { margin-bottom: 14px; user-select: none; }
 .fc-card { position: relative; width: 100%; min-height: 250px; border-radius: 18px; border: 1.5px solid var(--border); background: var(--surface); transition: border-color 0.2s; }
-.fc-face { width: 100%; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
+.fc-face { width: 100%; min-height: 250px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
 .fc-divider { width: 60px; height: 2px; background: var(--border2); border-radius: 99px; margin: 12px 0; }
 .fc-back { border-color: var(--accent); }
 .fc-tap-hint { position: absolute; bottom: 14px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px; }
