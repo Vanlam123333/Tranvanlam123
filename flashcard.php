@@ -348,7 +348,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
                 <div class="fc-tap-hint" style="position:relative;bottom:auto;margin-top:16px;">👆 Nhấn để xem nghĩa</div>
               </div>
               <!-- MẶT SAU: nghĩa tiếng Việt -->
-              <div class="fc-face fc-back" id="fcBack" style="display:none;">
+              <div class="fc-face fc-back" id="fcBack" style="display:none;visibility:hidden;">
                 <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
                 <div class="fc-meaning" id="fcMeaning"></div>
                 <div class="fc-example">
@@ -509,37 +509,55 @@ function loadCards(c) {
 function renderCard() {
   const c = cards[idx];
   if (!c) return;
-  document.getElementById('fcWord').textContent      = c.word;
+
+  // Cập nhật nội dung mặt trước
+  document.getElementById('fcWord').textContent      = c.word || '';
   document.getElementById('fcPhonetic').textContent  = c.phonetic || '';
   document.getElementById('fcType').textContent      = c.type || '';
+
+  // Cập nhật nội dung mặt sau (tiếng Việt)
   document.getElementById('fcMeaning').textContent   = c.meaning || '';
-  document.getElementById('fcExample').textContent   = c.example ? `"${c.example}"` : '';
+  document.getElementById('fcExample').textContent   = c.example ? '"' + c.example + '"' : '';
   document.getElementById('fcExampleVi').textContent = c.example_vi || '';
-  document.getElementById('fcCount').textContent     = `${idx + 1} / ${cards.length}`;
-  const front = document.getElementById('fcFront');
-  const back  = document.getElementById('fcBack');
-  if (front) front.style.display = 'flex';
-  if (back)  back.style.display  = 'none';
-  if (document.getElementById('fcCard')) document.getElementById('fcCard').style.borderColor = 'var(--border)';
+
+  document.getElementById('fcCount').textContent = (idx + 1) + ' / ' + cards.length;
+
+  // Reset về mặt trước
+  showFront();
   document.getElementById('srsBtns').style.display = 'none';
   flipped = false;
   highlightListItem();
   renderTestCard();
 }
 
+function showFront() {
+  const front = document.getElementById('fcFront');
+  const back  = document.getElementById('fcBack');
+  const card  = document.getElementById('fcCard');
+  if (front) { front.style.display = 'flex'; front.style.visibility = 'visible'; }
+  if (back)  { back.style.display  = 'none'; back.style.visibility  = 'hidden'; }
+  if (card)  card.style.borderColor = 'var(--border)';
+}
+
+function showBack() {
+  const front = document.getElementById('fcFront');
+  const back  = document.getElementById('fcBack');
+  const card  = document.getElementById('fcCard');
+  if (front) { front.style.display = 'none'; front.style.visibility = 'hidden'; }
+  if (back)  { back.style.display  = 'flex'; back.style.visibility  = 'visible'; }
+  if (card)  card.style.borderColor = 'var(--accent)';
+}
+
 function flipCard() {
   if (viewMode !== 'study') return;
   flipped = !flipped;
-  const front = document.getElementById('fcFront');
-  const back  = document.getElementById('fcBack');
   if (flipped) {
-    front.style.display = 'none'; back.style.display = 'flex';
-    document.getElementById('fcCard').style.borderColor = 'var(--accent)';
+    showBack();
+    document.getElementById('srsBtns').style.display = 'flex';
   } else {
-    front.style.display = 'flex'; back.style.display = 'none';
-    document.getElementById('fcCard').style.borderColor = 'var(--border)';
+    showFront();
+    document.getElementById('srsBtns').style.display = 'none';
   }
-  document.getElementById('srsBtns').style.display = flipped ? 'flex' : 'none';
 }
 
 // ── NAVIGATION ──
