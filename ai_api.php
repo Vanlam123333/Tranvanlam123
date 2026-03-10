@@ -91,7 +91,7 @@ if ($type === 'chat') {
 Mỗi card: word (từ tiếng Anh), phonetic (phiên âm IPA), type (noun/verb/adj/adv), meaning (nghĩa tiếng Việt ngắn), example (câu ví dụ tiếng Anh tự nhiên), example_vi (dịch tiếng Việt).
 CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\":\"...\",\"example\":\"...\",\"example_vi\":\"...\"}]"]
     ];
-    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 6000);
     $clean = preg_replace('/```json|```/', '', $raw);
     $s = strpos($clean,'['); $e = strrpos($clean,']');
     $cards = json_decode(substr($clean,$s,$e-$s+1), true) ?? [];
@@ -106,7 +106,7 @@ Mỗi card: word (từ tiếng Anh đúng chính tả), phonetic (phiên âm IPA
 Nếu từ đã có nghĩa kèm theo thì dùng nghĩa đó.
 CHỈ JSON: [{\"word\":\"...\",\"phonetic\":\"...\",\"type\":\"...\",\"meaning\":\"...\",\"example\":\"...\",\"example_vi\":\"...\"}]"]
     ];
-    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL);
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 6000);
     $clean = preg_replace('/```json|```/', '', $raw);
     $s = strpos($clean,'['); $e = strrpos($clean,']');
     $cards = json_decode(substr($clean,$s,$e-$s+1), true) ?? [];
