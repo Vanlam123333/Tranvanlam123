@@ -111,8 +111,8 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
 .fc-scene { margin-bottom: 14px; user-select: none; }
 .fc-card { position: relative; width: 100%; border-radius: 18px; border: 1.5px solid var(--border); background: var(--surface); transition: border-color 0.2s; cursor: pointer; }
 .fc-card.is-back { border-color: var(--accent); }
-.fc-card-inner { position: relative; width: 100%; min-height: 250px; }
-.fc-face { position: absolute; top: 0; left: 0; width: 100%; min-height: 250px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
+.fc-card-inner { position: relative; width: 100%; }
+.fc-face { width: 100%; min-height: 250px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
 .fc-divider { width: 60px; height: 2px; background: var(--border2); border-radius: 99px; margin: 12px 0; }
 .fc-tap-hint { position: relative; bottom: auto; margin-top: 16px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .fc-word { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
@@ -479,7 +479,10 @@ async function generate() {
     let body;
     if (inputMode === 'ai') {
       const topicVal = document.getElementById('topicInput').value.trim() || 'Giao tiếp hàng ngày';
-      const countVal = parseInt(document.getElementById('countInput').value) || 10;
+      const countVal = Math.max(1, Math.min(100, parseInt(document.getElementById('countInput').value) || 10));
+      if (isNaN(parseInt(document.getElementById('countInput').value)) || parseInt(document.getElementById('countInput').value) < 1) {
+        document.getElementById('countInput').value = 10;
+      }
       currentTopic = topicVal;
       body = { type: 'flashcard_en', topic: topicVal, level: selected.level, wordType: selected.type, count: countVal };
     } else {
@@ -527,7 +530,7 @@ function renderCard() {
 
   // Cập nhật chiều cao card-inner = chiều cao của face đang hiện
   // (dùng 250px mặc định, đủ cho cả 2)
-  document.getElementById('fcCardInner').style.minHeight = '250px';
+  // height auto-adjusts to face content
 
   // Reset về mặt trước
   flipped = false;
@@ -617,6 +620,10 @@ function jumpTo(i) { idx = i; renderCard(); }
 // ── VIEW MODE ──
 function setViewMode(mode) {
   viewMode = mode;
+  // Reset flip state & hide SRS khi đổi mode
+  flipped = false;
+  showFront();
+  document.getElementById('srsBtns').style.display = 'none';
   document.getElementById('studyMode').style.display = mode === 'study' ? 'block' : 'none';
   document.getElementById('testMode').style.display  = mode === 'test'  ? 'block' : 'none';
   document.getElementById('studyModeBtn').style.borderColor = mode === 'study' ? 'var(--accent)' : 'var(--border)';
@@ -630,13 +637,13 @@ function setViewMode(mode) {
 function renderTestCard() {
   if (viewMode !== 'test') return;
   const c = cards[idx]; if (!c) return;
+  testAnswered = false;  // reset luôn ở đây
   document.getElementById('testQuestion').textContent = c.meaning || '';
   document.getElementById('testInput').value = '';
   document.getElementById('testInput').className = 'test-input';
   document.getElementById('testFeedback').style.display = 'none';
   document.getElementById('testCount').textContent = `Câu ${idx + 1} / ${cards.length}`;
   document.getElementById('hintLetters').textContent = c.word[0] + '_'.repeat(c.word.length - 1);
-  testAnswered = false;
   setTimeout(() => document.getElementById('testInput').focus(), 100);
 }
 function checkAnswer() {
