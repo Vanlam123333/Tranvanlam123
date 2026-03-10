@@ -293,24 +293,82 @@ SYS;
 
 } elseif ($type === 'math_image') {
     $imageBase64 = $input['image'] ?? '';
+    $mediaType   = $input['mediaType'] ?? 'image/jpeg';
     if (!$imageBase64) { echo json_encode(['result'=>'Không có ảnh.']); exit; }
-    $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$GROQ_KEY,'Content-Type: application/json'],
-        CURLOPT_POSTFIELDS => json_encode([
-            'model' => 'llama-3.2-11b-vision-preview',
-            'max_tokens' => 3000,
-            'messages' => [['role'=>'user','content'=>[
-                ['type'=>'image_url','image_url'=>['url'=>'data:image/jpeg;base64,'.$imageBase64]],
-                ['type'=>'text','text'=>'Đây là bài toán cấp 3. Đọc đề và giải từng bước chi tiết bằng tiếng Việt. Trình bày rõ ràng.']
-            ]]]
-        ]),
-        CURLOPT_TIMEOUT => 60
-    ]);
-    $raw = curl_exec($ch); curl_close($ch);
-    $json = json_decode($raw, true);
-    $result = $json['choices'][0]['message']['content'] ?? 'Không thể đọc ảnh. Thử ảnh rõ hơn!';
+
+    // Dùng Anthropic Claude API — hỗ trợ ảnh base64 trực tiếp
+    $ANTHROPIC_KEY = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : (getenv('ANTHROPIC_API_KEY') ?: '');
+
+    if ($ANTHROPIC_KEY) {
+        // --- Anthropic Claude (ưu tiên) ---
+        $ch = curl_init('https://api.anthropic.com/v1/messages');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true,
+            CURLOPT_TIMEOUT => 60,
+            CURLOPT_HTTPHEADER => [
+                'x-api-key: '.$ANTHROPIC_KEY,
+                'anthropic-version: 2023-06-01',
+                'Content-Type: application/json'
+            ],
+            CURLOPT_POSTFIELDS => json_encode([
+                'model'      => 'claude-opus-4-6',
+                'max_tokens' => 3000,
+                'messages'   => [['role'=>'user','content'=>[
+                    ['type'=>'image','source'=>[
+                        'type'       => 'base64',
+                        'media_type' => $mediaType,
+                        'data'       => $imageBase64
+                    ]],
+                    ['type'=>'text','text'=>
+                        'Đây là bài toán toán học. Hãy:\n'.
+                        '1. Đọc và nhận diện đề bài chính xác\n'.
+                        '2. Giải từng bước chi tiết, rõ ràng bằng tiếng Việt\n'.
+                        '3. Trình bày công thức dạng LaTeX (dùng $...$ hoặc $$...$$)\n'.
+                        '4. Kết luận đáp án cuối cùng\n'.
+                        'Nếu không nhận ra được đề bài, hãy nói rõ phần nào không đọc được.'
+                    ]
+                ]]]
+            ])
+        ]);
+        $raw = curl_exec($ch); curl_close($ch);
+        $json   = json_decode($raw, true);
+        $result = $json['content'][0]['text'] ?? null;
+        if (!$result) {
+            $result = 'Lỗi Anthropic: '.($json['error']['message'] ?? 'Không xác định');
+        }
+    } else {
+        // --- Fallback: Groq Vision (chỉ hoạt động với URL, không hỗ trợ base64) ---
+        // Thử dùng llama-3.2-11b-vision-preview với base64 (Groq đang bổ sung hỗ trợ)
+        $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true,
+            CURLOPT_TIMEOUT => 60,
+            CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$GROQ_KEY,'Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode([
+                'model'      => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                'max_tokens' => 3000,
+                'messages'   => [['role'=>'user','content'=>[
+                    ['type'=>'image_url','image_url'=>['url'=>'data:'.$mediaType.';base64,'.$imageBase64]],
+                    ['type'=>'text','text'=>
+                        'Đây là bài toán toán học cấp 3. Đọc đề và giải từng bước chi tiết bằng tiếng Việt. '.
+                        'Trình bày rõ ràng, dùng LaTeX cho công thức ($...$). '.
+                        'Nếu không đọc được ảnh, hãy nói rõ.'
+                    ]
+                ]]]
+            ])
+        ]);
+        $raw = curl_exec($ch); curl_close($ch);
+        $json   = json_decode($raw, true);
+        $result = $json['choices'][0]['message']['content'] ?? null;
+        if (!$result) {
+            $errMsg = $json['error']['message'] ?? '';
+            if (strpos($errMsg, 'vision') !== false || strpos($errMsg, 'image') !== false) {
+                $result = '⚠️ Model không hỗ trợ đọc ảnh base64. Vui lòng cấu hình ANTHROPIC_API_KEY trong server để dùng tính năng này.';
+            } else {
+                $result = 'Không thể đọc ảnh. '.($errMsg ?: 'Thử ảnh rõ hơn!');
+            }
+        }
+    }
     echo json_encode(['result' => $result]);
 
 } elseif ($type === 'smart_plan') {
