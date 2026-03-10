@@ -28,7 +28,7 @@ $grouped = [];
 foreach ($upcoming_rows as $r) $grouped[$r['date']][] = $r;
 $hour = (int)date('H');
 $greeting = $hour < 12 ? 'Chào buổi sáng' : ($hour < 17 ? 'Chào buổi chiều' : 'Chào buổi tối');
-$greetingIcon = $hour < 12 ? '☀️' : ($hour < 17 ? '🌤️' : '🌙');
+$greetingIcon = $hour < 12 ? '<img src="https://api.iconify.design/ph/sun-bold.svg" style="width:20px;height:20px;vertical-align:middle">' : ($hour < 17 ? '<img src="https://api.iconify.design/ph/cloud-sun-bold.svg" style="width:20px;height:20px;vertical-align:middle">' : '<img src="https://api.iconify.design/ph/moon-bold.svg" style="width:20px;height:20px;vertical-align:middle">');
 $nameArr = explode(' ', $user['name']);
 $firstName = end($nameArr);
 $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
@@ -163,30 +163,30 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
   <!-- HERO GREETING -->
   <div class="dash-hero">
     <div class="dash-greeting"><?= $greetingIcon ?> <?= $dayVi ?>, <?= date('d/m/Y') ?></div>
-    <h1 class="dash-name">Chào, <?= htmlspecialchars($firstName) ?>! 👋</h1>
+    <h1 class="dash-name">Chào, <?= htmlspecialchars($firstName) ?>! </h1>
     <div class="dash-meta">
-      <div class="dash-meta-item">🕐 <span id="liveClock">--:--</span></div>
+      <div class="dash-meta-item"><img src="https://api.iconify.design/ph/clock-bold.svg" style="width:14px;height:14px;vertical-align:middle;filter:invert(0.5)"> <span id="liveClock">--:--</span></div>
       <?php if($total_today > 0): ?>
-      <div class="dash-meta-item">✅ <?= $done_today ?>/<?= $total_today ?> nhiệm vụ hôm nay</div>
-      <div class="dash-meta-item">📊 <?= $pct ?>% hoàn thành</div>
+      <div class="dash-meta-item"><img src="https://api.iconify.design/ph/check-circle-bold.svg" style="width:14px;height:14px;vertical-align:middle;filter:invert(0.5)"> <?= $done_today ?>/<?= $total_today ?> nhiệm vụ hôm nay</div>
+      <div class="dash-meta-item"><img src="https://api.iconify.design/ph/chart-bar-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"> <?= $pct ?>% hoàn thành</div>
       <?php endif; ?>
-      <div class="dash-meta-item">🍅 <?= $pomo_today['c'] ?> pomodoro</div>
+      <div class="dash-meta-item"><img src="https://api.iconify.design/ph/timer-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"> <?= $pomo_today['c'] ?> pomodoro</div>
     </div>
     <div class="dash-actions">
-      <a href="chat.php" class="dash-action-btn dash-action-primary">🧠 Chat với Spark AI</a>
-      <a href="pomodoro.php" class="dash-action-btn dash-action-ghost">🍅 Bắt đầu học</a>
-      <a href="planner.php" class="dash-action-btn dash-action-ghost">📅 Thêm việc</a>
+      <a href="chat.php" class="dash-action-btn dash-action-primary"><img src="https://api.iconify.design/ph/brain-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"> Chat với Spark AI</a>
+      <a href="pomodoro.php" class="dash-action-btn dash-action-ghost"><img src="https://api.iconify.design/ph/timer-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"> Bắt đầu học</a>
+      <a href="planner.php" class="dash-action-btn dash-action-ghost"><img src="https://api.iconify.design/ph/plus-circle-bold.svg" style="width:16px;height:16px;vertical-align:middle;filter:invert(1)"> Thêm việc</a>
     </div>
   </div>
 
   <!-- STATS -->
   <div class="stat-grid">
     <div class="stat-tile">
-      <div class="stat-tile-icon green">✅</div>
+      <div class="stat-tile-icon green"><img src="https://api.iconify.design/ph/check-circle-bold.svg" style="width:22px;height:22px;filter:invert(1)"></div>
       <div><div class="stat-tile-val"><?= $done_today ?>/<?= $total_today ?: '0' ?></div><div class="stat-tile-label">Nhiệm vụ hôm nay</div></div>
     </div>
     <div class="stat-tile">
-      <div class="stat-tile-icon indigo">🍅</div>
+      <div class="stat-tile-icon indigo"><img src="https://api.iconify.design/ph/timer-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"></div>
       <div><div class="stat-tile-val"><?= $pomo_today['c'] ?></div><div class="stat-tile-label">Pomodoro hôm nay</div></div>
     </div>
     <div class="stat-tile">
@@ -194,7 +194,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
       <div><div class="stat-tile-val"><?= $pomo_today['m'] ?>p</div><div class="stat-tile-label">Phút học hôm nay</div></div>
     </div>
     <div class="stat-tile">
-      <div class="stat-tile-icon teal">🗒️</div>
+      <div class="stat-tile-icon teal"><img src="https://api.iconify.design/ph/note-bold.svg" style="width:22px;height:22px;filter:invert(1)"></div>
       <div><div class="stat-tile-val"><?= $notes_count ?></div><div class="stat-tile-label">Ghi chú</div></div>
     </div>
   </div>
@@ -202,9 +202,9 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
   <!-- AI INSIGHT -->
   <div class="ai-insight">
     <div class="ai-insight-header">
-      <div class="ai-insight-badge">✨ AI <span>Spark</span></div>
+      <div class="ai-insight-badge"><img src="https://api.iconify.design/ph/sparkle-bold.svg" style="width:12px;height:12px;filter:invert(1)"> AI <span>Spark</span></div>
       <span style="font-size:11px;color:var(--muted);">Lời khuyên hôm nay</span>
-      <button onclick="loadAIInsight()" class="btn btn-ghost btn-sm" style="margin-left:auto;" id="insightRefresh">🔄 Làm mới</button>
+      <button onclick="loadAIInsight()" class="btn btn-ghost btn-sm" style="margin-left:auto;" id="insightRefresh"><img src="https://api.iconify.design/ph/arrow-clockwise-bold.svg" style="width:13px;height:13px;vertical-align:middle;filter:invert(0.6)"> Làm mới</button>
     </div>
     <div class="ai-insight-text" id="aiInsight">
       <span style="color:var(--muted);">⌛ Đang tải lời khuyên AI...</span>
@@ -237,7 +237,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
     <!-- TODAY TASKS -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">📅 Nhiệm vụ hôm nay</div>
+        <div class="card-title"><img src="https://api.iconify.design/ph/calendar-bold.svg" style="width:14px;height:14px;vertical-align:middle"> Nhiệm vụ hôm nay</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <?php if($total_today > 0): ?>
           <span style="font-size:11px;font-weight:800;color:var(--green);"><?= $done_today ?>/<?= $total_today ?></span>
@@ -260,7 +260,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
         <?php endwhile; ?>
         <?php else: ?>
         <div style="text-align:center;padding:1.5rem 0;color:var(--muted);">
-          <div style="font-size:2.5rem;margin-bottom:8px;opacity:.4;">📋</div>
+          <div style="font-size:2.5rem;margin-bottom:8px;opacity:.4;"><img src="https://api.iconify.design/ph/clipboard-bold.svg" style="width:28px;height:28px;opacity:.25"></div>
           <div style="font-size:13px;font-weight:600;margin-bottom:12px;">Chưa có nhiệm vụ hôm nay</div>
           <a href="planner.php" class="btn btn-primary btn-sm">+ Tạo kế hoạch</a>
         </div>
@@ -273,8 +273,8 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
       <!-- Week activity -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">📈 Hoạt động 7 ngày</div>
-          <span style="font-size:10px;color:var(--muted);">🔵 Pomo &nbsp; 🟢 Task</span>
+          <div class="card-title"><img src="https://api.iconify.design/ph/trend-up-bold.svg" style="width:14px;height:14px;vertical-align:middle"> Hoạt động 7 ngày</div>
+          <span style="font-size:10px;color:var(--muted);"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent)"></span> Pomo &nbsp; <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green)"></span> Task</span>
         </div>
         <div class="card-body" style="padding-top:.75rem;">
           <div class="week-strip">
@@ -314,7 +314,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
           <?php endforeach; ?>
           <?php endforeach; ?>
           <?php else: ?>
-          <div style="text-align:center;color:var(--muted);font-size:12px;padding:1rem 0;font-weight:600;">🎉 Không có nhiệm vụ sắp đến hạn!</div>
+          <div style="text-align:center;color:var(--muted);font-size:12px;padding:1rem 0;font-weight:600;"><img src="https://api.iconify.design/ph/star-bold.svg" style="width:14px;height:14px;vertical-align:middle"> Không có nhiệm vụ sắp đến hạn!</div>
           <?php endif; ?>
         </div>
       </div>
@@ -324,8 +324,8 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
   <!-- AI STUDY PLAN -->
   <div class="card" style="margin-bottom:1.2rem;">
     <div class="card-header">
-      <div class="card-title">🤖 AI Lập kế hoạch học</div>
-      <button onclick="generateStudyPlan()" class="btn btn-primary btn-sm" id="planBtn">✨ Tạo kế hoạch</button>
+      <div class="card-title"><img src="https://api.iconify.design/ph/robot-bold.svg" style="width:15px;height:15px;vertical-align:middle"> AI Lập kế hoạch học</div>
+      <button onclick="generateStudyPlan()" class="btn btn-primary btn-sm" id="planBtn">Tạo kế hoạch</button>
     </div>
     <div class="card-body">
       <div class="ai-plan-wrap" id="aiPlan">
@@ -334,22 +334,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
     </div>
   </div>
 
-  <!-- QUICK ACCESS -->
-  <div class="card">
-    <div class="card-header"><div class="card-title">⚡ Truy cập nhanh</div></div>
-    <div class="card-body">
-      <div class="quick-grid">
-        <a href="chat.php"      class="quick-btn"><span class="quick-btn-icon">🧠</span>Chat AI</a>
-        <a href="flashcard.php" class="quick-btn"><span class="quick-btn-icon">⚡</span>Flashcard</a>
-        <a href="notes.php"     class="quick-btn"><span class="quick-btn-icon">🗒️</span>Ghi chú</a>
-        <a href="planner.php"   class="quick-btn"><span class="quick-btn-icon">📅</span>Kế hoạch</a>
-        <a href="pomodoro.php"  class="quick-btn"><span class="quick-btn-icon">🍅</span>Pomodoro</a>
-        <a href="mindmap.php"   class="quick-btn"><span class="quick-btn-icon">🗺️</span>Mind Map</a>
-        <a href="math.php"      class="quick-btn"><span class="quick-btn-icon">📐</span>Toán</a>
-        <a href="quiz.php"      class="quick-btn"><span class="quick-btn-icon">🎯</span>Quiz</a>
-      </div>
-    </div>
-  </div>
+
 
 </div>
 
@@ -367,7 +352,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
 async function loadAIInsight() {
   const el = document.getElementById('aiInsight');
   const btn = document.getElementById('insightRefresh');
-  el.innerHTML = '<span style="color:var(--muted);">✨ Đang tải lời khuyên từ AI...</span>';
+  el.innerHTML = '<span style="color:var(--muted);">Đang tải lời khuyên từ AI...</span>';
   if(btn) btn.disabled = true;
   const hour = new Date().getHours();
   const tod = hour < 12 ? 'buổi sáng' : hour < 17 ? 'buổi chiều' : 'buổi tối';
@@ -375,9 +360,9 @@ async function loadAIInsight() {
   try {
     const res = await fetch('ai_api.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'chat',messages:msgs})});
     const data = await res.json();
-    el.innerHTML = data.result || 'Hãy giữ vững tinh thần học tập nhé! 💪';
+    el.innerHTML = data.result || 'Hãy giữ vững tinh thần học tập nhé!';
   } catch(e) {
-    el.innerHTML = '💡 Mỗi ngày học một điều mới, sau một năm bạn sẽ biết 365 điều mới!';
+    el.innerHTML = '<img src="https://api.iconify.design/ph/lightbulb-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"> Mỗi ngày học một điều mới, sau một năm bạn sẽ biết 365 điều mới!';
   }
   if(btn) btn.disabled = false;
 }
@@ -386,7 +371,7 @@ async function generateStudyPlan() {
   const el = document.getElementById('aiPlan');
   const btn = document.getElementById('planBtn');
   btn.disabled = true; btn.textContent = '⌛ Đang tạo...';
-  el.innerHTML = '<span style="color:var(--muted);">🤖 AI đang phân tích và tạo kế hoạch...</span>';
+  el.innerHTML = '<span style="color:var(--muted);">AI đang phân tích và tạo kế hoạch...</span>';
   const hour = new Date().getHours();
   const msgs = [{role:'user', content:`Tôi có ${<?=$total_today?>} nhiệm vụ hôm nay, đã làm ${<?=$done_today?>}. Đã học ${<?=$pomo_today['m']?>} phút. Hãy tạo kế hoạch học tập chi tiết cho phần còn lại của ngày hôm nay (từ ${hour}h), chia theo khung giờ pomodoro 25 phút, có nghỉ giải lao. Ngắn gọn, thực tế, bằng tiếng Việt.`}];
   try {
@@ -394,9 +379,9 @@ async function generateStudyPlan() {
     const data = await res.json();
     el.innerHTML = (data.result||'').replace(/\n/g,'<br>');
   } catch(e) {
-    el.innerHTML = '⚠️ Không thể tải kế hoạch. Thử lại!';
+    el.innerHTML = 'Không thể tải kế hoạch. Thử lại!';
   }
-  btn.disabled = false; btn.innerHTML = '✨ Tạo lại';
+  btn.disabled = false; btn.innerHTML = 'Tạo lại';
 }
 
 // Load on page ready
