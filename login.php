@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đăng nhập — MindSpark</title>
 <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 body { background: #07070e; overflow-x: hidden; }
 .login-scene {
@@ -53,7 +54,7 @@ body { background: #07070e; overflow-x: hidden; }
 }
 .login-hero-text { text-align: center; }
 .login-hero-title {
-  font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
+  font-family: 'Be Vietnam Pro', sans-serif; font-size: 3rem; font-weight: 800;
   color: #fff; letter-spacing: -1.5px; line-height: 1.05;
   margin-bottom: 1rem;
 }
@@ -96,10 +97,10 @@ body { background: #07070e; overflow-x: hidden; }
   box-shadow: 0 4px 20px rgba(79,70,229,0.4);
 }
 .login-logo-mark svg { width: 26px; height: 26px; }
-.login-logo-text { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.login-logo-text { font-family: 'Be Vietnam Pro', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
 .login-logo-text em { font-style: normal; background: linear-gradient(90deg, #6366f1, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-.login-welcome { font-size: 22px; font-family: 'Syne', sans-serif; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
+.login-welcome { font-size: 22px; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
 .login-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 1.8rem; }
 
 .login-input-wrap { position: relative; margin-bottom: 12px; }
@@ -111,7 +112,7 @@ body { background: #07070e; overflow-x: hidden; }
   width: 100%; padding: 12px 14px 12px 40px;
   border: 1.5px solid rgba(255,255,255,0.07);
   border-radius: 12px; background: rgba(255,255,255,0.04);
-  color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: #fff; font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px;
   outline: none; transition: all 0.2s;
 }
 .login-input:focus { border-color: #6366f1; background: rgba(99,102,241,0.06); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
@@ -120,7 +121,7 @@ body { background: #07070e; overflow-x: hidden; }
 .login-btn {
   width: 100%; padding: 13px; border-radius: 12px;
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: #fff; border: none; font-family: 'Syne', sans-serif;
+  color: #fff; border: none; font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 15px; font-weight: 700; cursor: pointer;
   transition: all 0.2s; margin-top: 8px;
   box-shadow: 0 4px 20px rgba(79,70,229,0.3);
@@ -166,11 +167,11 @@ body { background: #07070e; overflow-x: hidden; }
       <div class="login-hero-sub">MindSpark kết hợp AI tiên tiến với công cụ học tập hiệu quả để giúp bạn đạt kết quả tốt nhất.</div>
     </div>
     <div class="feature-pills">
-      <div class="feature-pill"><span>🧠</span> Gia sư AI giải thích mọi môn học</div>
-      <div class="feature-pill"><span>⚡</span> Flashcard thông minh với spaced repetition</div>
-      <div class="feature-pill"><span>🗺️</span> Mind Map trực quan bằng AI</div>
-      <div class="feature-pill"><span>🍅</span> Pomodoro + Deep Focus cho năng suất cao</div>
-      <div class="feature-pill"><span>📐</span> Giải toán từng bước với LaTeX</div>
+      <div class="feature-pill"><img src="https://api.iconify.design/ph/brain-bold.svg" style="width:20px;height:20px;filter:invert(1)"> Gia sư AI giải thích mọi môn học</div>
+      <div class="feature-pill"><img src="https://api.iconify.design/ph/lightning-bold.svg" style="width:20px;height:20px;filter:invert(1)"> Flashcard thông minh với spaced repetition</div>
+      <div class="feature-pill"><img src="https://api.iconify.design/ph/map-trifold-bold.svg" style="width:20px;height:20px;filter:invert(1)"> Mind Map trực quan bằng AI</div>
+      <div class="feature-pill"><img src="https://api.iconify.design/ph/timer-bold.svg" style="width:20px;height:20px;filter:invert(1)"> Pomodoro + Deep Focus cho năng suất cao</div>
+      <div class="feature-pill"><img src="https://api.iconify.design/ph/calculator-bold.svg" style="width:20px;height:20px;filter:invert(1)"> Giải toán từng bước với LaTeX</div>
     </div>
   </div>
 
@@ -203,11 +204,11 @@ body { background: #07070e; overflow-x: hidden; }
 
       <form method="POST">
         <div class="login-input-wrap">
-          <span class="login-input-icon">✉️</span>
+          <img src="https://api.iconify.design/ph/envelope-bold.svg" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;filter:invert(0.5)">
           <input type="email" name="email" class="login-input" placeholder="Email của bạn" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
         </div>
         <div class="login-input-wrap">
-          <span class="login-input-icon">🔑</span>
+          <img src="https://api.iconify.design/ph/lock-bold.svg" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;filter:invert(0.5)">
           <input type="password" name="password" class="login-input" placeholder="Mật khẩu" required>
         </div>
         <button type="submit" class="login-btn">Đăng nhập →</button>
