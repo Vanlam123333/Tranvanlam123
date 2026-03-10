@@ -1891,10 +1891,12 @@ function drawAnalyzeGraph(expr) {
 //  GIẢI TỪ ẢNH
 // ══════════════════════════════════════
 let imgBase64 = null;
+let imgMediaType = 'image/jpeg';
 
 function handleImgFile(input) {
   const file = input.files[0];
   if (!file) return;
+  imgMediaType = file.type || 'image/jpeg';
   const reader = new FileReader();
   reader.onload = e => {
     imgBase64 = e.target.result.split(',')[1];
@@ -1937,7 +1939,7 @@ async function solveFromImage() {
     const res  = await fetch('ai_api.php', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ type: 'math_image', image: imgBase64 })
+      body: JSON.stringify({ type: 'math_image', image: imgBase64, mediaType: imgMediaType })
     });
     const data = await res.json();
     document.getElementById('imgLoading').style.display  = 'none';
