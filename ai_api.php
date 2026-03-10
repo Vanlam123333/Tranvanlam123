@@ -282,6 +282,37 @@ SYS;
     $qs = $s!==false ? json_decode(substr($clean,$s,$e-$s+1), true) : [];
     echo json_encode(['questions' => $qs ?? []]);
 
+
+} elseif ($type === 'math_analyze') {
+    $expr = $input['expr'] ?? '';
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là giáo viên toán cấp 3 Việt Nam. Phân tích hàm số ngắn gọn, rõ ràng bằng tiếng Việt.'],
+        ['role'=>'user','content'=>"Phân tích hàm số f(x) = $expr. Nêu: 1. Tập xác định  2. Đơn điệu  3. Cực trị  4. Tiệm cận  5. Nhận xét. Ngắn gọn dễ hiểu cho học sinh cấp 3."]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 2000)]);
+
+} elseif ($type === 'math_image') {
+    $imageBase64 = $input['image'] ?? '';
+    if (!$imageBase64) { echo json_encode(['result'=>'Không có ảnh.']); exit; }
+    $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$GROQ_KEY,'Content-Type: application/json'],
+        CURLOPT_POSTFIELDS => json_encode([
+            'model' => 'llama-3.2-11b-vision-preview',
+            'max_tokens' => 3000,
+            'messages' => [['role'=>'user','content'=>[
+                ['type'=>'image_url','image_url'=>['url'=>'data:image/jpeg;base64,'.$imageBase64]],
+                ['type'=>'text','text'=>'Đây là bài toán cấp 3. Đọc đề và giải từng bước chi tiết bằng tiếng Việt. Trình bày rõ ràng.']
+            ]]]
+        ]),
+        CURLOPT_TIMEOUT => 60
+    ]);
+    $raw = curl_exec($ch); curl_close($ch);
+    $json = json_decode($raw, true);
+    $result = $json['choices'][0]['message']['content'] ?? 'Không thể đọc ảnh. Thử ảnh rõ hơn!';
+    echo json_encode(['result' => $result]);
+
 } elseif ($type === 'smart_plan') {
     $done = (int)($input['done'] ?? 0);
     $total = (int)($input['total'] ?? 0);
