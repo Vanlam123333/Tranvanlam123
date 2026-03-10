@@ -108,9 +108,10 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
 .fc-progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #a78bfa); transition: width 0.4s ease; }
 
 /* CARD */
-.fc-scene { cursor: pointer; margin-bottom: 14px; user-select: none; }
+.fc-scene { margin-bottom: 14px; user-select: none; }
 .fc-card { position: relative; width: 100%; min-height: 250px; border-radius: 18px; border: 1.5px solid var(--border); background: var(--surface); transition: border-color 0.2s; }
-.fc-face { width: 100%; min-height: 250px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
+.fc-face { width: 100%; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
+.fc-divider { width: 60px; height: 2px; background: var(--border2); border-radius: 99px; margin: 12px 0; }
 .fc-back { border-color: var(--accent); }
 .fc-tap-hint { position: absolute; bottom: 14px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .fc-word { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
@@ -338,21 +339,23 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
         <div id="studyMode">
           <div class="fc-scene" onclick="flipCard()">
             <div class="fc-card" id="fcCard">
+              <!-- MẶT TRƯỚC: từ tiếng Anh -->
               <div class="fc-face" id="fcFront">
                 <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
                 <div class="fc-word" id="fcWord"></div>
                 <div class="fc-phonetic" id="fcPhonetic"></div>
                 <div class="fc-badge" id="fcType"></div>
-                <div class="fc-tap-hint">👆 Nhấn để xem nghĩa</div>
+                <div class="fc-tap-hint" style="position:relative;bottom:auto;margin-top:16px;">👆 Nhấn để xem nghĩa</div>
               </div>
+              <!-- MẶT SAU: nghĩa tiếng Việt -->
               <div class="fc-face fc-back" id="fcBack" style="display:none;">
                 <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
                 <div class="fc-meaning" id="fcMeaning"></div>
                 <div class="fc-example">
-                  <em id="fcExample"></em>
+                  <div id="fcExample" style="font-size:13px;color:var(--muted);margin-top:8px;font-style:normal;"></div>
                   <div class="fc-example-vi" id="fcExampleVi"></div>
                 </div>
-                <div class="fc-tap-hint">👆 Nhấn để lật lại</div>
+                <div class="fc-tap-hint" style="position:relative;bottom:auto;margin-top:16px;">👆 Nhấn để lật lại</div>
               </div>
             </div>
           </div>
