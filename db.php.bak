@@ -100,19 +100,6 @@ CREATE TABLE IF NOT EXISTS room_messages (
     FOREIGN KEY(room_id) REFERENCES chat_rooms(id),
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
-CREATE TABLE IF NOT EXISTS flashcard_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    date TEXT NOT NULL,
-    topic TEXT,
-    word TEXT NOT NULL,
-    phonetic TEXT,
-    word_type TEXT,
-    meaning TEXT,
-    rating TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(id)
-);
 ");
 
 // Migrate old users table (add new columns if missing)
