@@ -337,8 +337,13 @@ canvas#graphCanvas {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .error-msg { color: var(--red); font-size: 11px; padding: 2px 8px; font-family: var(--mono); }
-em, i { font-style: normal !important; }
-* { font-style: normal; }
+
+/* Analyze & ImgSolve */
+.analyze-card { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+.analyze-card-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px; }
+.analyze-card-value { font-size:15px;font-weight:700;color:var(--text); }
+.analyze-spinner { width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto; }
+@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -354,6 +359,8 @@ em, i { font-style: normal !important; }
     <button class="math-tab" onclick="showTab('solver')">🧮 Giải toán AI</button>
     <button class="math-tab" onclick="showTab('formulas')">📚 Công thức</button>
     <button class="math-tab" onclick="showTab('calc')">🔢 Máy tính</button>
+    <button class="math-tab" onclick="showTab('analyze')">📊 Phân tích hàm</button>
+    <button class="math-tab" onclick="showTab('imgsolve')">📷 Giải từ ảnh</button>
   </div>
 
   <!-- ══════════ TAB: GRAPH ══════════ -->
@@ -693,11 +700,11 @@ em, i { font-style: normal !important; }
 //  TABS
 // ══════════════════════════════════════
 function showTab(t) {
-  ['graph','solver','formulas','calc'].forEach(x => {
+  ['graph','solver','formulas','calc','analyze','imgsolve'].forEach(x => {
     document.getElementById('tab-'+x).style.display = x===t ? 'block' : 'none';
   });
   document.querySelectorAll('.math-tab').forEach((b,i) => {
-    b.classList.toggle('active', ['graph','solver','formulas','calc'][i] === t);
+    b.classList.toggle('active', ['graph','solver','formulas','calc','analyze','imgsolve'][i] === t);
   });
   if (t === 'graph' && canvas) setTimeout(() => { resizeCanvas(); drawAll(); }, 50);
   if (t === 'formulas') renderFormulas('all');
@@ -1746,6 +1753,209 @@ function cx(key) {
   cxRender();
 }
 
+// ══════════════════════════════════════
+//  PHÂN TÍCH HÀM SỐ
+// ══════════════════════════════════════
+async function analyzeFunction() {
+  const expr = document.getElementById('analyzeInput').value.trim();
+  if (!expr) return;
+
+  document.getElementById('analyzeResult').style.display  = 'none';
+  document.getElementById('analyzeLoading').style.display = 'block';
+
+  try {
+    // Phân tích cục bộ bằng mathjs
+    const result = localAnalyze(expr);
+    // Gọi AI để giải thích chi tiết
+    const res  = await fetch('ai_api.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type: 'math_analyze', expr })
+    });
+    const data = await res.json();
+
+    document.getElementById('analyzeLoading').style.display = 'none';
+    document.getElementById('analyzeResult').style.display  = 'block';
+
+    // Render cards thông tin
+    const cards = [
+      { label: 'Tập xác định', value: result.domain },
+      { label: 'Giới hạn x→+∞', value: result.limitInf },
+      { label: 'Giới hạn x→-∞', value: result.limitNegInf },
+      { label: 'Cắt trục Oy (x=0)', value: result.yIntercept },
+    ];
+    document.getElementById('analyzeCards').innerHTML = cards.map(cd =>
+      `<div class="analyze-card"><div class="analyze-card-label">${cd.label}</div><div class="analyze-card-value">${cd.value}</div></div>`
+    ).join('');
+
+    // Vẽ đồ thị
+    drawAnalyzeGraph(expr);
+
+    // Hiển thị phân tích AI
+    document.getElementById('analyzeSteps').innerHTML =
+      `<div style="font-weight:700;margin-bottom:8px;color:var(--accent)">Phân tích chi tiết từ AI</div>` +
+      (data.result || '').replace(/\n/g, '<br>');
+
+  } catch(e) {
+    document.getElementById('analyzeLoading').style.display = 'none';
+    document.getElementById('analyzeResult').style.display  = 'block';
+    document.getElementById('analyzeSteps').innerHTML = '<span style="color:var(--red)">Lỗi phân tích. Kiểm tra lại biểu thức.</span>';
+    drawAnalyzeGraph(expr);
+  }
+}
+
+function localAnalyze(expr) {
+  const tryEval = (x) => { try { return math.evaluate(expr, {x}); } catch { return null; } };
+  // Domain
+  let domain = 'ℝ (toàn trục số)';
+  if (expr.includes('sqrt')) domain = 'x ≥ 0 (hoặc tùy biểu thức trong căn)';
+  if (expr.includes('/x') || expr.match(/\/\s*x/)) domain = 'x ≠ 0';
+  if (expr.includes('log') || expr.includes('ln')) domain = 'x > 0';
+  // Giới hạn
+  const limPos = tryEval(1e9);
+  const limNeg = tryEval(-1e9);
+  const fmt = v => v === null ? 'Không xác định' : !isFinite(v) ? (v > 0 ? '+∞' : '-∞') : v.toFixed(4);
+  // y-intercept
+  const y0 = tryEval(0);
+  return {
+    domain,
+    limitInf:    fmt(limPos),
+    limitNegInf: fmt(limNeg),
+    yIntercept:  y0 !== null ? y0.toFixed(4) : 'Không xác định'
+  };
+}
+
+function drawAnalyzeGraph(expr) {
+  const canvas = document.getElementById('analyzeCanvas');
+  canvas.width  = canvas.offsetWidth || 600;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const xMin = -10, xMax = 10;
+  const pts = [];
+  for (let i = 0; i <= W; i++) {
+    const x = xMin + (xMax - xMin) * i / W;
+    try {
+      const y = math.evaluate(expr, {x});
+      if (typeof y === 'number' && isFinite(y)) pts.push({i, y});
+      else pts.push(null);
+    } catch { pts.push(null); }
+  }
+  const ys = pts.filter(Boolean).map(p => p.y);
+  const yMin = Math.max(Math.min(...ys) - 1, -20);
+  const yMax = Math.min(Math.max(...ys) + 1, 20);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  ctx.fillStyle = isDark ? '#111120' : '#ffffff';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  ctx.lineWidth = 1;
+  for (let x = Math.ceil(xMin); x <= xMax; x++) {
+    const px = (x - xMin) / (xMax - xMin) * W;
+    ctx.beginPath(); ctx.moveTo(px,0); ctx.lineTo(px,H); ctx.stroke();
+  }
+
+  // Axes
+  const ax = (-xMin) / (xMax - xMin) * W;
+  const ay = (yMax) / (yMax - yMin) * H;
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0,ay); ctx.lineTo(W,ay); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ax,0); ctx.lineTo(ax,H); ctx.stroke();
+
+  // Curve
+  ctx.strokeStyle = '#6366f1';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  let started = false;
+  pts.forEach((p, i) => {
+    if (!p) { started = false; return; }
+    const px = i;
+    const py = (yMax - p.y) / (yMax - yMin) * H;
+    if (!started) { ctx.moveTo(px, py); started = true; }
+    else ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  // Label
+  ctx.fillStyle = '#6366f1';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillText('f(x) = ' + expr, 12, 20);
+}
+
+// ══════════════════════════════════════
+//  GIẢI TỪ ẢNH
+// ══════════════════════════════════════
+let imgBase64 = null;
+
+function handleImgFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imgBase64 = e.target.result.split(',')[1];
+    document.getElementById('imgPreview').src = e.target.result;
+    document.getElementById('imgPreviewWrap').style.display = 'block';
+    document.getElementById('imgResult').style.display = 'none';
+    document.getElementById('imgDropZone').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('imgDropZone').style.borderColor = 'var(--border)';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('imgFileInput').files = dt.files;
+    handleImgFile(document.getElementById('imgFileInput'));
+  }
+}
+
+function clearImg() {
+  imgBase64 = null;
+  document.getElementById('imgPreviewWrap').style.display = 'none';
+  document.getElementById('imgResult').style.display      = 'none';
+  document.getElementById('imgDropZone').style.display    = 'block';
+  document.getElementById('imgFileInput').value = '';
+}
+
+async function solveFromImage() {
+  if (!imgBase64) return;
+  const btn = document.getElementById('imgSolveBtn');
+  btn.disabled = true;
+  document.getElementById('imgLoading').style.display = 'block';
+  document.getElementById('imgResult').style.display  = 'none';
+
+  try {
+    const res  = await fetch('ai_api.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type: 'math_image', image: imgBase64 })
+    });
+    const data = await res.json();
+    document.getElementById('imgLoading').style.display  = 'none';
+    document.getElementById('imgResult').style.display   = 'block';
+    document.getElementById('imgResultContent').innerHTML =
+      (data.result || 'Không thể giải bài này.').replace(/\n/g,'<br>');
+    renderMathInElement(document.getElementById('imgResultContent'), {
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+      throwOnError: false
+    });
+  } catch(e) {
+    document.getElementById('imgLoading').style.display = 'none';
+    document.getElementById('imgResult').style.display  = 'block';
+    document.getElementById('imgResultContent').textContent = 'Lỗi kết nối. Thử lại!';
+  }
+  btn.disabled = false;
+}
+
 // Keyboard support for calculator tab
 document.addEventListener('keydown', function(e) {
   if (document.getElementById('tab-calc').style.display === 'none') return;
@@ -1761,5 +1971,79 @@ document.addEventListener('keydown', function(e) {
   if (e.key === ')' || (e.key === '0' && e.shiftKey)) { e.preventDefault(); cx('rpar'); }
 });
 </script>
+
+  <!-- TAB: PHÂN TÍCH HÀM SỐ -->
+  <div id="tab-analyze" style="display:none">
+    <div class="card" style="padding:1.2rem">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:var(--text)">Phân tích hàm số</div>
+        <div style="font-size:12px;color:var(--muted)">Nhập hàm f(x) để phân tích tự động</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <input id="analyzeInput" class="form-input" placeholder="VD: x^3 - 3*x^2 + 2  hoặc  sin(x)/x" style="flex:1;font-size:15px">
+        <button onclick="analyzeFunction()" class="btn btn-primary" style="padding:10px 20px;white-space:nowrap">Phân tích</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <span style="font-size:12px;color:var(--muted)">Ví dụ nhanh:</span>
+        <?php foreach(['x^2 - 3*x + 2','x^3 - 3*x','sin(x)','1/x','sqrt(x)','e^x'] as $ex): ?>
+        <button onclick="document.getElementById('analyzeInput').value='<?=$ex?>';analyzeFunction()" 
+          style="padding:3px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;cursor:pointer">
+          <?=$ex?>
+        </button>
+        <?php endforeach; ?>
+      </div>
+      <div id="analyzeResult" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px" id="analyzeCards"></div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <canvas id="analyzeCanvas" height="300" style="width:100%;display:block;background:var(--surface)"></canvas>
+        </div>
+        <div id="analyzeSteps" style="background:var(--surface2);border-radius:12px;padding:1rem;font-size:13px;line-height:1.8"></div>
+      </div>
+      <div id="analyzeLoading" style="display:none;text-align:center;padding:2rem;color:var(--muted)">
+        <div style="font-size:24px;margin-bottom:8px">⏳</div>Đang phân tích...
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: GIẢI TỪ ẢNH -->
+  <div id="tab-imgsolve" style="display:none">
+    <div class="card" style="padding:1.2rem">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Giải bài tập từ ảnh</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Chụp hoặc tải ảnh đề bài → AI giải từng bước chi tiết</div>
+
+      <div id="imgDropZone" onclick="document.getElementById('imgFileInput').click()"
+        style="border:2px dashed var(--border);border-radius:14px;padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="handleImgDrop(event)">
+        <div style="font-size:36px;margin-bottom:8px">📷</div>
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px">Nhấn để chọn ảnh hoặc kéo thả vào đây</div>
+        <div style="font-size:12px;color:var(--muted)">JPG, PNG — tối đa 10MB</div>
+      </div>
+      <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="handleImgFile(this)">
+
+      <div id="imgPreviewWrap" style="display:none;margin-bottom:14px;text-align:center">
+        <img id="imgPreview" style="max-height:280px;max-width:100%;border-radius:12px;border:1px solid var(--border)">
+        <div style="margin-top:8px;display:flex;gap:8px;justify-content:center">
+          <button onclick="solveFromImage()" class="btn btn-primary" id="imgSolveBtn">Giải bài này</button>
+          <button onclick="clearImg()" class="btn btn-ghost">Xóa ảnh</button>
+        </div>
+      </div>
+
+      <div id="imgResult" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Lời giải chi tiết</div>
+        </div>
+        <div id="imgResultContent" style="font-size:14px;line-height:1.9;color:var(--text)"></div>
+      </div>
+      <div id="imgLoading" style="display:none;text-align:center;padding:2rem;color:var(--muted)">
+        <div class="analyze-spinner"></div>
+        <div style="margin-top:12px;font-weight:600">AI đang đọc đề và giải bài...</div>
+        <div style="font-size:12px;margin-top:4px">Thường mất 5-15 giây</div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
