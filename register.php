@@ -70,17 +70,35 @@ body { background: #07070e; }
   align-items: center; justify-content: center;
   flex-direction: column; gap: 20px;
 }
-.success-overlay.show { display: flex; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.success-overlay.show { display: flex; animation: fadeIn .2s cubic-bezier(0.22,1,0.36,1); }
+@keyframes fadeIn { from { opacity:0; backdrop-filter:blur(0px); } to { opacity:1; backdrop-filter:blur(10px); } }
 
 .success-spinner {
   width: 64px; height: 64px;
-  border: 4px solid rgba(99,102,241,0.2);
-  border-top-color: #6366f1;
   border-radius: 50%;
-  animation: spin .7s linear infinite;
+  position: relative;
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.success-spinner::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #6366f1;
+  border-right-color: rgba(99,102,241,0.4);
+  filter: drop-shadow(0 0 8px rgba(99,102,241,0.6));
+}
+.success-spinner::after {
+  content: '';
+  position: absolute; inset: 6px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-bottom-color: #818cf8;
+  animation: spinReverse 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  opacity: 0.6;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spinReverse { to { transform: rotate(-360deg); } }
 
 .success-check {
   display: none;
@@ -88,10 +106,10 @@ body { background: #07070e; }
   background: linear-gradient(135deg, #10b981, #059669);
   align-items: center; justify-content: center;
   box-shadow: 0 0 40px rgba(16,185,129,0.5);
-  animation: popIn .4s cubic-bezier(0.34,1.56,0.64,1);
+  animation: popIn .5s cubic-bezier(0.34,1.56,0.64,1);
 }
 .success-check.show { display: flex; }
-@keyframes popIn { from { opacity:0; transform:scale(.5); } to { opacity:1; transform:scale(1); } }
+@keyframes popIn { from { opacity:0; transform:scale(.3) rotate(-15deg); } to { opacity:1; transform:scale(1) rotate(0deg); } }
 .success-check svg { width:32px; height:32px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
 
 .success-text {
@@ -179,12 +197,12 @@ function showSuccess() {
     check.classList.add('show');
     text.textContent = 'Đăng ký thành công!';
     sub.textContent  = 'Đang chuyển hướng...';
-  }, 800);
+  }, 600);
 
   // Sau 1.6s: chuyển trang
   setTimeout(() => {
     window.location.href = 'dashboard.php';
-  }, 1600);
+  }, 1400);
 }
 </script>
 </body>
