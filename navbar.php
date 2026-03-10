@@ -34,7 +34,17 @@ $allDrawer = [
   ['href'=>'mindmap.php',   'label'=>'Mind Map',  'icon'=>'mindmap'],
   ['href'=>'math.php',      'label'=>'Toán học',  'icon'=>'math'],
   ['href'=>'quiz.php',      'label'=>'Quiz',      'icon'=>'quiz'],
-  ['href'=>'profile.php',   'label'=>'Hồ sơ',     'icon'=>'profile'],
+  ['href'=>'gamification.php','label'=>'Thành tích', 'icon'=>'trophy'],
+  ['href'=>'profile.php',     'label'=>'Hồ sơ',       'icon'=>'profile'],
+  ['href'=>'gamification.php', 'label'=>'Thành tích',   'icon'=>'trophy'],
+  ['href'=>'daily_challenge.php','label'=>'Thử thách',  'icon'=>'challenge'],
+  ['href'=>'spaced_repetition.php','label'=>'SRS Ôn tập','icon'=>'srs'],
+  ['href'=>'question_bank.php','label'=>'Ngân hàng đề', 'icon'=>'bank'],
+  ['href'=>'study_room.php',   'label'=>'Study Room',   'icon'=>'studyroom'],
+  ['href'=>'duel.php',         'label'=>'Duel Mode',    'icon'=>'duel'],
+  ['href'=>'ai_tutor.php',     'label'=>'AI Gia sư',    'icon'=>'ai'],
+  ['href'=>'doc_summarizer.php','label'=>'Tóm tắt AI',  'icon'=>'doc'],
+  ['href'=>'writing_check.php','label'=>'Chấm bài AI',  'icon'=>'write'],
 ];
 
 $accentColors = ['#3b5bdb','#1a7f4b','#b45309','#b91c1c','#6d28d9','#0369a1','#9d174d'];
@@ -58,6 +68,14 @@ function ni($n) { // navIcon
     'profile'   => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
     'quiz'      => '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
     'logout'    => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+    'challenge' => '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+    'srs'       => '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    'bank'      => '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/>',
+    'studyroom' => '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    'duel'      => '<path d="m14.5 17.5 3-3-3-3"/><path d="m9.5 6.5-3 3 3 3"/><path d="M3 17.5h4a2 2 0 0 0 2-2v-7"/><path d="M21 6.5h-4a2 2 0 0 0-2 2v7"/>',
+    'doc'       => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/>',
+    'write'     => '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    'trophy'    => '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>',
     'dots'      => '<circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
   ];
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.($p[$n]??'').'</svg>';

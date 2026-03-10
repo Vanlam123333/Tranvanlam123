@@ -371,6 +371,31 @@ SYS;
     }
     echo json_encode(['result' => $result]);
 
+} elseif ($type === 'summarize') {
+    $text = mb_substr(trim($input['text'] ?? ''), 0, 8000);
+    $modePrompt = $input['modePrompt'] ?? 'Tóm tắt ngắn gọn + liệt kê ý chính.';
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là chuyên gia phân tích và tóm tắt văn bản. Trả lời bằng tiếng Việt. Định dạng rõ ràng với các section: TÓM TẮT:, Ý CHÍNH: (bullet points bắt đầu bằng -)'],
+        ['role'=>'user','content'=>"$modePrompt\n\nVăn bản:\n$text"]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 2000)]);
+
+} elseif ($type === 'personal_tutor') {
+    $statsJson = json_encode($input['stats'] ?? [], JSON_UNESCAPED_UNICODE);
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là gia sư AI cá nhân hóa. Phân tích dữ liệu học và đưa ra gợi ý cụ thể, ngắn gọn. Tiếng Việt. Dùng emoji. Tối đa 200 từ.'],
+        ['role'=>'user','content'=>"Dữ liệu học của tôi:\n$statsJson\nHãy: 1) Nhận xét điểm mạnh/yếu 2) Gợi ý 3 việc cụ thể nên làm hôm nay 3) Động viên."]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 600)]);
+
+} elseif ($type === 'writing_check') {
+    $essay = mb_substr(trim($input['essay'] ?? ''), 0, 3000);
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là giáo viên tiếng Anh chuyên chấm IELTS Writing. Phản hồi chi tiết, tiếng Việt.'],
+        ['role'=>'user','content'=>"Chấm bài viết tiếng Anh sau:\n\n$essay\n\nPhân tích: 1.Ngữ pháp X/10 + lỗi cụ thể 2.Từ vựng X/10 + gợi ý 3.Cấu trúc X/10 4.Ý tưởng X/10 5.Điểm tổng X/10 6.Viết lại 2-3 câu hay hơn"]
+    ];
+    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 1500)]);
+
 } elseif ($type === 'smart_plan') {
     $done = (int)($input['done'] ?? 0);
     $total = (int)($input['total'] ?? 0);
@@ -381,5 +406,62 @@ SYS;
         ['role'=>'user','content'=>"Bây giờ là $hour giờ. Đã làm $done/$total nhiệm vụ, học $pomo pomodoro. Tạo kế hoạch học từ giờ đến tối với khung giờ pomodoro 25 phút. Ngắn gọn."]
     ];
     echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 500)]);
+}
+
+} elseif ($type === 'doc_summarize') {
+    $content = mb_substr(trim($input['content'] ?? ''), 0, 8000);
+    $outputs = $input['outputs'] ?? ['summary','bullets'];
+    $wantQuiz = in_array('quiz',$outputs);
+    $wantMindmap = in_array('mindmap',$outputs);
+    $prompt = "Phân tích nội dung sau và trả về JSON với các trường:\n";
+    $prompt .= "- summary: tóm tắt ngắn (3-4 câu)\n";
+    $prompt .= "- bullets: mảng 5-8 ý chính quan trọng nhất\n";
+    if($wantQuiz) $prompt .= "- quiz: mảng 5 câu hỏi trắc nghiệm [{\"question\":\"...\",\"a\":\"...\",\"b\":\"...\",\"c\":\"...\",\"d\":\"...\",\"correct\":0,\"explanation\":\"...\"}]\n";
+    if($wantMindmap) $prompt .= "- mindmap: sơ đồ tư duy dạng text thụt lề\n";
+    $prompt .= "\nCHỈ JSON:\n\nNỘI DUNG:\n$content";
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là chuyên gia phân tích tài liệu học tập. CHỈ trả về JSON thuần túy, không giải thích.'],
+        ['role'=>'user','content'=>$prompt]
+    ];
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 3000);
+    $clean = preg_replace('/```json|```/','', $raw);
+    $s=strpos($clean,'{'); $e=strrpos($clean,'}');
+    $result = ($s!==false&&$e!==false) ? json_decode(substr($clean,$s,$e-$s+1),true) : null;
+    echo json_encode($result ?: ['summary'=>$raw,'bullets'=>[]]);
+
+} elseif ($type === 'generate_quiz') {
+    $topic = mb_substr(trim($input['topic'] ?? ''), 0, 200);
+    $count = max(5, min(15, (int)($input['count'] ?? 10)));
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là giáo viên tạo đề thi. CHỈ trả về JSON array.'],
+        ['role'=>'user','content'=>"Tạo $count câu hỏi trắc nghiệm về \"$topic\".\nJSON: [{\"question\":\"...\",\"a\":\"...\",\"b\":\"...\",\"c\":\"...\",\"d\":\"...\",\"correct\":0,\"explanation\":\"...\"}]\nCorrect là index (0=A,1=B,2=C,3=D). CHỈ JSON."]
+    ];
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 4000);
+    $clean = preg_replace('/```json|```/','', $raw);
+    $s=strpos($clean,'['); $e=strrpos($clean,']');
+    $questions = ($s!==false&&$e!==false) ? json_decode(substr($clean,$s,$e-$s+1),true) : [];
+    echo json_encode(['questions' => $questions ?: []]);
+
+} elseif ($type === 'tutor_chat') {
+    $messages = $input['messages'] ?? [];
+    if (empty($messages)) { echo json_encode(['reply'=>'']); exit; }
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 800);
+    echo json_encode(['reply' => $raw]);
+
+} elseif ($type === 'grade_essay') {
+    $essay = mb_substr(trim($input['essay'] ?? ''), 0, 4000);
+    $topic = mb_substr(trim($input['topic'] ?? ''), 0, 300);
+    $essayType = $input['essay_type'] ?? 'ielts_task2';
+    $typeNote = $essayType === 'ielts_task1' ? 'IELTS Task 1 (mô tả biểu đồ/sơ đồ)' : ($essayType === 'ielts_task2' ? 'IELTS Task 2 (argumentative essay)' : 'đoạn văn tiếng Anh');
+    $topicNote = $topic ? "ĐỀ BÀI: $topic\n" : '';
+    $messages = [
+        ['role'=>'system','content'=>'Bạn là giáo viên chấm bài tiếng Anh chuyên nghiệp. Chấm theo tiêu chí IELTS. CHỈ trả về JSON.'],
+        ['role'=>'user','content'=>"Chấm bài $typeNote sau:\n{$topicNote}\nBÀI VIẾT:\n$essay\n\nJSON: {\"overall\":6.5,\"overall_comment\":\"...\",\"criteria\":[{\"name\":\"Task Achievement\",\"score\":6.5,\"comment\":\"...\"},{\"name\":\"Coherence & Cohesion\",\"score\":6.5,\"comment\":\"...\"},{\"name\":\"Lexical Resource\",\"score\":6.5,\"comment\":\"...\"},{\"name\":\"Grammatical Range\",\"score\":6.5,\"comment\":\"...\"}],\"corrections\":[{\"original\":\"...\",\"corrected\":\"...\",\"explanation\":\"...\"}],\"suggestions\":[\"...\",\"...\"]}"]
+    ];
+    $raw = callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 2000);
+    $clean = preg_replace('/```json|```/','', $raw);
+    $s=strpos($clean,'{'); $e=strrpos($clean,'}');
+    $result = ($s!==false&&$e!==false) ? json_decode(substr($clean,$s,$e-$s+1),true) : null;
+    echo json_encode(['result' => $result ?: ['overall'=>0,'overall_comment'=>$raw,'criteria'=>[],'corrections'=>[],'suggestions'=>[]]]);
 }
 ?>

@@ -814,6 +814,15 @@ async function saveSession() {
   const subject = document.getElementById('pomSubject').value.trim();
   const mins = Math.round(totalSecs / 60);
   try {
+    // Award XP for focus session
+    if (mode === 'focus') {
+      try {
+        await fetch('gamification.php', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({action:'award_xp', for:'pomodoro', xp:25, note:'Hoàn thành pomodoro '+mins+' phút'})
+        });
+      } catch(e) {}
+    }
     await fetch('pomodoro.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

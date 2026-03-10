@@ -159,8 +159,46 @@ em, i { font-style: normal !important; }
 </style>
 </head>
 <body>
+<?php
+// Load gamification data for dashboard
+require_once __DIR__ . '/gamification.php';
+updateStreak($uid);
+$gami = $db->query("SELECT xp, level, streak, coins FROM users WHERE id=$uid")->fetchArray(SQLITE3_ASSOC);
+$gamiLevel = $gami['level'] ?? 1;
+$gamiStreak = $gami['streak'] ?? 0;
+$gamiXP = $gami['xp'] ?? 0;
+$gamiLvlInfo = getXPProgress((int)$gamiXP);
+?>
 <?php include 'navbar.php'; ?>
 <div class="page">
+
+  <!-- GAMIFICATION STRIP -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem;">
+    <a href="gamification.php" style="text-decoration:none;">
+      <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:14px;padding:14px;color:#fff;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:1.6rem;">⚡</div>
+        <div><div style="font-size:1.2rem;font-weight:900;">Lv.<?php echo $gamiLevel; ?></div><div style="font-size:10px;opacity:0.7;"><?php echo number_format($gamiXP); ?> XP</div></div>
+      </div>
+    </a>
+    <a href="gamification.php" style="text-decoration:none;">
+      <div style="background:linear-gradient(135deg,#431407,#7c2d12);border-radius:14px;padding:14px;color:#fff;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:1.6rem;">🔥</div>
+        <div><div style="font-size:1.2rem;font-weight:900;"><?php echo $gamiStreak; ?> ngày</div><div style="font-size:10px;opacity:0.7;">Streak hiện tại</div></div>
+      </div>
+    </a>
+    <a href="daily_challenge.php" style="text-decoration:none;">
+      <div style="background:linear-gradient(135deg,#0f4c75,#1b262c);border-radius:14px;padding:14px;color:#fff;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:1.6rem;">🎯</div>
+        <div><div style="font-size:1.2rem;font-weight:900;">Thử thách</div><div style="font-size:10px;opacity:0.7;">Hôm nay</div></div>
+      </div>
+    </a>
+    <a href="spaced_repetition.php" style="text-decoration:none;">
+      <div style="background:linear-gradient(135deg,#064e3b,#065f46);border-radius:14px;padding:14px;color:#fff;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:1.6rem;">🧠</div>
+        <div><div style="font-size:1.2rem;font-weight:900;">SRS</div><div style="font-size:10px;opacity:0.7;">Ôn thông minh</div></div>
+      </div>
+    </a>
+  </div>
 
   <!-- HERO GREETING -->
   <div class="dash-hero">
