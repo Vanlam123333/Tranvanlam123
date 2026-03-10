@@ -1,9 +1,9 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error'=>'Unauthorized']); exit; }
 
 header('Content-Type: application/json');
-$GROQ_KEY = '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';
+$GROQ_KEY = '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';
 $GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 $MODEL = 'llama-3.3-70b-versatile';
 
@@ -371,14 +371,7 @@ SYS;
     }
     echo json_encode(['result' => $result]);
 
-} elseif ($type === 'summarize') {
-    $text = mb_substr(trim($input['text'] ?? ''), 0, 8000);
-    $modePrompt = $input['modePrompt'] ?? 'Tóm tắt ngắn gọn + liệt kê ý chính.';
-    $messages = [
-        ['role'=>'system','content'=>'Bạn là chuyên gia phân tích và tóm tắt văn bản. Trả lời bằng tiếng Việt. Định dạng rõ ràng với các section: TÓM TẮT:, Ý CHÍNH: (bullet points bắt đầu bằng -)'],
-        ['role'=>'user','content'=>"$modePrompt\n\nVăn bản:\n$text"]
-    ];
-    echo json_encode(['result' => callGroq($messages, $GROQ_KEY, $GROQ_URL, $MODEL, 2000)]);
+
 
 } elseif ($type === 'personal_tutor') {
     $statsJson = json_encode($input['stats'] ?? [], JSON_UNESCAPED_UNICODE);
