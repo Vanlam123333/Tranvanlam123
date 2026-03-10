@@ -1891,12 +1891,10 @@ function drawAnalyzeGraph(expr) {
 //  GIẢI TỪ ẢNH
 // ══════════════════════════════════════
 let imgBase64 = null;
-let imgMediaType = 'image/jpeg';
 
 function handleImgFile(input) {
   const file = input.files[0];
   if (!file) return;
-  imgMediaType = file.type || 'image/jpeg';
   const reader = new FileReader();
   reader.onload = e => {
     imgBase64 = e.target.result.split(',')[1];
@@ -1939,7 +1937,7 @@ async function solveFromImage() {
     const res  = await fetch('ai_api.php', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ type: 'math_image', image: imgBase64, mediaType: imgMediaType })
+      body: JSON.stringify({ type: 'math_image', image: imgBase64 })
     });
     const data = await res.json();
     document.getElementById('imgLoading').style.display  = 'none';
@@ -1974,38 +1972,342 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-  <!-- TAB: PHÂN TÍCH HÀM SỐ -->
+  <!-- TAB: PHÂN TÍCH HÀM SỐ v2 -->
+  <style>
+  .az-layout { display:grid; grid-template-columns:1fr 400px; gap:16px; align-items:start; }
+  @media(max-width:960px){ .az-layout{ grid-template-columns:1fr; } }
+
+  /* Input bar */
+  .az-bar { display:flex; align-items:center; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; transition:border-color .2s; }
+  .az-bar:focus-within { border-color:var(--accent); }
+  .az-fn { padding:0 14px; font-size:15px; font-weight:800; font-family:'Georgia',serif; color:var(--accent); background:var(--surface2); border-right:1.5px solid var(--border); height:50px; display:flex; align-items:center; white-space:nowrap; }
+  .az-inp { flex:1; background:transparent; border:none; outline:none; color:var(--text); font-size:16px; font-family:'Courier New',monospace; font-weight:600; padding:12px 14px; min-width:0; caret-color:var(--accent); }
+  .az-btn { padding:0 20px; height:50px; background:var(--accent); border:none; color:#fff; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; transition:filter .15s; }
+  .az-btn:hover { filter:brightness(1.12); }
+
+  /* Examples */
+  .az-chips { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:12px; align-items:center; }
+  .az-chip { padding:3px 11px; border-radius:20px; border:1.5px solid var(--border); background:var(--surface2); font-size:11px; font-weight:700; font-family:'Courier New',monospace; cursor:pointer; color:var(--text2); transition:all .15s; }
+  .az-chip:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+
+  /* GeoGebra */
+  .az-ggb-box { border:1.5px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:12px; }
+  .az-ggb-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--border); background:var(--surface); }
+  .az-ggb-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+  .az-ggb-btns { display:flex; gap:5px; }
+  .az-ggb-btn { padding:3px 10px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; }
+  .az-ggb-btn:hover { border-color:var(--accent); color:var(--accent); }
+  #azGgb { width:100%; height:460px; border:none; display:block; }
+
+  /* Stats */
+  .az-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  @media(max-width:640px){ .az-stats{ grid-template-columns:repeat(2,1fr); } }
+  .az-stat { background:var(--surface); border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; transition:border-color .2s; }
+  .az-stat.on { border-color:var(--accent); }
+  .az-stat-l { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:3px; }
+  .az-stat-v { font-size:13px; font-weight:800; color:var(--text); font-family:'Courier New',monospace; }
+
+  /* Keyboard */
+  .az-kbd { background:var(--surface); border:1.5px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:12px; }
+  .az-kbd-head { padding:8px 12px; border-bottom:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; justify-content:space-between; }
+  .az-kbd-ht { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+  .az-kbd-tabs { display:flex; gap:3px; }
+  .az-kt { padding:3px 9px; border-radius:6px; border:none; background:transparent; color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; font-family:var(--font); transition:all .15s; }
+  .az-kt.on { background:var(--accent-soft); color:var(--accent); }
+  .az-kbd-body { padding:8px; }
+
+  /* Preview */
+  .az-prev { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; margin-bottom:7px; font-family:'Courier New',monospace; font-size:13px; color:var(--text2); min-height:34px; display:flex; align-items:center; justify-content:space-between; gap:8px; word-break:break-all; }
+  .az-cur { display:inline-block; width:2px; height:15px; background:var(--accent); animation:azBlink 1s step-end infinite; vertical-align:middle; }
+  @keyframes azBlink { 50%{opacity:0} }
+  .az-del { width:32px; height:28px; border-radius:6px; border:1.5px solid var(--red-soft); background:var(--red-soft); color:var(--red); font-size:13px; cursor:pointer; flex-shrink:0; transition:all .12s; }
+  .az-del:hover { background:var(--red); color:#fff; }
+
+  /* Key grid */
+  .az-kgrid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+  .az-panel { display:none; }
+  .az-panel.on { display:block; }
+  .az-k { height:38px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:'Georgia',serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; }
+  .az-k:hover { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); transform:translateY(-1px); }
+  .az-k:active { transform:translateY(0); }
+  .az-k.fn { color:var(--accent); border-color:var(--border2); font-size:11px; }
+  .az-k.fn:hover { background:var(--accent); color:#fff; }
+  .az-k.op { color:var(--gold); background:var(--gold-soft); border-color:var(--gold-soft); }
+  .az-k.op:hover { background:var(--gold); color:#fff; border-color:var(--gold); }
+  .az-k.ac { background:var(--accent); color:#fff; border-color:var(--accent); font-size:12px; }
+  .az-k.ac:hover { filter:brightness(1.1); }
+
+  /* AI panel */
+  .az-ai { background:var(--surface); border:1.5px solid var(--border); border-radius:14px; overflow:hidden; }
+  .az-ai-head { padding:9px 12px; border-bottom:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; gap:7px; }
+  .az-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); flex-shrink:0; transition:background .3s; }
+  .az-dot.on { background:var(--green); box-shadow:0 0 7px var(--green); }
+  .az-dot.spin { background:var(--accent); animation:azPulse .8s ease-in-out infinite; }
+  @keyframes azPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+  .az-ai-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); }
+  .az-ai-body { padding:12px 14px; font-size:13px; line-height:1.85; color:var(--text2); min-height:80px; max-height:400px; overflow-y:auto; }
+  .az-ai-body strong { color:var(--text); }
+  .az-spinner { width:28px; height:28px; border:3px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; margin:2rem auto; display:block; }
+  .az-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; color:var(--muted); gap:7px; text-align:center; }
+  </style>
+
   <div id="tab-analyze" style="display:none">
-    <div class="card" style="padding:1.2rem">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:700;color:var(--text)">Phân tích hàm số</div>
-        <div style="font-size:12px;color:var(--muted)">Nhập hàm f(x) để phân tích tự động</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <input id="analyzeInput" class="form-input" placeholder="VD: x^3 - 3*x^2 + 2  hoặc  sin(x)/x" style="flex:1;font-size:15px">
-        <button onclick="analyzeFunction()" class="btn btn-primary" style="padding:10px 20px;white-space:nowrap">Phân tích</button>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-        <span style="font-size:12px;color:var(--muted)">Ví dụ nhanh:</span>
-        <?php foreach(['x^2 - 3*x + 2','x^3 - 3*x','sin(x)','1/x','sqrt(x)','e^x'] as $ex): ?>
-        <button onclick="document.getElementById('analyzeInput').value='<?=$ex?>';analyzeFunction()" 
-          style="padding:3px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;cursor:pointer">
-          <?=$ex?>
-        </button>
-        <?php endforeach; ?>
-      </div>
-      <div id="analyzeResult" style="display:none">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px" id="analyzeCards"></div>
-        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
-          <canvas id="analyzeCanvas" height="300" style="width:100%;display:block;background:var(--surface)"></canvas>
+    <div class="az-layout">
+
+      <!-- ── CỘT TRÁI: Input + GeoGebra + Stats ── -->
+      <div>
+        <!-- Input bar -->
+        <div class="az-bar">
+          <span class="az-fn">f(x) =</span>
+          <input type="text" class="az-inp" id="azInp"
+            placeholder="VD: x^3 - 3*x^2 + 2"
+            oninput="azSync()"
+            onkeydown="if(event.key==='Enter')azRun()">
+          <button class="az-btn" onclick="azRun()">▶ Phân tích</button>
         </div>
-        <div id="analyzeSteps" style="background:var(--surface2);border-radius:12px;padding:1rem;font-size:13px;line-height:1.8"></div>
+
+        <!-- Example chips -->
+        <div class="az-chips">
+          <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Ví dụ:</span>
+          <?php foreach(['x^2 - 3*x + 2','x^3 - 3*x','sin(x)','1/x','sqrt(x)','e^x','ln(x)','abs(x)','tan(x)'] as $ex): ?>
+          <span class="az-chip" onclick="azSet('<?=addslashes($ex)?>')"><?=htmlspecialchars($ex)?></span>
+          <?php endforeach; ?>
+        </div>
+
+        <!-- GeoGebra -->
+        <div class="az-ggb-box">
+          <div class="az-ggb-bar">
+            <span class="az-ggb-title">📐 GeoGebra — Đồ thị chi tiết</span>
+            <div class="az-ggb-btns">
+              <button class="az-ggb-btn" onclick="azGgbPlot()">▶ Vẽ hàm</button>
+              <button class="az-ggb-btn" onclick="azGgbReset()">⌂ Reset</button>
+              <button class="az-ggb-btn" onclick="azGgbFull()">⛶ Phóng to</button>
+            </div>
+          </div>
+          <iframe id="azGgb" src="https://www.geogebra.org/graphing?lang=vi" allowfullscreen allow="fullscreen"></iframe>
+        </div>
+
+        <!-- Stats -->
+        <div class="az-stats" id="azStats">
+          <div class="az-stat" id="azSD"><div class="az-stat-l">Tập xác định</div><div class="az-stat-v" id="azSDv">—</div></div>
+          <div class="az-stat" id="azLP"><div class="az-stat-l">Giới hạn x→+∞</div><div class="az-stat-v" id="azLPv">—</div></div>
+          <div class="az-stat" id="azLN"><div class="az-stat-l">Giới hạn x→−∞</div><div class="az-stat-v" id="azLNv">—</div></div>
+          <div class="az-stat" id="azY0"><div class="az-stat-l">Cắt trục Oy</div><div class="az-stat-v" id="azY0v">—</div></div>
+        </div>
       </div>
-      <div id="analyzeLoading" style="display:none;text-align:center;padding:2rem;color:var(--muted)">
-        <div style="font-size:24px;margin-bottom:8px">⏳</div>Đang phân tích...
-      </div>
-    </div>
-  </div>
+
+      <!-- ── CỘT PHẢI: Bàn phím + AI ── -->
+      <div>
+
+        <!-- ⌨ BÀN PHÍM TOÁN HỌC -->
+        <div class="az-kbd">
+          <div class="az-kbd-head">
+            <span class="az-kbd-ht">⌨ Bàn phím toán học</span>
+            <div class="az-kbd-tabs">
+              <button class="az-kt on"  onclick="azTab('basic',this)">Cơ bản</button>
+              <button class="az-kt"     onclick="azTab('trig',this)">Lượng giác</button>
+              <button class="az-kt"     onclick="azTab('calc',this)">Giải tích</button>
+              <button class="az-kt"     onclick="azTab('sym',this)">Ký hiệu</button>
+            </div>
+          </div>
+          <div class="az-kbd-body">
+
+            <!-- Preview + Del -->
+            <div class="az-prev">
+              <span id="azPrev" style="flex:1"></span>
+              <button class="az-del" onclick="azDel()" title="Xóa">⌫</button>
+            </div>
+
+            <!-- BASIC -->
+            <div class="az-panel on" id="azPbasic">
+              <div class="az-kgrid">
+                <?php $bk=[['x','x',''],['x²','^2',''],['xⁿ','^','op'],['√','sqrt(','fn'],['|x|','abs(','fn'],['7','7',''],['8','8',''],['9','9',''],['(','(','op'],[')',')','op'],['4','4',''],['5','5',''],['6','6',''],['×','*','op'],['÷','/','op'],['1','1',''],['2','2',''],['3','3',''],['–','-','op'],['+','+','op'],['0','0',''],['.','.',''],['e','e','fn'],['π','pi','fn'],['AC','__ac__','ac']];
+                foreach($bk as [$l,$v,$c]): ?>
+                <button class="az-k <?=$c?>" onclick="azK('<?=addslashes($v)?>')"><?=htmlspecialchars($l)?></button>
+                <?php endforeach; ?>
+              </div>
+            </div>
+
+            <!-- TRIG -->
+            <div class="az-panel" id="azPtrig">
+              <div class="az-kgrid">
+                <?php $tk=[['sin','sin(','fn'],['cos','cos(','fn'],['tan','tan(','fn'],['cot','1/tan(','fn'],['sec','1/cos(','fn'],['asin','asin(','fn'],['acos','acos(','fn'],['atan','atan(','fn'],['sinh','sinh(','fn'],['cosh','cosh(','fn'],['tanh','tanh(','fn'],['π','pi','fn'],['π/2','pi/2','fn'],['π/4','pi/4','fn'],['2π','2*pi','fn'],['x','x',''],['²','^2',''],['⁻¹','^(-1)','fn'],['(','(','op'],[')',')','op'],['7','7',''],['8','8',''],['9','9',''],['×','*','op'],['AC','__ac__','ac']];
+                foreach($tk as [$l,$v,$c]): ?>
+                <button class="az-k <?=$c?>" onclick="azK('<?=addslashes($v)?>')"><?=htmlspecialchars($l)?></button>
+                <?php endforeach; ?>
+              </div>
+            </div>
+
+            <!-- CALC -->
+            <div class="az-panel" id="azPcalc">
+              <div class="az-kgrid">
+                <?php $ck=[['ln','ln(','fn'],['log','log(','fn'],['log₂','log2(','fn'],['eˣ','exp(','fn'],['10ˣ','10^(','fn'],['√','sqrt(','fn'],['∛','cbrt(','fn'],['x²','^2',''],['x³','^3',''],['xⁿ','^','op'],['1/x','1/x','fn'],['|x|','abs(','fn'],['⌊x⌋','floor(','fn'],['⌈x⌉','ceil(','fn'],['round','round(','fn'],['x','x',''],['e','e','fn'],['(','(','op'],[')',')','op'],['AC','__ac__','ac']];
+                foreach($ck as [$l,$v,$c]): ?>
+                <button class="az-k <?=$c?>" onclick="azK('<?=addslashes($v)?>')"><?=htmlspecialchars($l)?></button>
+                <?php endforeach; ?>
+              </div>
+            </div>
+
+            <!-- SYM -->
+            <div class="az-panel" id="azPsym">
+              <div class="az-kgrid">
+                <?php $sk=[['∞','Infinity','fn'],['π','pi','fn'],['e','e','fn'],['φ','(1+sqrt(5))/2','fn'],['i','i','fn'],['≤','<=','op'],['≥','>=','op'],['≠','!=','op'],['+','+','op'],['–','-','op'],['×','*','op'],['÷','/','op'],['^','^','op'],['(','(','op'],[')',')','op'],['max','max(','fn'],['min','min(','fn'],['mod','%','op'],[',',',',''],['AC','__ac__','ac']];
+                foreach($sk as [$l,$v,$c]): ?>
+                <button class="az-k <?=$c?>" onclick="azK('<?=addslashes($v)?>')"><?=htmlspecialchars($l)?></button>
+                <?php endforeach; ?>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /az-kbd -->
+
+        <!-- AI Analysis -->
+        <div class="az-ai">
+          <div class="az-ai-head">
+            <div class="az-dot" id="azDot"></div>
+            <span class="az-ai-title">Phân tích chi tiết từ AI</span>
+          </div>
+          <div class="az-ai-body" id="azAI">
+            <div class="az-empty">
+              <span style="font-size:2rem;opacity:.3">🧮</span>
+              <span>Nhập hàm số và bấm <strong>Phân tích</strong></span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right col -->
+    </div><!-- /az-layout -->
+  </div><!-- /tab-analyze -->
+
+  <script>
+  // ── Keyboard tab ──
+  function azTab(n, btn) {
+    document.querySelectorAll('.az-panel').forEach(p => p.classList.remove('on'));
+    document.querySelectorAll('.az-kt').forEach(b => b.classList.remove('on'));
+    document.getElementById('azP' + n).classList.add('on');
+    btn.classList.add('on');
+  }
+
+  // ── Key press ──
+  function azK(v) {
+    const inp = document.getElementById('azInp');
+    if (v === '__ac__') { inp.value = ''; azSync(); return; }
+    const s = inp.selectionStart, e = inp.selectionEnd;
+    inp.value = inp.value.slice(0, s) + v + inp.value.slice(e);
+    const np = s + v.length;
+    inp.setSelectionRange(np, np);
+    inp.focus();
+    azSync();
+  }
+
+  function azDel() {
+    const inp = document.getElementById('azInp');
+    const s = inp.selectionStart;
+    if (!s) return;
+    inp.value = inp.value.slice(0, s - 1) + inp.value.slice(s);
+    inp.setSelectionRange(s - 1, s - 1);
+    inp.focus();
+    azSync();
+  }
+
+  function azSync() {
+    const v = document.getElementById('azInp').value;
+    document.getElementById('azPrev').innerHTML =
+      (v ? v : '<span style="color:var(--muted);font-style:italic">Nhập biểu thức...</span>') +
+      '<span class="az-cur"></span>';
+  }
+
+  function azSet(expr) {
+    document.getElementById('azInp').value = expr;
+    azSync();
+  }
+
+  // ── GeoGebra ──
+  function azGgbPlot() {
+    const expr = document.getElementById('azInp').value.trim();
+    if (!expr) return;
+    document.getElementById('azGgb').src =
+      'https://www.geogebra.org/graphing?lang=vi#' + encodeURIComponent(expr);
+  }
+  function azGgbReset() {
+    document.getElementById('azGgb').src = 'https://www.geogebra.org/graphing?lang=vi';
+  }
+  function azGgbFull() {
+    const el = document.getElementById('azGgb');
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  }
+
+  // ── Local analysis ──
+  function azLocal(expr) {
+    const tryE = x => { try { return math.evaluate(expr, {x}); } catch { return null; } };
+    let domain = 'ℝ (toàn bộ trục số)';
+    if (/sqrt\s*\(/.test(expr))              domain = 'Tùy biểu thức trong căn';
+    if (/\/\s*x\b|\/\s*\(\s*x\s*\)/.test(expr)) domain = 'x ≠ 0';
+    if (/\b(ln|log)\s*\(/.test(expr))        domain = 'x > 0';
+    if (/\btan\s*\(/.test(expr))             domain = 'x ≠ π/2 + kπ';
+    const fmt = v => v === null ? '?' : !isFinite(v) ? (v > 0 ? '+∞' : '−∞') : v.toFixed(4);
+    return {
+      domain,
+      lp:  fmt(tryE(1e9)),
+      ln:  fmt(tryE(-1e9)),
+      y0:  fmt(tryE(0))
+    };
+  }
+
+  // ── Main run ──
+  async function azRun() {
+    const expr = document.getElementById('azInp').value.trim();
+    if (!expr) return;
+
+    // Stats
+    const loc = azLocal(expr);
+    document.getElementById('azSDv').textContent = loc.domain;
+    document.getElementById('azLPv').textContent = loc.lp;
+    document.getElementById('azLNv').textContent = loc.ln;
+    document.getElementById('azY0v').textContent = loc.y0;
+    document.querySelectorAll('.az-stat').forEach(s => s.classList.add('on'));
+
+    // GeoGebra plot
+    azGgbPlot();
+
+    // AI
+    const dot = document.getElementById('azDot');
+    const ai  = document.getElementById('azAI');
+    dot.className = 'az-dot spin';
+    ai.innerHTML  = '<span class="az-spinner"></span>';
+
+    try {
+      const res  = await fetch('ai_api.php', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ type: 'math_analyze', expr })
+      });
+      const data = await res.json();
+      dot.className = 'az-dot on';
+      ai.innerHTML  = '<p>' +
+        (data.result || 'Không phân tích được.')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>') +
+        '</p>';
+      if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(ai, {
+          delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+          throwOnError:false
+        });
+      }
+    } catch(e) {
+      dot.className = 'az-dot';
+      ai.innerHTML  = '<span style="color:var(--red);font-size:13px;">⚠ Lỗi kết nối AI. Kết quả cục bộ đã hiển thị.</span>';
+    }
+  }
+
+  // Hàm cũ để không lỗi nếu có nơi nào gọi
+  function analyzeFunction() { azRun(); }
+
+  azSync();
+  </script>
 
   <!-- TAB: GIẢI TỪ ẢNH -->
   <div id="tab-imgsolve" style="display:none">
