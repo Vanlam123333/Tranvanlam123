@@ -109,11 +109,12 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
 
 /* CARD */
 .fc-scene { margin-bottom: 14px; user-select: none; }
-.fc-card { position: relative; width: 100%; min-height: 250px; border-radius: 18px; border: 1.5px solid var(--border); background: var(--surface); transition: border-color 0.2s; }
-.fc-face { width: 100%; min-height: 250px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
+.fc-card { position: relative; width: 100%; border-radius: 18px; border: 1.5px solid var(--border); background: var(--surface); transition: border-color 0.2s; cursor: pointer; }
+.fc-card.is-back { border-color: var(--accent); }
+.fc-card-inner { position: relative; width: 100%; min-height: 250px; }
+.fc-face { position: absolute; top: 0; left: 0; width: 100%; min-height: 250px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-sizing: border-box; }
 .fc-divider { width: 60px; height: 2px; background: var(--border2); border-radius: 99px; margin: 12px 0; }
-.fc-back { border-color: var(--accent); }
-.fc-tap-hint { position: absolute; bottom: 14px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.fc-tap-hint { position: relative; bottom: auto; margin-top: 16px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .fc-word { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
 .fc-phonetic { font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 8px; }
 .fc-badge { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: var(--accent-soft); color: var(--accent); }
@@ -339,23 +340,25 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
         <div id="studyMode">
           <div class="fc-scene" onclick="flipCard()">
             <div class="fc-card" id="fcCard">
-              <!-- MẶT TRƯỚC: từ tiếng Anh -->
-              <div class="fc-face" id="fcFront">
-                <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
-                <div class="fc-word" id="fcWord"></div>
-                <div class="fc-phonetic" id="fcPhonetic"></div>
-                <div class="fc-badge" id="fcType"></div>
-                <div class="fc-tap-hint" style="position:relative;bottom:auto;margin-top:16px;">👆 Nhấn để xem nghĩa</div>
-              </div>
-              <!-- MẶT SAU: nghĩa tiếng Việt -->
-              <div class="fc-face fc-back" id="fcBack" style="display:none;visibility:hidden;">
-                <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
-                <div class="fc-meaning" id="fcMeaning"></div>
-                <div class="fc-example">
-                  <div id="fcExample" style="font-size:13px;color:var(--muted);margin-top:8px;font-style:normal;"></div>
-                  <div class="fc-example-vi" id="fcExampleVi"></div>
+              <div class="fc-card-inner" id="fcCardInner">
+                <!-- MẶT TRƯỚC: từ tiếng Anh -->
+                <div class="fc-face" id="fcFront">
+                  <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
+                  <div class="fc-word" id="fcWord"></div>
+                  <div class="fc-phonetic" id="fcPhonetic"></div>
+                  <div class="fc-badge" id="fcType"></div>
+                  <div class="fc-tap-hint">👆 Nhấn để xem nghĩa</div>
                 </div>
-                <div class="fc-tap-hint" style="position:relative;bottom:auto;margin-top:16px;">👆 Nhấn để lật lại</div>
+                <!-- MẶT SAU: nghĩa tiếng Việt -->
+                <div class="fc-face" id="fcBack" style="display:none;">
+                  <button class="audio-btn" onclick="event.stopPropagation();speak()" title="Nghe phát âm">🔊</button>
+                  <div class="fc-meaning" id="fcMeaning"></div>
+                  <div class="fc-example">
+                    <div id="fcExample" style="font-size:13px;color:var(--muted);margin-top:8px;font-style:normal;"></div>
+                    <div class="fc-example-vi" id="fcExampleVi"></div>
+                  </div>
+                  <div class="fc-tap-hint">👆 Nhấn để lật lại</div>
+                </div>
               </div>
             </div>
           </div>
@@ -510,42 +513,42 @@ function renderCard() {
   const c = cards[idx];
   if (!c) return;
 
-  // Cập nhật nội dung mặt trước
-  document.getElementById('fcWord').textContent      = c.word || '';
-  document.getElementById('fcPhonetic').textContent  = c.phonetic || '';
-  document.getElementById('fcType').textContent      = c.type || '';
+  // Điền nội dung mặt trước
+  document.getElementById('fcWord').textContent     = c.word     || '';
+  document.getElementById('fcPhonetic').textContent = c.phonetic || '';
+  document.getElementById('fcType').textContent     = c.type     || '';
 
-  // Cập nhật nội dung mặt sau (tiếng Việt)
-  document.getElementById('fcMeaning').textContent   = c.meaning || '';
-  document.getElementById('fcExample').textContent   = c.example ? '"' + c.example + '"' : '';
+  // Điền nội dung mặt sau (tiếng Việt)
+  document.getElementById('fcMeaning').textContent   = c.meaning    || '';
+  document.getElementById('fcExample').textContent   = c.example    ? '"' + c.example + '"' : '';
   document.getElementById('fcExampleVi').textContent = c.example_vi || '';
 
   document.getElementById('fcCount').textContent = (idx + 1) + ' / ' + cards.length;
 
+  // Cập nhật chiều cao card-inner = chiều cao của face đang hiện
+  // (dùng 250px mặc định, đủ cho cả 2)
+  document.getElementById('fcCardInner').style.minHeight = '250px';
+
   // Reset về mặt trước
+  flipped = false;
   showFront();
   document.getElementById('srsBtns').style.display = 'none';
-  flipped = false;
   highlightListItem();
   renderTestCard();
 }
 
 function showFront() {
-  const front = document.getElementById('fcFront');
-  const back  = document.getElementById('fcBack');
-  const card  = document.getElementById('fcCard');
-  if (front) { front.style.display = 'flex'; front.style.visibility = 'visible'; }
-  if (back)  { back.style.display  = 'none'; back.style.visibility  = 'hidden'; }
-  if (card)  card.style.borderColor = 'var(--border)';
+  document.getElementById('fcFront').style.display = 'flex';
+  document.getElementById('fcBack').style.display  = 'none';
+  document.getElementById('fcCard').classList.remove('is-back');
+  document.getElementById('fcCard').style.borderColor = 'var(--border)';
 }
 
 function showBack() {
-  const front = document.getElementById('fcFront');
-  const back  = document.getElementById('fcBack');
-  const card  = document.getElementById('fcCard');
-  if (front) { front.style.display = 'none'; front.style.visibility = 'hidden'; }
-  if (back)  { back.style.display  = 'flex'; back.style.visibility  = 'visible'; }
-  if (card)  card.style.borderColor = 'var(--accent)';
+  document.getElementById('fcFront').style.display = 'none';
+  document.getElementById('fcBack').style.display  = 'flex';
+  document.getElementById('fcCard').classList.add('is-back');
+  document.getElementById('fcCard').style.borderColor = 'var(--accent)';
 }
 
 function flipCard() {
