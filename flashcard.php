@@ -185,6 +185,8 @@ $db->exec("CREATE TABLE IF NOT EXISTS flashcard_history (
 .fc-done-stat { background: var(--surface2); border-radius: 10px; padding: 12px 8px; text-align: center; }
 .fc-done-stat-num { font-size: 1.4rem; font-weight: 800; }
 .fc-done-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

@@ -228,6 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
   color: var(--text); pointer-events: none; box-shadow: var(--shadow-lg);
   max-width: 200px; z-index: 20; display: none;
 }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

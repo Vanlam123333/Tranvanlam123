@@ -357,6 +357,8 @@ function logoMark() {
   .mobile-topbar { display: flex !important; }
   .bottom-nav    { display: flex !important; }
 }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 
 <!-- ══════════════════════════════════

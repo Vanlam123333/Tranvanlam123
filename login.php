@@ -152,6 +152,8 @@ body { background: #07070e; overflow-x: hidden; }
   .login-left { display: flex; max-width: 480px; }
   .login-right { width: auto; min-width: 480px; }
 }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

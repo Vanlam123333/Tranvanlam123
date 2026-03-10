@@ -219,6 +219,15 @@ nav, .navbar, header:not(.chat-header) { display:none !important; }
 }
 .sidebar-brand-icon svg { width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round; }
 .sidebar-brand-name { font-size:18px; font-weight:800; color:var(--text); letter-spacing:-.5px; }
+.back-home {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 11px; border-radius:9px;
+  background:var(--surface2); border:1px solid var(--border);
+  color:var(--text2); text-decoration:none; font-size:12.5px; font-weight:600;
+  transition:all .15s; margin-left:auto; flex-shrink:0;
+}
+.back-home:hover { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+.back-home svg { width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
 
 .sidebar-search {
   display: flex; align-items: center; gap: 8px;
@@ -753,6 +762,8 @@ nav, .navbar, header:not(.chat-header) { display:none !important; }
 @media(max-width:480px){
   .input-area { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
 }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>
@@ -766,6 +777,10 @@ nav, .navbar, header:not(.chat-header) { display:none !important; }
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <span class="sidebar-brand-name">MindSpark Chat</span>
+        <a href="dashboard.php" class="back-home">
+          <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+          Trang chủ
+        </a>
       </div>
       <div class="sidebar-search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>

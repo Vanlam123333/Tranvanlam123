@@ -337,6 +337,8 @@ canvas#graphCanvas {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .error-msg { color: var(--red); font-size: 11px; padding: 2px 8px; font-family: var(--mono); }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

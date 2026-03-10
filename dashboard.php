@@ -40,6 +40,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Dashboard — MindSpark</title>
 <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ── DASHBOARD ── */
 .dash-hero {
@@ -154,6 +155,7 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
 
 @media(max-width:900px) { .stat-grid { grid-template-columns: repeat(2,1fr); } }
 @media(max-width:600px) { .stat-grid { grid-template-columns: repeat(2,1fr); } .hero-cards { grid-template-columns: 1fr; } .dash-name { font-size: 1.6rem; } }
+em, i { font-style: normal !important; }
 </style>
 </head>
 <body>
@@ -348,23 +350,44 @@ $pct = $total_today > 0 ? round($done_today/$total_today*100) : 0;
   setTimeout(tick,10000);
 })();
 
-// AI Insight
-async function loadAIInsight() {
+// Quotes truyền động lực
+const QUOTES = [
+  "Không có con đường tắt nào dẫn đến nơi xứng đáng. — Beverly Sills",
+  "Người chiến thắng không phải người không bao giờ thất bại, mà là người không bao giờ bỏ cuộc. — Vince Lombardi",
+  "Giáo dục là vũ khí mạnh nhất mà bạn có thể dùng để thay đổi thế giới. — Nelson Mandela",
+  "Hôm nay bạn đọc, ngày mai bạn dẫn đầu. — Margaret Fuller",
+  "Sự khởi đầu luôn là phần khó nhất. Nhưng bạn đã bắt đầu rồi — đó là điều quan trọng nhất.",
+  "Mỗi chuyên gia từng là người mới bắt đầu. Đừng sợ việc không biết.",
+  "Thành công không đến từ những gì bạn thỉnh thoảng làm, mà từ những gì bạn kiên trì làm mỗi ngày.",
+  "Não bộ giống như cơ bắp — càng luyện tập, càng mạnh hơn. Hôm nay là ngày tập luyện của bạn.",
+  "Một giờ học hôm nay bằng cả ngàn giờ lo lắng ngày mai.",
+  "Bạn không cần phải giỏi để bắt đầu, nhưng bạn cần bắt đầu để trở nên giỏi. — Zig Ziglar",
+  "Kỷ luật là cầu nối giữa mục tiêu và thành tích. — Jim Rohn",
+  "Học không phải để thi, mà để hiểu. Khi hiểu rồi, thi chỉ là hình thức.",
+  "Đừng so sánh mình với người khác. So sánh mình hôm nay với mình hôm qua.",
+  "Kiến thức là thứ duy nhất khi cho đi bạn không mất gì, mà còn được thêm.",
+  "Mỗi trang sách bạn đọc là một bước bạn tiến xa hơn người từ bỏ.",
+  "Khó khăn chỉ là cơ hội trong bộ đồ làm việc. — Henry J. Kaiser",
+  "Thành công là tổng của những nỗ lực nhỏ được lặp đi lặp lại ngày qua ngày. — Robert Collier",
+  "Học là hành trình, không phải điểm đến. Tận hưởng từng bước đi.",
+];
+
+function loadAIInsight() {
   const el = document.getElementById('aiInsight');
   const btn = document.getElementById('insightRefresh');
-  el.innerHTML = '<span style="color:var(--muted);">Đang tải lời khuyên từ AI...</span>';
-  if(btn) btn.disabled = true;
-  const hour = new Date().getHours();
-  const tod = hour < 12 ? 'buổi sáng' : hour < 17 ? 'buổi chiều' : 'buổi tối';
-  const msgs = [{role:'user', content:`Tôi đang học vào ${tod}. Hôm nay tôi có ${<?=$total_today?>} nhiệm vụ, đã hoàn thành ${<?=$done_today?>}. Đã học ${<?=$pomo_today['c']?>} pomodoro (${<?=$pomo_today['m']?>} phút). Hãy đưa ra 1 lời khuyên học tập ngắn gọn, truyền cảm hứng và thực tế cho tôi (2-3 câu, bằng tiếng Việt, thân thiện, kèm emoji phù hợp).`}];
-  try {
-    const res = await fetch('ai_api.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'chat',messages:msgs})});
-    const data = await res.json();
-    el.innerHTML = data.result || 'Hãy giữ vững tinh thần học tập nhé!';
-  } catch(e) {
-    el.innerHTML = '<img src="https://api.iconify.design/ph/lightbulb-bold.svg" style="width:18px;height:18px;vertical-align:middle;filter:invert(1)"> Mỗi ngày học một điều mới, sau một năm bạn sẽ biết 365 điều mới!';
-  }
-  if(btn) btn.disabled = false;
+  // Fade out
+  el.style.transition = 'opacity 0.25s';
+  el.style.opacity = '0';
+  setTimeout(() => {
+    const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    const parts = q.split(' — ');
+    if (parts.length === 2) {
+      el.innerHTML = `"${parts[0]}" <strong style="color:var(--accent);display:block;margin-top:6px;font-size:12px;">— ${parts[1]}</strong>`;
+    } else {
+      el.innerHTML = q;
+    }
+    el.style.opacity = '1';
+  }, 250);
 }
 
 async function generateStudyPlan() {

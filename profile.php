@@ -207,6 +207,8 @@ textarea.form-input-enhanced{resize:vertical;min-height:80px;line-height:1.5;}
   .pf-layout{grid-template-columns:1fr;}
   .pf-stats-row{grid-template-columns:repeat(2,1fr);}
 }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

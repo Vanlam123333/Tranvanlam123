@@ -124,6 +124,8 @@ body { background: #07070e; }
 }
 .login-footer { text-align: center; font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 1.2rem; }
 .login-footer a { color: #818cf8; text-decoration: none; font-weight: 600; }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

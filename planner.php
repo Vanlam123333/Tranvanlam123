@@ -43,7 +43,7 @@ $total_count = $db->query("SELECT COUNT(*) as c FROM plans WHERE user_id=$uid AN
 require_once __DIR__ . "/db.php"; include 'navbar.php'; ?>
 <div class="page">
   <div class="row center" style="margin-bottom:1.5rem;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
-    <h1 class="page-title" style="margin:0;">📅 Kế hoạch học tập</h1>
+    <h1 class="page-title" style="margin:0;">Kế hoạch học tập</h1>
     <input type="date" value="<?= $date ?>" onchange="location='planner.php?date='+this.value"
       style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.6rem 1rem;color:var(--text);font-size:0.9rem;outline:none;">
   </div>

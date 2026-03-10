@@ -12,6 +12,8 @@ require_once __DIR__ . "/db.php"; requireLogin(); $uid = $_SESSION['user_id']; ?
 .quiz-opt:disabled{cursor:default;}
 .quiz-opt.correct{border-color:var(--green);background:rgba(52,211,153,0.1);color:var(--green);font-weight:700;}
 .quiz-opt.wrong{border-color:var(--red);background:rgba(248,113,113,0.1);color:var(--red);}
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

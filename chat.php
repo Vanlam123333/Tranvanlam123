@@ -136,6 +136,8 @@ $user = getCurrentUser();
 [data-mode="code"] .send-btn { background: linear-gradient(135deg, #0f172a, #1e293b); }
 
 @media(max-width:768px) { .chat-sidebar { display: none; } }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

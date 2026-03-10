@@ -362,6 +362,8 @@ $REACTIONS = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'
   .comments-section{padding:0 12px 10px;}
   .reaction-picker{left:0;}
 }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>

@@ -282,6 +282,8 @@ for ($i = 6; $i >= 0; $i--) {
 }
 #fsPlayBtn:hover { transform: scale(1.07); }
 #fsPlayBtn:active { transform: scale(0.96); }
+em, i { font-style: normal !important; }
+* { font-style: normal; }
 </style>
 </head>
 <body>
